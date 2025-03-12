@@ -161,7 +161,7 @@ const NoticeTrackerTable: React.FC<NoticeTrackerTableProps> = ({
         header: 'Company',
         enableSorting: false,
         accessorKey: 'Company.name',
-        cell: (props) => <div className="w-52 truncate">{props.getValue() as string}</div>,
+        cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
       },
       {
         header: 'Location',
@@ -188,6 +188,21 @@ const NoticeTrackerTable: React.FC<NoticeTrackerTableProps> = ({
             {dayjs(props.getValue() as string).format('DD-MM-YYYY')}
           </div>
         ),
+      },
+      {
+        header: 'Status',
+        enableSorting: false,
+        accessorKey: 'status',
+        cell: (props) => {
+          const status = props.getValue() as string;
+          return (
+            <div className="w-32 truncate">
+              <span className={`px-2 py-1 rounded ${getStatusColor(status)}`}>
+                {status.toUpperCase()}
+              </span>
+            </div>
+          );
+        },
       },
       {
         header: 'Reference Number',
@@ -237,21 +252,7 @@ const NoticeTrackerTable: React.FC<NoticeTrackerTableProps> = ({
           );
         },
       },
-      {
-        header: 'Status',
-        enableSorting: false,
-        accessorKey: 'status',
-        cell: (props) => {
-          const status = props.getValue() as string;
-          return (
-            <div className="w-32 truncate">
-              <span className={`px-2 py-1 rounded ${getStatusColor(status)}`}>
-                {status.toUpperCase()}
-              </span>
-            </div>
-          );
-        },
-      },
+    
       // {
       //   header: 'Actions',
       //   id: 'actions',

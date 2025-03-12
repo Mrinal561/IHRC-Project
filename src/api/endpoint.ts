@@ -231,7 +231,11 @@ export const endpoints = {
         createNoticeStatusSuggestions: () => api(`/companyadmin/noticeTracker/status`),
         noticeCriticalitySuggestion: () => api(`/companyadmin/noticeTracker/criticality`),
         createNoticeCriticalitySuggestion: () => api(`/companyadmin/noticeTracker/criticality`),
-        download:()=> api(`companyadmin/noticetracker/download-notice-data`)
+        download:()=> api(`companyadmin/noticetracker/download-notice-data`),
+        followUpNoticeDetail: (id: any) => api(`companyadmin/noticetracker/followup/${id}`),
+        updateFollowupNotice: (id: any) => api(`companyadmin/noticetracker/followup/${id}`),
+        replyNoticeDetail: (id: any) => api(`companyadmin/noticetracker/reply/${id}`),
+        updateReplyNotice: (id: any) => api(`companyadmin/noticetracker/reply/${id}`),
     },
     permission:{
         approve:(id:any)=> api(`companyadmin/company/tracker-edit-permission/${id}`),

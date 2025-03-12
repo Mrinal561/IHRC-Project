@@ -1,249 +1,19 @@
 
-// import React from 'react';
-// import Timeline from '@/components/ui/Timeline';
-// import Avatar from '@/components/ui/Avatar';
-// import Badge from '@/components/ui/Badge';
-// import Card from '@/components/ui/Card';
-// import Tag from '@/components/ui/Tag';
-// import { FileText, AlertCircle, Mail, CheckCircle, File, Plus } from 'lucide-react';
-// import { Button } from '@/components/ui';
-// import { IoArrowBack } from 'react-icons/io5';
-// import { useNavigate } from 'react-router-dom';
-
-// const TimelineAvatar = ({ children, ...rest }) => {
-//     return (
-//         <Avatar {...rest} size={25} shape="circle">
-//             {children}
-//         </Avatar>
-//     );
-// };
-
-// const getStatusColor = (status) => {
-//     const colors = {
-//         open: 'bg-blue-500 rounded text-white',
-//         close: 'bg-gray-500 rounded text-white',
-//         reopen: 'bg-amber-500 rounded text-white',
-//         general: 'bg-green-500 rounded text-white',
-//         other: 'bg-purple-500 rounded text-white'
-//     };
-//     return colors[status] || 'bg-gray-500';
-// };
-
-// const getCriticalityIcon = (criticality) => {
-//     switch (criticality) {
-//         case 'new notice':
-//             return <FileText className="w-4 h-4" />;
-//         case 'extension letter':
-//             return <Mail className="w-4 h-4" />;
-//         case 'response letter':
-//             return <Mail className="w-4 h-4" />;
-//         case 'further notice':
-//             return <AlertCircle className="w-4 h-4" />;
-//         case 'closure':
-//             return <CheckCircle className="w-4 h-4" />;
-//         default:
-//             return <FileText className="w-4 h-4" />;
-//     }
-// };
-
-// const NoticeTimelinePage = () => {
-//     const navigate = useNavigate();
-//     const noticeData = {
-//         noticeType: "Safety Compliance",
-//         noticeAct: "Workplace Safety Act 2023",
-//         referenceNumber: "REF/2024/SC/001",
-//         noticeDetails: "Initial notice regarding workplace safety compliance requirements. The company needs to provide documentation for safety measures implemented in the workplace and ensure compliance with updated regulations.",
-//         receivedDate: "2024-02-15",
-//         currentStatus: "close",
-//         document: {
-//             name: "Safety_Notice_Document.pdf",
-//             url: "#"
-//         },
-//         responses: [
-//             {
-//                 replyDetails: "Acknowledged receipt of notice. Initial assessment underway.",
-//                 replyDate: "2024-02-16",
-//                 status: "open",
-//                 criticality: "new notice",
-//                 document: {
-//                     name: "Initial_Reply.pdf",
-//                     url: "#"
-//                 },
-//                 respondedBy: "John Doe"
-//             },
-//             {
-//                 replyDetails: "Requesting 2-week extension to gather comprehensive safety documentation",
-//                 replyDate: "2024-02-20",
-//                 status: "general",
-//                 criticality: "extension letter",
-//                 document: {
-//                     name: "Seconf_Reply.pdf",
-//                     url: "#"
-//                 },
-//                 respondedBy: "Jane Smith"
-//             },
-//             {
-//                 replyDetails: "Submitted complete safety documentation and implementation timeline",
-//                 replyDate: "2024-02-28",
-//                 status: "close",
-//                 criticality: "response letter",
-//                 document: {
-//                     name: "Safety_Documentation.pdf",
-//                     url: "#"
-//                 },
-//                 respondedBy: "Mike Johnson"
-//             }
-//         ]
-//     };
-
-//     const formatDate = (dateString) => {
-//         const date = new Date(dateString);
-//         return date.toLocaleDateString('en-US', {
-//             year: 'numeric',
-//             month: 'long',
-//             day: 'numeric'
-//         });
-//     };
-
-//     return (
-//         <div className="p-6">
-//             {/* Notice History Header */}
-//             <div className="flex items-center gap-2 mb-8">
-//                 <Button
-//                     size="sm"
-//                     className="p-2"
-//                     variant="plain"
-//           icon={<IoArrowBack className="text-gray-500 hover:text-gray-700" />}
-//           onClick={() => navigate(-1)}
-//                 >
-//                 </Button>
-//                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-//                     Notice History
-//                 </h1>
-//             </div>
-            
-//             {/* Notice Details Card */}
-//             <Card className="mb-8 p-4">
-//                 <div className="space-y-4">
-//                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notice Details</h3>
-                    
-//                     <div className="grid grid-cols-2 gap-4">
-//                         <div>
-//                             <p className="text-sm text-gray-500">Notice Type:</p>
-//                             <p className="text-gray-900 dark:text-gray-100">{noticeData.noticeType}</p>
-//                         </div>
-//                         <div>
-//                             <p className="text-sm text-gray-500">Notice Act:</p>
-//                             <p className="text-gray-900 dark:text-gray-100">{noticeData.noticeAct}</p>
-//                         </div>
-//                         <div>
-//                             <p className="text-sm text-gray-500">Notice Reference Number:</p>
-//                             <p className="text-gray-900 dark:text-gray-100">{noticeData.referenceNumber}</p>
-//                         </div>
-//                         <div>
-//                             <p className="text-sm text-gray-500">Notice Received on:</p>
-//                             <p className="text-gray-900 dark:text-gray-100">{formatDate(noticeData.receivedDate)}</p>
-//                         </div>
-//                     </div>
-
-//                     <div>
-//                         <p className="text-sm text-gray-500">Notice Details:</p>
-//                         <p className="text-gray-600 dark:text-gray-300 mt-1">
-//                             {noticeData.noticeDetails}
-//                         </p>
-//                     </div>
-
-//                     {noticeData.document && (
-//                         <div>
-//                             <p className="text-sm text-gray-500 mb-2">Attached Document:</p>
-//                             <div className="inline-flex items-center space-x-2 bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-700 transition-colors">
-//                                 <File className="w-4 h-4" />
-//                                 <a href={noticeData.document.url} className="hover:underline">
-//                                     {noticeData.document.name}
-//                                 </a>
-//                             </div>
-//                         </div>
-//                     )}
-
-//                 </div>
-//             </Card>
-
-//             {/* Reply Timeline */}
-//             <div className="mb-6">
-//                 <h2 className="text-lg font-semibold mb-4">Reply History</h2>
-//                 <Timeline>
-//                     {noticeData.responses.map((response, index) => (
-//                         <Timeline.Item
-//                             key={index}
-//                             media={
-//                                 <TimelineAvatar className={getStatusColor(response.status)}>
-//                                     {getCriticalityIcon(response.criticality)}
-//                                 </TimelineAvatar>
-//                             }
-//                         >
-//                             <div className="my-1">
-//                                 <div className="flex items-center mb-2">
-//                                     <span className="font-semibold text-gray-900 dark:text-gray-100">
-//                                         {response.respondedBy}
-//                                     </span>
-//                                     <span className="mx-2">has replied on</span>
-//                                     <span className="text-gray-600">
-//                                         {formatDate(response.replyDate)}
-//                                     </span>
-//                                     <span className="mx-2">and has set notice status to</span>
-//                                     <div className={`${getStatusColor(response.status)} px-1`}>
-//                                         {response.status.toUpperCase()}
-//                                     </div>
-//                                 </div>
-
-//                                 <Card className="mt-2">
-//                                     <div className="space-y-4">
-//                                         <div>
-//                                             <p className="text-gray-600 dark:text-gray-300">{response.replyDetails}</p>
-//                                         </div>
-                                        
-//                                         {response.document && (
-//                         <div className="flex items-center space-x-2 pt-2">
-//                             <div className="inline-flex items-center space-x-2 bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-700 transition-colors">
-//                                 <File className="w-4 h-4" />
-//                                 <a href={response.document.url} className="hover:underline">
-//                                     {response.document.name}
-//                                 </a>
-//                             </div>
-//                         </div>
-//                     )}
-//                                     </div>
-//                                 </Card>
-//                             </div>
-//                         </Timeline.Item>
-//                     ))}
-//                 </Timeline>
-//             </div>
-//             <div className="flex justify-end mt-6">
-//             <Button
-//                  variant="solid">
-//                     <span>Add Reply</span>
-//                 </Button>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default NoticeTimelinePage;
-
-
 import React, { useEffect, useState } from 'react';
 import Timeline from '@/components/ui/Timeline';
 import Avatar from '@/components/ui/Avatar';
 import Card from '@/components/ui/Card';
-import { FileText, AlertCircle, Mail, CheckCircle, File } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { FileText, AlertCircle, Mail, CheckCircle, File, Edit } from 'lucide-react';
+import { Button, Tooltip } from '@/components/ui';
 import { IoArrowBack } from 'react-icons/io5';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { endpoints } from '@/api/endpoint';
 import httpClient from '@/api/http-client';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json';
+import EditReplyDialog from './EditReplyDialog';
+import EditFollowUpDialog from './EditFollowUpDialog';
+
 
 
 interface TimelineItem {
@@ -259,6 +29,7 @@ interface TimelineItem {
     respondedBy: string;
     referenceNumber?: string;
     relatedAct?: string;
+    id?: number; // Add id for editing
 }
 
 interface NoticeDetails {
@@ -319,10 +90,12 @@ const NoticeTimelinePage = () => {
     const [noticeData, setNoticeData] = useState<NoticeDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [replyId, setReplyId] = useState<number | null>(null);
-      const [isLoading, setIsLoading] = useState(true);
-
+    const [isLoading, setIsLoading] = useState(true);
+    const [editReplyId, setEditReplyId] = useState<number | null>(null);
+    const [editFollowUpId, setEditFollowUpId] = useState<number | null>(null);
+    const [replyEditDialogOpen, setReplyEditDialogOpen] = useState(false);
+    const [followUpEditDialogOpen, setFollowUpEditDialogOpen] = useState(false);
     
-
 
     const baseUrl = `${import.meta.env.VITE_API_GATEWAY}`;
 
@@ -338,24 +111,22 @@ const NoticeTimelinePage = () => {
             const response = await httpClient.get(endpoints.noticeTracker.detail(noticeId));
             const noticeData = response.data;            
             
-    
-            // Check if replies exist and are not empty
             if (noticeData.replies && noticeData.replies.length > 0) {
                 const replyDataId = noticeData.replies[noticeData.replies.length - 1].id;
-                setReplyId(replyDataId); // Set the replyId
+                setReplyId(replyDataId);
             } else {
-                setReplyId(null); // Set replyId to null if no replies exist
+                setReplyId(null);
             }
         } catch (error) {
-            throw error
+            throw error;
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchNoticeDetails()
-    }, [replyId]); // This will log whenever replyId changes
+        fetchNoticeDetails();
+    }, [replyId]);
 
     const transformTimelineData = (data: any[]): TimelineItem[] => {
         return data.map((item) => {
@@ -376,7 +147,9 @@ const NoticeTimelinePage = () => {
                         name: docPath.split('/').pop() || '',
                         url: docPath ? `${baseUrl}/${docPath}` : ''
                     },
-                    respondedBy: item.user.name
+                    respondedBy: item.user.name,
+                    id: item.data.reply_id
+                    // Add id for editing
                 };
             }
 
@@ -395,6 +168,7 @@ const NoticeTimelinePage = () => {
                     referenceNumber: item.data.reference_number,
                     relatedAct: item.data.related_act,
                     status: item.data.status,
+                    id: item.data.follow_up_notice_id
                 };
             }
 
@@ -406,11 +180,12 @@ const NoticeTimelinePage = () => {
         const fetchTimelineData = async () => {
             try {
                 const response = await httpClient.get(endpoints.noticeTracker.timeline(noticeId));
+                console.log("Raw API response:", response.data);
                 const transformedData = transformTimelineData(response.data);
-                setTimelineData(transformedData);
                 
+                setTimelineData(transformedData);
+                console.log("Timeline data:", timelineData);
 
-                // Extract notice details from the first item
                 if (response.data.length > 0 && response.data[0].type === 'NOTICE_CREATED') {
                     const notice = response.data[0];                    
                     const docPath = notice.data.notice_document || '';
@@ -429,14 +204,11 @@ const NoticeTimelinePage = () => {
                     });
                     if (notice.replies && notice.replies.length > 0) {
                         const latestReply = notice.replies[notice.replies.length - 1];
-                        
                         setReplyId(latestReply.id);
                     }
-                   
-                    
                 }
             } catch (error) {
-               throw error
+               throw error;
             } finally {
                 setLoading(false);
             }
@@ -463,9 +235,25 @@ const NoticeTimelinePage = () => {
         ));
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    const refreshTimelineData = async () => {
+        try {
+            const response = await httpClient.get(endpoints.noticeTracker.timeline(noticeId));
+            const transformedData = transformTimelineData(response.data);
+            setTimelineData(transformedData);
+        } catch (error) {
+            console.error("Error refreshing timeline data:", error);
+        }
+    };
+
+    const handleEditReply = (id) => {
+        setEditReplyId(id);
+        setReplyEditDialogOpen(true)
+    };
+    
+    const handleEditFollowUp = (id) => {
+        setEditFollowUpId(id);
+        setFollowUpEditDialogOpen(true)
+    };
 
     const renderTimelineItem = (item: TimelineItem) => {
         const isFollowUp = item.type === 'followup';
@@ -490,11 +278,15 @@ const NoticeTimelinePage = () => {
                             </div>
                         </>
                     )}
+                  
                 </div>
 
                 <Card className="mt-2">
+                    <div className='flex justify-between'>
+
+                    
                     <div className="space-y-4">
-                    <div>
+                        <div>
                             <p className="text-sm text-gray-500">Notice Type:</p>
                             <div className="inline-flex items-center space-x-2 bg-blue-500 text-white px-2 py-1 rounded-md">
                                 {item.noticeType ? item.noticeType.split(' ')
@@ -514,8 +306,6 @@ const NoticeTimelinePage = () => {
                                 </div>
                             </>
                         )}
-                       
-                        
                         <div>
                             <p className="text-sm text-gray-500">
                                 {isFollowUp ? "Follow-up Notice Details:" : "Reply Details:"}
@@ -524,8 +314,6 @@ const NoticeTimelinePage = () => {
                                 {formatTextWithLineBreaks(item.details)}
                             </p>
                         </div>
-
-
                         {item.document && item.document.name && (
                             <div className="items-center space-x-2 pt-2">
                                 <p className="text-sm text-gray-500 mb-2">Document:</p>
@@ -542,6 +330,21 @@ const NoticeTimelinePage = () => {
                                 </div>
                             </div>
                         )}
+                    </div>
+                    <div>
+                        <Tooltip title= {isFollowUp ? 'Edit Follow-up Notice' : 'Edit reply'}>
+                            
+                        <Button
+    variant="plain"
+    icon={<Edit className="w-4 h-4" />}
+    onClick={() => {
+        console.log("Edit button clicked for item:", item);
+        isFollowUp ? handleEditFollowUp(item.id) : handleEditReply(item.id);
+    }}
+    className="ml-auto"
+/>
+                        </Tooltip>
+                    </div>
                     </div>
                 </Card>
             </div>
@@ -562,7 +365,6 @@ const NoticeTimelinePage = () => {
           </div>
         );
       }
-    
 
     return (
         <div className="p-6">
@@ -583,7 +385,6 @@ const NoticeTimelinePage = () => {
                 <Card className="mb-8 p-4">
                     <div className="space-y-4">
                         <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notice Details</h3>
-                        
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="text-sm text-gray-500">Notice Type:</p>
@@ -610,17 +411,13 @@ const NoticeTimelinePage = () => {
                                   {noticeData.criticality.charAt(0).toUpperCase() + noticeData.criticality.slice(1)}
                                 </p>
                             </div>
-                            
-                        <div>
-                            <p className="text-sm text-gray-500">Notice Details:</p>
-                            <p className="text-gray-600 dark:text-gray-300 preserve-newlines">
-                                {formatTextWithLineBreaks(noticeData.noticeDetails)}
-                            </p>
+                            <div>
+                                <p className="text-sm text-gray-500">Notice Details:</p>
+                                <p className="text-gray-600 dark:text-gray-300 preserve-newlines">
+                                    {formatTextWithLineBreaks(noticeData.noticeDetails)}
+                                </p>
+                            </div>
                         </div>
-                        </div>
-                        
-
-
                         {noticeData.document && noticeData.document.name && (
                             <div>
                                 <p className="text-sm text-gray-500 mb-2">Notice Copy:</p>
@@ -673,38 +470,60 @@ const NoticeTimelinePage = () => {
                 )}
             </div>
 
-            {/* Conditional Rendering for Buttons */}
-            <div className="flex justify-end mt-6">
             {noticeData && (
-    <div className="flex justify-end mt-6">
-        {noticeData.status === 'Open' ? (
-            <Button 
-                variant="solid" 
-                onClick={() => navigate('/notice-tracker/response', {
-                    state: { 
-                        noticeId: noticeId, // Pass noticeId
-                        replyId: replyId // Pass latest replyId
-                    }
-                })}
-            >
-                <span>Add Reply</span>
-            </Button>
-        ) : noticeData.status === 'Closed' ? (
-            <Button 
-                variant="solid" 
-                onClick={() => navigate('/notice-tracker/followUpNotice', {
-                    state: { 
-                        noticeId: noticeId, // Pass noticeId
-                        replyId: replyId // Pass latest replyId
-                    }
-                })}
-            >
-                <span>Add Follow-Up Notice</span>
-            </Button>
-        ) : null}
-    </div>
-)}
-            </div>
+                <div className="flex justify-end mt-6">
+                    {noticeData.status === 'Open' ? (
+                        <Button 
+                            variant="solid" 
+                            onClick={() => navigate('/notice-tracker/response', {
+                                state: { 
+                                    noticeId: noticeId,
+                                    replyId: replyId
+                                }
+                            })}
+                        >
+                            <span>Add Reply</span>
+                        </Button>
+                    ) : noticeData.status === 'Closed' ? (
+                        <Button 
+                            variant="solid" 
+                            onClick={() => navigate('/notice-tracker/followUpNotice', {
+                                state: { 
+                                    noticeId: noticeId,
+                                    replyId: replyId
+                                }
+                            })}
+                        >
+                            <span>Add Follow-Up Notice</span>
+                        </Button>
+                    ) : null}
+                </div>
+            )}
+
+            {editReplyId && (
+                <EditReplyDialog
+                    replyId={editReplyId}
+                    isOpen={replyEditDialogOpen}
+                    onClose={() => {
+                        setEditReplyId(null);
+                        setReplyEditDialogOpen(false);
+                        refreshTimelineData();
+                    }}
+                    
+                />
+            )}
+
+            {editFollowUpId && (
+                <EditFollowUpDialog
+                    followUpId={editFollowUpId}
+                    isOpen={followUpEditDialogOpen}
+                    onClose={() => {
+                        setEditFollowUpId(null);
+                        setFollowUpEditDialogOpen(false);
+                        refreshTimelineData();
+                    }}
+                />
+            )}
         </div>
     );
 };

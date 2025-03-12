@@ -65,6 +65,8 @@ export const updateNotice = createAsyncThunk(
     }
 );
 
+
+
 // Delete notice
 export const deleteNotice = createAsyncThunk(
     'noticeTracker/deleteNotice',

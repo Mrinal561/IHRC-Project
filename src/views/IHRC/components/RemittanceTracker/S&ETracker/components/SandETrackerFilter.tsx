@@ -227,6 +227,11 @@ const SandETrackerFilter: React.FC<NoticeProps> = ({ onFilterChange }) => {
     );
   };
 
+  const statusOption = [
+    {value: 'open', label: '  Open'},
+    {value: 'closed', label: 'Closed'},
+]
+
   // Load Status Options
   const loadStatusOptions = async () => {
     try {
@@ -387,7 +392,7 @@ const SandETrackerFilter: React.FC<NoticeProps> = ({ onFilterChange }) => {
       <div className="min-w-0">
         <OutlinedSelect
           label="Status"
-          options={statusOptions}
+          options={statusOption}
           value={selectedStatus}
           onChange={handleStatusChange}
         />
