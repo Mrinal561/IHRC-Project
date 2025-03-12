@@ -457,6 +457,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchAuthUser } from '@/store/slices/login';
 import { Notification, toast } from '@/components/ui';
+import { FilterProvider } from './components/FilterContext';
 
 const FINANCIAL_YEAR_KEY = 'selectedFinancialYear';
 const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged';
@@ -679,6 +680,8 @@ const SandETracker = () => {
     }
 
     return (
+        // <FilterProvider>
+
         <AdaptableCard className="h-full" bodyClass="h-full">
             <div className="flex flex-wrap gap-6 items-center justify-between mb-6">
                 <div className="mb-4 lg:mb-0">
@@ -688,7 +691,7 @@ const SandETracker = () => {
                     onFilterChange={handleFilterChange}
                     onRefresh={() => fetchNoticeTrackerData(pagination.pageIndex, pagination.pageSize)}
                     canCreate={permissions.canCreate}
-                />
+                    />
             </div>
             <NoticeTrackerTable
                 loading={isLoading}
@@ -700,8 +703,9 @@ const SandETracker = () => {
                 onPageSizeChange={handlePageSizeChange}
                 canEdit={permissions.canEdit}
                 canDelete={permissions.canDelete}
-            />
+                />
         </AdaptableCard>
+                // </FilterProvider>
     );
 };
 
