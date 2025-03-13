@@ -95,7 +95,7 @@ const PTRCTrackerTool: React.FC<{
           'group_id[]': filters.groupId,
           'code[]': filters.ptCode,
           'company_id[]': filters.companyId,
-          'to_date[]': formattedEndDate,
+          'to_date': formattedEndDate,
           'from_date': formattedStartDate
         }
       });

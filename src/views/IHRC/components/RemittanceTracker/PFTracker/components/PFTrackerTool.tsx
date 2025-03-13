@@ -101,7 +101,7 @@ const PFTrackerTool: React.FC<{
           'group_id[]': filters.groupId,
           'code[]': filters.pfCode,
           'company_id[]': filters.companyId,
-          'to_date[]': formattedEndDate,
+          'to_date': formattedEndDate,
           'from_date': formattedStartDate
         }
       })

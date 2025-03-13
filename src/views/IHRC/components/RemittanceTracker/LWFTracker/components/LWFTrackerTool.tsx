@@ -94,7 +94,7 @@ const LWFTrackerTool: React.FC<{
           'group_id[]': filters.groupId,
           'code[]': filters.lwfCode,
           'company_id[]': filters.companyId,
-          'to_date[]': formattedEndDate,
+          'to_date': formattedEndDate,
           'from_date': formattedStartDate
         }
       });
