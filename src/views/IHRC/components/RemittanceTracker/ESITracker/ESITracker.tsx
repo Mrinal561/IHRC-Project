@@ -101,7 +101,8 @@ const ESITracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
+                            closable={true}
                         >
                             You don't have access to any modules
                         </Notification>
@@ -122,7 +123,8 @@ const ESITracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
+                            closable={true}
                         >
                             You don't have access to this module
                         </Notification>
@@ -142,7 +144,8 @@ const ESITracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
+                            closable={true}
                         >
                             You don't have access to this menu
                         </Notification>
@@ -163,7 +166,8 @@ const ESITracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
+                            closable={true}
                         >
                             You don't have permission of ESI Tracker
                         </Notification>

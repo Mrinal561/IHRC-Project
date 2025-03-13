@@ -94,10 +94,9 @@ const PTECTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
             if (!file || !currentGroup) {
                 toast.push(
                     <Notification
-                        title="Error"
+                        title="warning"
                         closable={true}
-                        type="danger"
-                        closable={true}
+                        type="warning"
                     >
                         Please select a file to upload
                     </Notification>,
@@ -197,10 +196,9 @@ const PTECTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
             console.error('Download error:', error)
             toast.push(
                 <Notification
-                    title="Error"
+                    title="error"
                     closable={true}
-                    type="danger"
-                    closable={true}
+                    type="error"
                 >
                     {/* No PT Setup data found for your company */}
                     No eligible data found for export
@@ -223,6 +221,16 @@ const PTECTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
                 setter(selectedOption.value)
             }
         }
+
+        const handleMonthChange = (selectedOption: { value: string; label: string } | null) => {
+            if (selectedOption) {
+                setCurrentGroup(selectedOption.value);
+            } else {
+                // Reset month and file if month is deselected
+                setCurrentGroup('');
+                setFile(null);
+            }
+        };
 
     return (
         <>
@@ -252,21 +260,24 @@ const PTECTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
                             value={groupOptions.find(
                                 (option) => option.value === currentGroup,
                             )}
-                            onChange={handleChange(
-                                setCurrentGroup,
-                                'groupName',
-                            )}
+                            onChange={handleMonthChange}
                         />
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
                     <p>Upload PT EC File:</p>
-                    <Input
-                        type="file"
-                        onChange={handleFileChange}
-                        className="mb-4"
-                    />
+                   {!currentGroup && (
+                                               <p className="text-sm text-red-500 mb-2">
+                                                   Please select a month first to enable file upload.
+                                               </p>
+                                           )}
+                                           <Input
+                                               type="file"
+                                               onChange={handleFileChange}
+                                               className="mb-4"
+                                               disabled={!currentGroup} // Disable file input if no month is selected
+                                           />
                 </div>
                 <div className="my-4 flex gap-2 items-center">
                     {/* <p>Download PT EC Upload Format</p> */}

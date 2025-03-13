@@ -161,7 +161,7 @@ const ESITrackerEditDialog: React.FC<ESITrackerEditDialogProps> = ({
       console.error('Error fetching tracker data:', err);
       setError('Failed to load tracker details');
       setLoading(false);
-      openNotification('danger', 'Failed to load tracker details');
+      openNotification('error', 'Failed to load tracker details');
     }
   };
   const handleChange = (field: keyof ESIChallanData, value: string | number) => {
@@ -201,7 +201,7 @@ const handleSubmit = async () => {
     const isValid = await validateForm();
     if (!isValid) {
       console.log(isValid)
-      openNotification('danger', 'Please fix the validation errors');
+      openNotification('error', 'Please fix the validation errors');
       return;
     }
 
@@ -266,11 +266,12 @@ const handleDateChange = async (field: 'month' | 'dueDate' | 'payment_date', dat
   }
 };
 
-  const openNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const openNotification = (type: 'success' | 'info' | 'error' | 'warning', message: string) => {
     toast.push(
       <Notification
         title={type.charAt(0).toUpperCase() + type.slice(1)}
         type={type}
+        closable={true}
       >
         {message}
       </Notification>

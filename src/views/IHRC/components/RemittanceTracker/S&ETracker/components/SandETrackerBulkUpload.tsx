@@ -110,7 +110,7 @@
 //     } catch (error) {
 //       console.error('Failed to load company groups:', error);
 //       toast.push(
-//         <Notification title="Error" closable={true} type="danger">
+//         <Notification title="Error" closable={true} type="error">
 //           Failed to load company groups
 //         </Notification>
 //       );
@@ -149,7 +149,7 @@
 //     } catch (error: any) {
 //       console.error('Failed to load companies:', error);
 //       toast.push(
-//         <Notification title="Error" closable={true} type="danger">
+//         <Notification title="Error" closable={true} type="error">
 //           {error.response?.data?.message || 'Failed to load companies'}
 //         </Notification>
 //       );
@@ -222,7 +222,7 @@
 //     } catch (error) {
 //       console.error('Failed to load states:', error);
 //       toast.push(
-//         <Notification title="Error" closable={true} type="danger">
+//         <Notification title="Error" closable={true} type="error">
 //           Failed to load states
 //         </Notification>
 //       );
@@ -659,7 +659,7 @@ const SandETrackerBulkUpload = ({ onSuccess, canCreate }) => {
         } catch (error) {
             console.error('Failed to load company groups:', error)
             toast.push(
-                <Notification title="Error" closable={true} type="danger">
+                <Notification title="Error" closable={true} type="error">
                     Failed to load company groups
                 </Notification>,
             )
@@ -679,7 +679,7 @@ const SandETrackerBulkUpload = ({ onSuccess, canCreate }) => {
         } catch (error) {
             console.error('Failed to load companies:', error)
             toast.push(
-                <Notification title="Error" closable={true} type="danger">
+                <Notification title="Error" closable={true} type="error">
                     Failed to load companies
                 </Notification>,
             )
@@ -728,7 +728,7 @@ const SandETrackerBulkUpload = ({ onSuccess, canCreate }) => {
         } catch (error) {
             console.error('Failed to load states:', error)
             toast.push(
-                <Notification title="Error" closable={true} type="danger">
+                <Notification title="Error" closable={true} type="error">
                     Failed to load states
                 </Notification>,
             )

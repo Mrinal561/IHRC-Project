@@ -93,10 +93,9 @@ const LWFTrackerBulkUpload: React.FC<LWFTrackerBulkUploadProps> = ({
             if (!file || !currentGroup) {
                 toast.push(
                     <Notification
-                        title="Error"
+                        title="warning"
                         closable={true}
-                        type="danger"
-                        closable={true}
+                        type="warning"
                     >
                         Please select a file and a month to upload
                     </Notification>,
@@ -116,7 +115,7 @@ const LWFTrackerBulkUpload: React.FC<LWFTrackerBulkUploadProps> = ({
 
             if (res) {
                 toast.push(
-                    <Notification title="Success" type="success">
+                    <Notification title="Success" type="success" closable={true}>
                         Upload successful!
                     </Notification>,
                 )
@@ -152,6 +151,7 @@ const LWFTrackerBulkUpload: React.FC<LWFTrackerBulkUploadProps> = ({
                 <Notification
                     type="warning"
                     title="Please select a month before downloading"
+                    closable={true}
                 />,
             )
             return
@@ -186,8 +186,7 @@ const LWFTrackerBulkUpload: React.FC<LWFTrackerBulkUploadProps> = ({
                 <Notification
                     title="Error"
                     closable={true}
-                    type="danger"
-                    closable={true}
+                    type="error"
                 >
                     No LWF Setup data found for your company
                 </Notification>,
@@ -209,6 +208,16 @@ const LWFTrackerBulkUpload: React.FC<LWFTrackerBulkUploadProps> = ({
                 setter(selectedOption.value)
             }
         }
+
+        const handleMonthChange = (selectedOption: { value: string; label: string } | null) => {
+            if (selectedOption) {
+                setCurrentGroup(selectedOption.value);
+            } else {
+                // Reset month and file if month is deselected
+                setCurrentGroup('');
+                setFile(null);
+            }
+        };
 
     return (
         <>
@@ -239,21 +248,24 @@ const LWFTrackerBulkUpload: React.FC<LWFTrackerBulkUploadProps> = ({
                             value={groupOptions.find(
                                 (option) => option.value === currentGroup,
                             )}
-                            onChange={handleChange(
-                                setCurrentGroup,
-                                'groupName',
-                            )}
+                            onChange={handleMonthChange}
                         />
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-2 my-4">
                     <p>Upload LWF File:</p>
-                    <Input
-                        type="file"
-                        onChange={handleFileChange}
-                        className="mb-4"
-                    />
+                    {!currentGroup && (
+                               <p className="text-sm text-red-500 mb-2">
+                                   Please select a month first to enable file upload.
+                               </p>
+                           )}
+                           <Input
+                               type="file"
+                               onChange={handleFileChange}
+                               className="mb-4"
+                               disabled={!currentGroup} // Disable file input if no month is selected
+                           />
                 </div>
                 <div className="my-4 flex gap-2 items-center">
                     <a

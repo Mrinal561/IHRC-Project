@@ -157,7 +157,7 @@ const SandETrackerTool: React.FC<SandETrackerToolProps> = ({ onRefresh, onFilter
      
     } catch (error) {
       toast.push(
-        <Notification title='Danger' type='danger' closable={true} duration={10000}>
+        <Notification title='error' type='error' closable={true} duration={10000}>
         Failed to generate excel file
         </Notification>
       )

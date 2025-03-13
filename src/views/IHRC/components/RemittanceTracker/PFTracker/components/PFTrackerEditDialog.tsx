@@ -214,7 +214,7 @@ const PFTrackerEditDialog: React.FC<PFTrackerEditDialogProps> = ({
         }
       });
       setValidationErrors(errors);
-      openNotification('danger', 'Please fix validation errors');
+      openNotification('error', 'Please fix validation errors');
     } else {
       console.error('Error submitting tracker data:', err);
       // openNotification('danger', 'Failed to update PF Tracker');
@@ -247,7 +247,7 @@ const handleDateChange = async (field: 'month' | 'dueDate' | 'payment_date', dat
   }
 };
 
-  const openNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const openNotification = (type: 'success' | 'info' | 'error' | 'warning', message: string) => {
     toast.push(
       <Notification
         title={type.charAt(0).toUpperCase() + type.slice(1)}

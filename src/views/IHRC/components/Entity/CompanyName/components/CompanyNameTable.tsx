@@ -116,7 +116,7 @@ const CompanyNameTable: React.FC<CompanyNameTableProps> = ({
       setCompanyTableData(mappedData);
     } catch (error) {
       console.error('Failed to fetch company data:', error);
-      showNotification('danger', 'Failed to fetch company data');
+      showNotification('error', 'Failed to fetch company data');
     }
   };
 
@@ -133,7 +133,7 @@ const CompanyNameTable: React.FC<CompanyNameTableProps> = ({
       );
     } catch (error) {
       console.error('Failed to load company groups:', error);
-      showNotification('danger', 'Failed to load company groups');
+      showNotification('error', 'Failed to load company groups');
     }
   };
 
@@ -223,9 +223,9 @@ const CompanyNameTable: React.FC<CompanyNameTableProps> = ({
     setErrors({}); 
   };
 
-  const showNotification = (type: 'success' | 'danger', message: string) => {
+  const showNotification = (type: 'success' | 'error', message: string) => {
     toast.push(
-      <Notification title={type === 'success' ? 'Success' : 'Error'} type={type}>
+      <Notification title={type === 'success' ? 'Success' : 'Error'} type={type} closable={true}>
         {message}
       </Notification>
     );
@@ -276,7 +276,7 @@ const CompanyNameTable: React.FC<CompanyNameTableProps> = ({
   
 const handleEditConfirm = async () => {
   if (!itemToEdit) {
-    showNotification('danger', 'No company selected for editing');
+    showNotification('error', 'No company selected for editing');
     return;
   }
 
@@ -309,7 +309,7 @@ const handleEditConfirm = async () => {
         onDataChange();
       }
     } else {
-      showNotification('danger', 'No changes detected');
+      showNotification('error', 'No changes detected');
       handleDialogClose();
     }
   } catch (error: any) {

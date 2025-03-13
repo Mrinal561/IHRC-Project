@@ -40,7 +40,7 @@ const CompanyGroupTool: React.FC<CompanyGroupToolProps> = ({
             onDialogClose()
             setLoader(true)
             toast.push(
-                <Notification title="Success" type="success">
+                <Notification title="Success" type="success" closable={true}>
                     Company Group added successfully
                 </Notification>,
             )
@@ -48,7 +48,7 @@ const CompanyGroupTool: React.FC<CompanyGroupToolProps> = ({
             console.log('re rendering')
         } catch (error) {
             toast.push(
-                <Notification title="Failed" type="danger">
+                <Notification title="Failed" type="error" closable={true}>
                     Failed to add company group
                 </Notification>,
             )

@@ -155,7 +155,7 @@ const UserAddForm = () => {
             setBranches(formattedBranches || [])
         } catch (error) {
             console.error('Failed to load branches:', error)
-            showNotification('danger', 'Failed to load branches')
+            showNotification('error', 'Failed to load branches')
         }
     }
 
@@ -173,7 +173,7 @@ const UserAddForm = () => {
             )
         } catch (error) {
             console.error('Failed to load company groups:', error)
-            showNotification('danger', 'Failed to load company groups')
+            showNotification('error', 'Failed to load company groups')
         }
     }
 
@@ -192,7 +192,7 @@ const UserAddForm = () => {
             setCompanies(formattedCompanies || [])
         } catch (error: any) {
             console.error('Failed to load companies:', error)
-            showNotification('danger', 'Failed to load companies')
+            showNotification('error', 'Failed to load companies')
         }
     }
 
@@ -207,12 +207,12 @@ const UserAddForm = () => {
             )
         } catch (error) {
             console.error('Failed to load user roles:', error)
-            showNotification('danger', 'Failed to load user roles')
+            showNotification('error', 'Failed to load user roles')
         }
     }
 
     const showNotification = (
-        type: 'success' | 'info' | 'danger' | 'warning',
+        type: 'success' | 'info' | 'error' | 'warning',
         message: string,
     ) => {
         toast.push(
@@ -253,7 +253,7 @@ const UserAddForm = () => {
             }
         } catch (error: any) {
             const errorMessage = error || 'Failed to add user'
-            // showNotification('danger', errorMessage) // Show the API error message
+            // showNotification('error', errorMessage) // Show the API error message
         } finally {
             setIsSubmitting(false)
         }

@@ -100,7 +100,7 @@ const PFIWTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                         >
                             You don't have access to any modules
                         </Notification>
@@ -120,7 +120,7 @@ const PFIWTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                         >
                             You don't have access to this module
                         </Notification>
@@ -140,7 +140,7 @@ const PFIWTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                         >
                             You don't have access to this menu
                         </Notification>
@@ -161,7 +161,7 @@ const PFIWTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                         >
                             You don't have permission of PFIW Tracker
                         </Notification>

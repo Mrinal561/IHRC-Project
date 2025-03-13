@@ -119,9 +119,9 @@ const [loading, setLoading] = useState(false)
   })
   
 
-  const showNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const showNotification = (type: 'success' | 'info' | 'danger' | 'warning' | 'error', message: string) => {
     toast.push(
-      <Notification title={type.charAt(0).toUpperCase() + type.slice(1)} type={type}>
+      <Notification title={type.charAt(0).toUpperCase() + type.slice(1)} type={type} closable={true}>
         {message}
       </Notification>
     );
@@ -140,7 +140,7 @@ const [loading, setLoading] = useState(false)
       }
     } catch (error) {
       console.error('Failed to load company groups:', error);
-      showNotification('danger', 'Failed to load company groups');
+      showNotification('error', 'Failed to load company groups');
     }
   };
 
@@ -160,7 +160,7 @@ const [loading, setLoading] = useState(false)
       setCompanies(formattedCompanies || []);
     } catch (error) {
       console.error('Failed to load companies:', error);
-      showNotification('danger', 'Failed to load companies');
+      showNotification('error', 'Failed to load companies');
     }
   };
 
@@ -184,7 +184,7 @@ const [loading, setLoading] = useState(false)
       setBranchData(formattedBranches || []);
     } catch (error) {
       console.error('Failed to load branches:', error);
-      showNotification('danger', 'Failed to load branches');
+      showNotification('error', 'Failed to load branches');
     }
   };
   const handleCompanySelect = (selectedOption: SelectOption, setFieldValue: any) => {
@@ -222,7 +222,7 @@ const [loading, setLoading] = useState(false)
       setUsers(formattedUsers || []);
     } catch (error) {
       console.error('Failed to load users:', error);
-      showNotification('danger', 'Failed to load users');
+      showNotification('error', 'Failed to load users');
     }
   };
 
@@ -264,7 +264,7 @@ const [loading, setLoading] = useState(false)
     try {
       setLoading(true)
       if (!values.agreementDocument) {
-        showNotification('danger', 'Agreement document is required');
+        showNotification('error', 'Agreement document is required');
         return;
       }
   
@@ -314,11 +314,11 @@ const [loading, setLoading] = useState(false)
   
       if (error.response?.data?.message && Array.isArray(error.response.data.message)) {
         error.response.data.message.forEach((message: string) => {
-          showNotification('danger', message);
+          showNotification('error', message);
         });
       } else {
         const errorMessage = error.response?.data?.message || 'Failed to create branch agreement';
-        showNotification('danger', errorMessage);
+        showNotification('error', errorMessage);
       }
     } finally {
       setSubmitting(false);

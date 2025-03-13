@@ -101,7 +101,7 @@ const PFTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                             duration={2000}
                         >
                             You don't have access to any modules
@@ -122,7 +122,7 @@ const PFTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                             duration={2000}
                         >
                             You don't have access to this module
@@ -143,7 +143,7 @@ const PFTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                             duration={2000}
                         >
                             You don't have access to this menu
@@ -165,7 +165,7 @@ const PFTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                             duration={2000}
                         >
                             You don't have permission of PF Tracker

@@ -369,7 +369,7 @@ const CompanyName = () => {
         } catch (error) {
             console.error('Failed to load default company group:', error)
             toast.push(
-                <Notification title="Error" closable={true} type="danger">
+                <Notification title="Error" closable={true} type="error">
                     Failed to load company group
                 </Notification>,
             )
@@ -406,7 +406,7 @@ const CompanyName = () => {
         } catch (error) {
             console.error('Failed to fetch companies:', error)
             toast.push(
-                <Notification title="Error" closable={true} type="danger">
+                <Notification title="Error" closable={true} type="error">
                     Failed to fetch companies
                 </Notification>,
             )
@@ -469,7 +469,7 @@ const CompanyName = () => {
                 if (response) {
                     onDialogClose()
                     toast.push(
-                        <Notification title="Success" type="success">
+                        <Notification title="Success" type="success" closable={true}>
                             Company added successfully
                         </Notification>,
                     )

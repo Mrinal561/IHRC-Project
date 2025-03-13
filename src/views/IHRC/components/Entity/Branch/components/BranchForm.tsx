@@ -483,13 +483,14 @@ const AddBranchForm: React.FC = () => {
     )
 
     const showNotification = (
-        type: 'success' | 'info' | 'danger' | 'warning',
+        type: 'success' | 'info' | 'error' | 'warning' | 'error',
         message: string,
     ) => {
         toast.push(
             <Notification
                 title={type.charAt(0).toUpperCase() + type.slice(1)}
                 type={type}
+                closable={true}
             >
                 {message}
             </Notification>,
@@ -511,11 +512,11 @@ const AddBranchForm: React.FC = () => {
                 setStates(formattedStates)
             } else {
                 console.error('Invalid state data structure:', response.data)
-                showNotification('danger', 'Invalid state data received')
+                showNotification('error', 'Invalid state data received')
             }
         } catch (error) {
             console.error('Failed to load states:', error)
-            showNotification('danger', 'Failed to load states')
+            showNotification('error', 'Failed to load states')
         } finally {
             setIsLoading(false)
         }
@@ -571,7 +572,7 @@ const AddBranchForm: React.FC = () => {
             )
         } catch (error) {
             console.error('Failed to load company groups:', error)
-            showNotification('danger', 'Failed to load company groups')
+            showNotification('error', 'Failed to load company groups')
         }
     }
 
@@ -613,7 +614,7 @@ const AddBranchForm: React.FC = () => {
         } catch (error: any) {
             console.error('Failed to load companies:', error)
             showNotification(
-                'danger',
+                'error',
                 error.response?.data?.message || 'Failed to load companies',
             )
             setCompanies([])

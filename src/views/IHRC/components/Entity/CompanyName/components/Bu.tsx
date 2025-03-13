@@ -30,7 +30,6 @@ const Bu: React.FC<BuProps> = ({ onUploadSuccess }) => {
                         title="Error"
                         closable={true}
                         type="danger"
-                        closable={true}
                     >
                         Please select a file to upload
                     </Notification>,
@@ -54,7 +53,7 @@ const Bu: React.FC<BuProps> = ({ onUploadSuccess }) => {
 
             if (res) {
                 toast.push(
-                    <Notification title="Success" type="success">
+                    <Notification title="Success" type="success" closable={true}>
                         Upload successful!
                     </Notification>,
                 )
@@ -103,7 +102,7 @@ const Bu: React.FC<BuProps> = ({ onUploadSuccess }) => {
         } catch (error) {
             console.error('Download error:', error)
             toast.push(
-                <Notification title="Error" closable={true} type="danger">
+                <Notification title="Error" closable={true} type="danger" >
                     Failed to download template. Please try again.
                 </Notification>,
             )

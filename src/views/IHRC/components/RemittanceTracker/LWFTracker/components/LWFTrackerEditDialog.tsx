@@ -85,7 +85,7 @@ const LWFTrackerEditDialog: React.FC<LWFTrackerEditDialogProps> = ({
       console.error('Error fetching tracker data:', err);
       setError('Failed to load tracker details');
       setLoading(false);
-      openNotification('danger', 'Failed to load tracker details');
+      openNotification('error', 'Failed to load tracker details');
     }
   };
 
@@ -126,7 +126,7 @@ const LWFTrackerEditDialog: React.FC<LWFTrackerEditDialogProps> = ({
         setLoading(true)
         const isValid = await validateForm();
       if (!isValid) {
-        openNotification('danger', 'Please fix the validation errors');
+        openNotification('error', 'Please fix the validation errors');
         return;
       }
     // Create updateData object (matching the original updateTracker data expectation)
@@ -183,11 +183,12 @@ const handleDateChange = async (field: 'month' | 'dueDate' | 'payment_date', dat
   }
 };
 
-  const openNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const openNotification = (type: 'success' | 'info' | 'error' | 'warning', message: string) => {
     toast.push(
       <Notification
         title={type.charAt(0).toUpperCase() + type.slice(1)}
         type={type}
+        closable={true}
       >
         {message}
       </Notification>

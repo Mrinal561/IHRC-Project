@@ -78,7 +78,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
         if(res) {
           setDeleteConfirmOpen(false);
           toast.push(
-            <Notification title="Success" type="success">
+            <Notification title="Success" type="success" closable={true}>
               ESI Tracker Data Deleted Successfully
             </Notification>
           );

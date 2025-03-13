@@ -105,7 +105,7 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
       console.error('Error fetching tracker data:', err);
       setError('Failed to load tracker details');
       setLoading(false);
-      openNotification('danger', 'Failed to load tracker details');
+      openNotification('error', 'Failed to load tracker details');
     }
   };
 
@@ -147,7 +147,7 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
         setLoading(true);
         const isValid = await validateForm();
         if (!isValid) {
-          openNotification('danger', 'Please fix the validation errors');
+          openNotification('error', 'Please fix the validation errors');
           return;
         }
     // Create updateData object (matching the original updateTracker data expectation)
@@ -176,7 +176,7 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
     }
   } catch (err) {
     console.error('Error submitting tracker data:', err);
-    // openNotification('danger', 'Failed to save changes');
+    // openNotification('error', 'Failed to save changes');
   } finally {
     setLoading(false);
   }
@@ -206,7 +206,7 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
     }
   };
 
-  const openNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const openNotification = (type: 'success' | 'info' | 'error' | 'warning', message: string) => {
     toast.push(
       <Notification
         title={type.charAt(0).toUpperCase() + type.slice(1)}

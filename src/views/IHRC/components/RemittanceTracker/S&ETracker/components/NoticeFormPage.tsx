@@ -109,7 +109,7 @@
           
 //           // Show error toast for the first error
 //           toast.push(
-//               <Notification title="Validation Error" type="danger">
+//               <Notification title="Validation Error" type="error">
 //                   {validationErrors.inner[0].message}
 //               </Notification>
 //           )
@@ -137,7 +137,7 @@
 //         } catch (error) {
 //             console.error('Failed to load company groups:', error)
 //             toast.push(
-//                 <Notification title="Error" closable={true} type="danger">
+//                 <Notification title="Error" closable={true} type="error">
 //                     Failed to load company groups
 //                 </Notification>,
 //             )
@@ -157,7 +157,7 @@
 //         } catch (error) {
 //             console.error('Failed to load companies:', error)
 //             toast.push(
-//                 <Notification title="Error" closable={true} type="danger">
+//                 <Notification title="Error" closable={true} type="error">
 //                     Failed to load companies
 //                 </Notification>,
 //             )
@@ -178,7 +178,7 @@
 //         } catch (error) {
 //             console.error('Failed to load states:', error)
 //             toast.push(
-//                 <Notification title="Error" closable={true} type="danger">
+//                 <Notification title="Error" closable={true} type="error">
 //                     Failed to load states
 //                 </Notification>,
 //             )
@@ -263,7 +263,7 @@
 //         } catch (error) {
 //           console.log(error)
 //           toast.push(
-//               <Notification title="Error" type="danger">
+//               <Notification title="Error" type="error">
 //                   Failed to submit form
 //               </Notification>
 //           )
@@ -680,7 +680,7 @@ const NoticeFormPage = ({ onSuccess }) => {
 
     const showError = (message: string) => {
         toast.push(
-            <Notification title="Error" type="danger" duration={5000}>
+            <Notification title="Error" type="error" duration={5000}>
                 {message}
             </Notification>
         )
@@ -745,7 +745,7 @@ const NoticeFormPage = ({ onSuccess }) => {
   //     if (errorMessages.length > 0) {
   //         const errorMessagesList = errorMessages.join('\n• ');
   //         toast.push(
-  //             <Notification title="Validation Errors" type="danger" duration={5000}>
+  //             <Notification title="Validation Errors" type="error" duration={5000}>
   //                 <div className="whitespace-pre-line">
   //                     • {errorMessagesList}
   //                 </div>
@@ -779,7 +779,7 @@ const NoticeFormPage = ({ onSuccess }) => {
         } else {
             console.error('Validation error:', error);
             toast.push(
-                <Notification title="Error" type="danger">
+                <Notification title="Error" type="error">
                     An unexpected error occurred
                 </Notification>
             );

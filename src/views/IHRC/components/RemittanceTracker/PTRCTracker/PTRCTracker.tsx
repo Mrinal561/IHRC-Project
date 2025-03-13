@@ -97,7 +97,7 @@ const PTRCTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                         >
                             You don't have access to any modules
                         </Notification>
@@ -117,7 +117,7 @@ const PTRCTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                         >
                             You don't have access to this module
                         </Notification>
@@ -138,7 +138,7 @@ const PTRCTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                         >
                             You don't have access to this menu
                         </Notification>
@@ -159,7 +159,7 @@ const PTRCTracker: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
                         >
                             You don't have permission of PTRC Tracker
                         </Notification>

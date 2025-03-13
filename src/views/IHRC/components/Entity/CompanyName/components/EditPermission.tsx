@@ -223,7 +223,7 @@ const EditPermission = () => {
         if (response) {
          fetchData();
           toast.push(
-            <Notification title="Copy Success" type="success" duration={3000}>
+            <Notification title="Copy Success" type="success" duration={3000} closable={true}>
             Permission has been given successfully
         </Notification>,
           );
@@ -232,7 +232,7 @@ const EditPermission = () => {
           // or update the local state if you have a way to do so
         } else {
           toast.push(
-            <Notification title="Failed" type="danger" duration={3000}>
+            <Notification title="Failed" type="error" duration={3000} closable={true}>
             Failed to approve permission request
         </Notification>,
           );
@@ -240,7 +240,7 @@ const EditPermission = () => {
       } catch (err) {
         console.error('Error approving permission:', err);
         toast.push(
-            <Notification title="Failed" type="danger" duration={3000}>
+            <Notification title="Failed" type="error" duration={3000} closable={true}>
             Failed to approve permission request
         </Notification>,
         )

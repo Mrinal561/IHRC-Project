@@ -16,7 +16,7 @@ export type WithProps = CommonProps
 export declare namespace TypeAttributes {
     type Size = 'lg' | 'md' | 'sm' | 'xs'
     type Shape = 'round' | 'circle' | 'none'
-    type Status = 'success' | 'warning' | 'danger' | 'info'
+    type Status = 'success' | 'warning' | 'danger' | 'info' | 'error'
     type FormLayout = 'horizontal' | 'vertical' | 'inline'
     type ControlSize = 'lg' | 'md' | 'sm'
     type MenuVariant = 'light' | 'dark' | 'themed' | 'transparent'

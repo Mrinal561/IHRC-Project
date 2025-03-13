@@ -79,7 +79,8 @@ const BranchAgreements: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
+                            closable={true}
                         >
                             You don't have access to any modules
                         </Notification>
@@ -99,7 +100,8 @@ const BranchAgreements: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
+                            closable={true}
                         >
                             You don't have access to this module
                         </Notification>
@@ -119,7 +121,8 @@ const BranchAgreements: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
+                            closable={true}
                         >
                             You don't have access to this menu
                         </Notification>
@@ -140,7 +143,8 @@ const BranchAgreements: React.FC = () => {
                     toast.push(
                         <Notification
                             title="Permission"
-                            type="danger"
+                            type="error"
+                            closable={true}
                         >
                             You don't have permission to view Branch Agreements
                         </Notification>

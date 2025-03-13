@@ -64,7 +64,7 @@ const NoticeResponsePage = () => {
       } catch (error) {
         console.error('Failed to fetch notice details:', error);
         toast.push(
-          <Notification title="Error" closable={true} type="danger">
+          <Notification title="Error" closable={true} type="error">
             Failed to fetch notice details
           </Notification>
         );
@@ -95,7 +95,7 @@ const NoticeResponsePage = () => {
     if (file) {
       if (file.size > 20 * 1024 * 1024) { // 20MB limit
         toast.push(
-          <Notification title="Error" closable={true} type="danger">
+          <Notification title="Error" closable={true} type="error">
             File size should not exceed 20MB
           </Notification>
         );
@@ -107,7 +107,7 @@ const NoticeResponsePage = () => {
       } catch (error) {
         console.error('Error converting file:', error);
         toast.push(
-          <Notification title="Error" closable={true} type="danger">
+          <Notification title="Error" closable={true} type="error">
             Error processing file
           </Notification>
         );
@@ -148,7 +148,7 @@ const NoticeResponsePage = () => {
       } else {
         console.error('Validation error:', error);
         toast.push(
-          <Notification title="Error" type="danger">
+          <Notification title="Error" type="error">
             An unexpected error occurred
           </Notification>
         );
@@ -181,7 +181,7 @@ const NoticeResponsePage = () => {
     } catch (error) {
       console.error('Failed to submit reply:', error);
       // toast.push(
-      //   <Notification title="Error" type="danger">
+      //   <Notification title="Error" type="error">
       //     Failed to submit reply
       //   </Notification>
       // );

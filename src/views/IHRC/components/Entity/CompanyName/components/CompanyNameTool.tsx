@@ -77,7 +77,7 @@ const CompanyNameTool: React.FC<CompanyToolProps> = ({ onDataChange }) => {
     try {
       await dispatch(createCompany(newCompany));
       toast.push(
-        <Notification title="Success" type="success">
+        <Notification title="Success" type="success" closable={true}>
           Company added successfully
         </Notification>
       );
@@ -86,7 +86,7 @@ const CompanyNameTool: React.FC<CompanyToolProps> = ({ onDataChange }) => {
       onDataChange(); // This will trigger the parent component to refresh the data
     } catch (error) {
       toast.push(
-        <Notification title="Failed" type="danger">
+        <Notification title="Failed" type="error" closable={true}>
           Failed to add company
         </Notification>
       );

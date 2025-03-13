@@ -201,13 +201,14 @@ const BranchAgreementTable = (canEdit,canDelete) => {
     }, [filters.company_id]);
 
     const showNotification = (
-        type: 'success' | 'info' | 'danger' | 'warning',
+        type: 'success' | 'info' | 'danger' | 'warning' | 'error',
         message: string,
     ) => {
         toast.push(
             <Notification
                 title={type.charAt(0).toUpperCase() + type.slice(1)}
                 type={type}
+                closable={true}
             >
                 {message}
             </Notification>,
@@ -223,7 +224,7 @@ const BranchAgreementTable = (canEdit,canDelete) => {
           setDeleteDialogOpen(false);
         } catch (error) {
           console.error('Failed to delete agreement:', error);
-          showNotification('danger', 'Failed to delete agreement');
+          showNotification('error', 'Failed to delete agreement');
         } finally {
             setLoading(false)
         }

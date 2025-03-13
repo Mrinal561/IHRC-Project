@@ -104,7 +104,7 @@ const BranchAgreementEditForm = () => {
       setUsers(formattedUsers || []);
     } catch (error) {
       console.error('Failed to load users:', error);
-      showNotification('danger', 'Failed to load users');
+      showNotification('error', 'Failed to load users');
     }
   };
 
@@ -134,13 +134,13 @@ const BranchAgreementEditForm = () => {
       }
     } catch (error) {
       console.error('Failed to load branches:', error);
-      showNotification('danger', 'Failed to load branches');
+      showNotification('error', 'Failed to load branches');
     }
   };
 
-  const showNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const showNotification = (type: 'success' | 'info' | 'danger' | 'warning' | 'error', message: string) => {
     toast.push(
-      <Notification title={type.charAt(0).toUpperCase() + type.slice(1)} type={type}>
+      <Notification title={type.charAt(0).toUpperCase() + type.slice(1)} type={type} closable={true}>
         {message}
       </Notification>
     );
@@ -179,7 +179,7 @@ const BranchAgreementEditForm = () => {
       setLoading(false);
     } catch (error) {
       console.error('Failed to load initial data:', error);
-      showNotification('danger', 'Failed to load agreement data');
+      showNotification('error', 'Failed to load agreement data');
     }
   };
 
@@ -225,7 +225,7 @@ const BranchAgreementEditForm = () => {
       navigate('/agreements');
     } catch (error) {
       console.error('Failed to update agreement:', error);
-      showNotification('danger', 'Failed to update agreement');
+      showNotification('error', 'Failed to update agreement');
     } finally {
       setSubmitting(false);
     }
@@ -258,7 +258,7 @@ const BranchAgreementEditForm = () => {
       }
     } catch (error) {
       console.error('Failed to load company groups:', error);
-      showNotification('danger', 'Failed to load company groups');
+      showNotification('error', 'Failed to load company groups');
     }
   };
 
@@ -487,7 +487,7 @@ const BranchAgreementEditForm = () => {
                     const file = e.currentTarget.files?.[0];
                     if (file) {
                       if (file.size > 20 * 1024 * 1024) {
-                        showNotification('danger', 'File size exceeds 20MB limit');
+                        showNotification('error', 'File size exceeds 20MB limit');
                         e.target.value = '';
                         return;
                       }

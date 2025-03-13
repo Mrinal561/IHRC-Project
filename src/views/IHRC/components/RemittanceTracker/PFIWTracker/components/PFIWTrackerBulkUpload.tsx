@@ -84,64 +84,117 @@ const PFIWTrackerBulkUpload: React.FC<PFIWTrackerBulkUploadProps> = ({
         setIsDialogOpen(true)
     }
 
+    // const handleConfirm = async () => {
+    //     try {
+    //         if (!file || !currentGroup) {
+    //             toast.push(
+    //                 <Notification
+    //                     title="Error"
+    //                     closable={true}
+    //                     type="error"
+    //                 >
+    //                     Please select a file and a month to upload
+    //                 </Notification>,
+    //             )
+    //             return
+    //         }
+    //         setLoading(true)
+    //         const formData = new FormData()
+    //         formData.append('document', file)
+    //         formData.append('month', currentGroup)
+
+    //         console.log('FormData:', formData)
+
+    //         const res = await dispatch(createPfIwTracker(formData))
+    //             .unwrap()
+    //             .catch((error: any) => {
+    //                 throw error // Re-throw to prevent navigation
+    //             })
+
+    //         if (res) {
+    //             toast.push(
+    //                 <Notification title="Success" type="success" closable={true}>
+    //                     Upload successful!
+    //                 </Notification>,
+    //             )
+
+    //             // Close dialog and reset state
+    //             handleCancel()
+
+    //             // Refresh the table data
+    //             onUploadConfirm()
+
+    //             navigate('/uploadedpfiwdetail')
+    //         }
+    //     } catch (error) {
+    //         setIsDialogOpen(false)
+    //         handleCancel()
+
+    //         // toast.push(
+    //         //   <Notification title="Error" closable={true} type="danger">
+    //         //     Upload failed. Please try again.
+    //         //   </Notification>
+    //         // );
+    //         console.error('Upload error:', error)
+    //     } finally {
+    //         setLoading(false)
+    //         handleCancel()
+    //     }
+    // }
+
     const handleConfirm = async () => {
+     
         try {
-            if (!file || !currentGroup) {
+            // Validate month selection
+            if (!currentGroup || !file) {
+                console.log('Month not selected'); // Debugging
                 toast.push(
                     <Notification
-                        title="Error"
+                        title="warning"
                         closable={true}
-                        type="danger"
-                        closable={true}
+                        type="warning"
                     >
-                        Please select a file and a month to upload
+                        Please select a month and file before uploading.
                     </Notification>,
-                )
-                return
+                );
+                return;
             }
-            setLoading(true)
-            const formData = new FormData()
-            formData.append('document', file)
-            formData.append('month', currentGroup)
-
-            console.log('FormData:', formData)
-
+    
+    
+            // Proceed with upload if both validations pass
+            setLoading(true);
+            const formData = new FormData();
+            formData.append('document', file);
+            formData.append('month', currentGroup);
+    
             const res = await dispatch(createPfIwTracker(formData))
                 .unwrap()
                 .catch((error: any) => {
-                    throw error // Re-throw to prevent navigation
-                })
-
+                    throw error; // Re-throw to prevent navigation
+                });
+    
             if (res) {
                 toast.push(
-                    <Notification title="Success" type="success">
+                    <Notification title="Success" type="success" closable={true}>
                         Upload successful!
                     </Notification>,
-                )
-
+                );
+    
                 // Close dialog and reset state
-                handleCancel()
-
+                handleCancel();
+    
                 // Refresh the table data
-                onUploadConfirm()
-
-                navigate('/uploadedpfiwdetail')
+                onUploadConfirm();
+    
+                navigate('/uploadedpfiwdetail');
             }
         } catch (error) {
-            setIsDialogOpen(false)
-            handleCancel()
-
-            // toast.push(
-            //   <Notification title="Error" closable={true} type="danger">
-            //     Upload failed. Please try again.
-            //   </Notification>
-            // );
-            console.error('Upload error:', error)
+            console.error('Upload error:', error);
+          
         } finally {
-            setLoading(false)
-            handleCancel()
+            setLoading(false);
         }
-    }
+    };
 
     const handleCancel = () => {
         setIsDialogOpen(false)
@@ -156,6 +209,7 @@ const PFIWTrackerBulkUpload: React.FC<PFIWTrackerBulkUploadProps> = ({
                 <Notification
                     type="warning"
                     title="Please select a month before downloading"
+                    closable={true}
                 />,
             )
             return
@@ -186,8 +240,7 @@ const PFIWTrackerBulkUpload: React.FC<PFIWTrackerBulkUploadProps> = ({
                 <Notification
                     title="Error"
                     closable={true}
-                    type="danger"
-                    closable={true}
+                    type="error"
                 >
                     No PFIW Setup data found for your company
                 </Notification>,
@@ -208,6 +261,16 @@ const PFIWTrackerBulkUpload: React.FC<PFIWTrackerBulkUploadProps> = ({
                 setter(selectedOption.value)
             }
         }
+
+        const handleMonthChange = (selectedOption: { value: string; label: string } | null) => {
+            if (selectedOption) {
+                setCurrentGroup(selectedOption.value);
+            } else {
+                // Reset month and file if month is deselected
+                setCurrentGroup('');
+                setFile(null);
+            }
+        };
 
     return (
         <>
@@ -232,28 +295,29 @@ const PFIWTrackerBulkUpload: React.FC<PFIWTrackerBulkUploadProps> = ({
                 <div className="flex gap-3 w-full items-center">
                     <p className="">Select Payroll Month:</p>
                     <div className="w-40">
-                        <OutlinedSelect
-                            label="Month"
-                            options={groupOptions}
-                            value={groupOptions.find(
-                                (option) => option.value === currentGroup,
-                            )}
-                            onChange={handleChange(
-                                setCurrentGroup,
-                                'groupName',
-                            )}
-                        />
+                    <OutlinedSelect
+    label="Month"
+    options={groupOptions}
+    value={groupOptions.find((option) => option.value === currentGroup)}
+    onChange={handleMonthChange} // Use the updated handler
+/>
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-2 my-4">
-                    <p>Upload PF IW File:</p>
-                    <Input
-                        type="file"
-                        onChange={handleFileChange}
-                        className="mb-4"
-                    />
-                </div>
+        <p>Upload PF IW File:</p>
+        {!currentGroup && (
+            <p className="text-sm text-red-500 mb-2">
+                Please select a month first to enable file upload.
+            </p>
+        )}
+        <Input
+            type="file"
+            onChange={handleFileChange}
+            className="mb-4"
+            disabled={!currentGroup} // Disable file input if no month is selected
+        />
+    </div>
                 <div className="my-4 flex gap-2 items-center">
                     <a
                         onClick={handleDownload}

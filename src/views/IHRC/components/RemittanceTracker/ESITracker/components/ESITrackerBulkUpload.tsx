@@ -96,10 +96,9 @@ const ESITrackerBulkUpload: React.FC<ESITrackerBulkUploadProps> = ({
             if (!file || !currentGroup) {
                 toast.push(
                     <Notification
-                        title="Error"
+                        title="warning"
                         closable={true}
-                        type="danger"
-                        closable={true}
+                        type="warning"
                     >
                         Please select a file and month to upload
                     </Notification>,
@@ -108,7 +107,7 @@ const ESITrackerBulkUpload: React.FC<ESITrackerBulkUploadProps> = ({
             }
             if (!financialYear) {
                 toast.push(
-                    <Notification title="Error" closable={true} type="danger">
+                    <Notification title="Error" closable={true} type="error">
                         Please select a financial year first
                     </Notification>,
                 )
@@ -129,7 +128,7 @@ const ESITrackerBulkUpload: React.FC<ESITrackerBulkUploadProps> = ({
 
             if (res) {
                 toast.push(
-                    <Notification title="Success" type="success">
+                    <Notification title="Success" type="success" closable={true}>
                         Upload successful!
                     </Notification>,
                 )
@@ -161,6 +160,7 @@ const ESITrackerBulkUpload: React.FC<ESITrackerBulkUploadProps> = ({
                 <Notification
                     type="warning"
                     title="Please select a month before downloading"
+                    closable={true}
                 />,
             )
             return
@@ -170,6 +170,7 @@ const ESITrackerBulkUpload: React.FC<ESITrackerBulkUploadProps> = ({
                 <Notification
                     type="warning"
                     title="Please select a financial year first"
+                    closable={true}
                 />,
             )
             return
@@ -200,10 +201,9 @@ const ESITrackerBulkUpload: React.FC<ESITrackerBulkUploadProps> = ({
             console.error('Download error:', error)
             toast.push(
                 <Notification
-                    title="Error"
+                    title="error"
                     closable={true}
-                    type="danger"
-                    closable={true}
+                    type="error"
                 >
                     No ESI Setup data found for your company
                 </Notification>,
@@ -225,6 +225,16 @@ const ESITrackerBulkUpload: React.FC<ESITrackerBulkUploadProps> = ({
                 setter(selectedOption.value)
             }
         }
+
+        const handleMonthChange = (selectedOption: { value: string; label: string } | null) => {
+            if (selectedOption) {
+                setCurrentGroup(selectedOption.value);
+            } else {
+                // Reset month and file if month is deselected
+                setCurrentGroup('');
+                setFile(null);
+            }
+        };
 
     return (
         <>
@@ -255,21 +265,24 @@ const ESITrackerBulkUpload: React.FC<ESITrackerBulkUploadProps> = ({
                             value={groupOptions.find(
                                 (option) => option.value === currentGroup,
                             )}
-                            onChange={handleChange(
-                                setCurrentGroup,
-                                'groupName',
-                            )}
+                            onChange={handleMonthChange}
                         />
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
                     <p>Upload ESI File:</p>
-                    <Input
-                        type="file"
-                        onChange={handleFileChange}
-                        className="mb-4"
-                    />
+                   {!currentGroup && (
+                              <p className="text-sm text-red-500 mb-2">
+                                  Please select a month first to enable file upload.
+                              </p>
+                          )}
+                          <Input
+                              type="file"
+                              onChange={handleFileChange}
+                              className="mb-4"
+                              disabled={!currentGroup} // Disable file input if no month is selected
+                          />
                 </div>
                 <div className="my-4 flex gap-2 items-center">
                     <a

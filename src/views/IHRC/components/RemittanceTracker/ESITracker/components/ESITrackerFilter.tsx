@@ -103,11 +103,12 @@ const ESIWTrackerFilter: React.FC<ESIWTrackerFilterProps> = ({ onFilterChange })
   }, [selectedCompanyGroup, onFilterChange]);
 
   
-  const showNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const showNotification = (type: 'success' | 'info' | 'error' | 'warning', message: string) => {
     toast.push(
       <Notification
         title={type.charAt(0).toUpperCase() + type.slice(1)}
         type={type}
+        closable={true}
       >
         {message}
       </Notification>
@@ -137,7 +138,7 @@ const ESIWTrackerFilter: React.FC<ESIWTrackerFilterProps> = ({ onFilterChange })
       }
     } catch (error) {
       console.error('Failed to load company group:', error);
-      showNotification('danger', 'Failed to load company group');
+      showNotification('error', 'Failed to load company group');
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +168,7 @@ const ESIWTrackerFilter: React.FC<ESIWTrackerFilterProps> = ({ onFilterChange })
       }
     } catch (error: any) {
       console.error('Failed to load companies:', error);
-      showNotification('danger', error.response?.data?.message || 'Failed to load companies');
+      showNotification('error', error.response?.data?.message || 'Failed to load companies');
       setCompanies([]);
     }
   };
@@ -199,7 +200,7 @@ const ESIWTrackerFilter: React.FC<ESIWTrackerFilterProps> = ({ onFilterChange })
       }
     } catch (error: any) {
       console.error('Failed to load ESI Codes:', error);
-      showNotification('danger', error.response?.data?.message || 'Failed to load ESI Codes');
+      showNotification('error', error.response?.data?.message || 'Failed to load ESI Codes');
       setEsiCodeOptions([]);
     }
   };

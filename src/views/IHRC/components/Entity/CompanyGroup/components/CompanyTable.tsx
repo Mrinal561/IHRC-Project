@@ -251,7 +251,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
 
     const showSuccessNotification = (message: string) => {
         toast.push(
-            <Notification title="Success" type="success">
+            <Notification title="Success" type="success" closable={true}>
                 {message}
             </Notification>,
         )

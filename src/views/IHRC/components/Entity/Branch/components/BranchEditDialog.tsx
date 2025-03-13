@@ -182,17 +182,18 @@ const BranchEditDialog: React.FC<BranchEditDialogProps> = ({
       }
     } catch (err) {
       console.error('Error submitting branch data:', err);
-    //   openNotification('danger', 'Failed to update branch');
+    //   openNotification('error', 'Failed to update branch');
     } finally {
       setLoading(false);
     }
   };
 
-  const openNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const openNotification = (type: 'success' | 'info' | 'error' | 'warning' | 'error', message: string) => {
     toast.push(
       <Notification
         title={type.charAt(0).toUpperCase() + type.slice(1)}
         type={type}
+        closable={true}
       >
         {message}
       </Notification>

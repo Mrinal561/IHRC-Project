@@ -227,7 +227,7 @@
 //                     toast.push(
 //                         <Notification
 //                             title="Permission"
-//                             type="danger"
+//                             type="error"
 //                         >
 //                             You don't have access to any modules
 //                         </Notification>
@@ -247,7 +247,7 @@
 //                     toast.push(
 //                         <Notification
 //                             title="Permission"
-//                             type="danger"
+//                             type="error"
 //                         >
 //                             You don't have access to this module
 //                         </Notification>
@@ -267,7 +267,7 @@
 //                     toast.push(
 //                         <Notification
 //                             title="Permission"
-//                             type="danger"
+//                             type="error"
 //                         >
 //                             You don't have access to this menu
 //                         </Notification>
@@ -288,7 +288,7 @@
 //                     toast.push(
 //                         <Notification
 //                             title="Permission"
-//                             type="danger"
+//                             type="error"
 //                         >
 //                             You don't have permission to access Notice Tracker
 //                         </Notification>
@@ -529,7 +529,7 @@ const SandETracker = () => {
 
                 if (!response.payload?.moduleAccess) {
                     toast.push(
-                        <Notification title="Permission" type="danger">
+                        <Notification title="Permission" type="error">
                             You don't have access to any modules
                         </Notification>
                     );
@@ -545,7 +545,7 @@ const SandETracker = () => {
 
                 if (!remittanceModule) {
                     toast.push(
-                        <Notification title="Permission" type="danger">
+                        <Notification title="Permission" type="error">
                             You don't have access to this module
                         </Notification>
                     );
@@ -561,7 +561,7 @@ const SandETracker = () => {
 
                 if (!noticeTrackerMenu) {
                     toast.push(
-                        <Notification title="Permission" type="danger">
+                        <Notification title="Permission" type="error">
                             You don't have access to this menu
                         </Notification>
                     );
@@ -577,7 +577,7 @@ const SandETracker = () => {
 
                 if (!newPermissions.canList) {
                     toast.push(
-                        <Notification title="Permission" type="danger">
+                        <Notification title="Permission" type="error">
                             You don't have permission to access Notice Tracker
                         </Notification>
                     );

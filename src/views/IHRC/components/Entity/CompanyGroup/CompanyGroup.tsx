@@ -56,7 +56,7 @@ const CompanyGroup = () => {
         } catch (error) {
             console.error('Failed to fetch company groups:', error)
             toast.push(
-                <Notification title="Error" closable={true} type="danger">
+                <Notification title="Error" closable={true} type="error">
                     Failed to fetch company groups
                 </Notification>,
             )
@@ -130,7 +130,7 @@ const CompanyGroup = () => {
             }
         } catch (error) {
             toast.push(
-                <Notification title="Failed" type="danger">
+                <Notification title="Failed" type="error">
                     Failed to add company group
                 </Notification>,
             )

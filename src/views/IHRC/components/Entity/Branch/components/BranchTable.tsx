@@ -310,13 +310,14 @@ const BranchTable: React.FC<BranchTableProps> = ({
     )
 
     const openNotification = (
-        type: 'success' | 'info' | 'danger' | 'warning',
+        type: 'success' | 'info' | 'error' | 'warning',
         message: string,
     ) => {
         toast.push(
             <Notification
                 title={type.charAt(0).toUpperCase() + type.slice(1)}
                 type={type}
+                closable={true}
             >
                 {message}
             </Notification>,
@@ -354,7 +355,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
         } catch (error) {
             console.error('Failed to fetch branch:', error)
             toast.push(
-                <Notification title="Error" closable={true} type="danger">
+                <Notification title="Error" closable={true} type="error">
                     Failed to fetch Branch
                 </Notification>,
             )
