@@ -101,6 +101,9 @@ const PFIWTracker: React.FC = () => {
                         <Notification
                             title="Permission"
                             type="error"
+                            closable={true}
+                            duration={2000}
+
                         >
                             You don't have access to any modules
                         </Notification>
@@ -121,6 +124,9 @@ const PFIWTracker: React.FC = () => {
                         <Notification
                             title="Permission"
                             type="error"
+                            closable={true}
+                            duration={2000}
+
                         >
                             You don't have access to this module
                         </Notification>
@@ -141,6 +147,9 @@ const PFIWTracker: React.FC = () => {
                         <Notification
                             title="Permission"
                             type="error"
+                            closable={true}
+                            duration={2000}
+
                         >
                             You don't have access to this menu
                         </Notification>
@@ -162,6 +171,9 @@ const PFIWTracker: React.FC = () => {
                         <Notification
                             title="Permission"
                             type="error"
+                            closable={true}
+                            duration={2000}
+
                         >
                             You don't have permission of PFIW Tracker
                         </Notification>
@@ -224,7 +236,8 @@ const PFIWTracker: React.FC = () => {
                 setIsLoading(false)
             }
         },
-        [filters.groupId, filters.companyId, filters.pfCode, filters.startDate, filters.endDate,financialYear, filters.search]
+        [filters.groupId, filters.companyId, filters.pfCode, filters.startDate, filters.endDate,financialYear, filters.location_name
+        ]
     )
 
     useEffect(() => {
