@@ -680,7 +680,7 @@ const NoticeFormPage = ({ onSuccess }) => {
 
     const showError = (message: string) => {
         toast.push(
-            <Notification title="Error" type="error" duration={5000}>
+            <Notification title="Error" type="error" duration={5000} closable={true}>
                 {message}
             </Notification>
         )
@@ -778,11 +778,7 @@ const NoticeFormPage = ({ onSuccess }) => {
             // showErrors(newErrors);
         } else {
             console.error('Validation error:', error);
-            toast.push(
-                <Notification title="Error" type="error">
-                    An unexpected error occurred
-                </Notification>
-            );
+          
         }
         return false;
     }
@@ -797,7 +793,7 @@ const NoticeFormPage = ({ onSuccess }) => {
             const resultAction = await dispatch(createNotice(formData)).unwrap()
             if (resultAction) {
                 toast.push(
-                    <Notification title="Success" type="success">
+                    <Notification title="Success" type="success" closable={true}>
                         Notice uploaded successfully
                     </Notification>
                 )

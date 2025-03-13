@@ -801,7 +801,7 @@ const SandETrackerBulkUpload = ({ onSuccess, canCreate }) => {
 
             if (resultAction) {
                 toast.push(
-                    <Notification title="Success" type="success">
+                    <Notification title="Success" type="success" closable={true}>
                         Uploaded Successfully
                     </Notification>,
                 )

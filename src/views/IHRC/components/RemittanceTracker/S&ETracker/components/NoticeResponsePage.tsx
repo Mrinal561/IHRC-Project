@@ -147,11 +147,7 @@ const NoticeResponsePage = () => {
         setErrors(newErrors);
       } else {
         console.error('Validation error:', error);
-        toast.push(
-          <Notification title="Error" type="error">
-            An unexpected error occurred
-          </Notification>
-        );
+       
       }
       return false;
     }
@@ -172,7 +168,7 @@ const NoticeResponsePage = () => {
 
       if (response.data) {
         toast.push(
-          <Notification title="Success" type="success">
+          <Notification title="Success" type="success" closable={true}>
             Reply submitted successfully
           </Notification>
         );

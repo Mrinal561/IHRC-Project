@@ -205,7 +205,7 @@ const NoticeFollowUpPage = () => {
 
       if (response.data) {
         toast.push(
-          <Notification title="Success" type="success">
+          <Notification title="Success" type="success" closable={true}>
             Follow-up notice created successfully
           </Notification>
         );

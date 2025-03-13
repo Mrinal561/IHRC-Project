@@ -45,6 +45,7 @@ const SandETrackerEditDialog: React.FC<PFTrackerEditDialogProps> = ({
         <Notification
             title={type.charAt(0).toUpperCase() + type.slice(1)}
             type={type}
+            closable={true}
         >
             {message}
         </Notification>

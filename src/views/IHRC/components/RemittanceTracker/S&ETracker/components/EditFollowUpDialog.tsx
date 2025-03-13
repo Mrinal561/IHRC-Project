@@ -113,7 +113,7 @@ const EditFollowUpDialog = ({ followUpId, onClose, isOpen }) => {
             await httpClient.put(endpoints.noticeTracker.updateFollowupNotice(followUpId), payload);
 
             toast.push(
-                <Notification title="Success" type="success">
+                <Notification title="Success" type="success" closable={true}>
                     Follow-up notice updated successfully.
                 </Notification>
             );

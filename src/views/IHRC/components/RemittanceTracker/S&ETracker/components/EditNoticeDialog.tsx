@@ -136,7 +136,7 @@ const EditNoticeDialog: React.FC<EditNoticeDialogProps> = ({
       })).unwrap();
       
       toast.push(
-        <Notification title="Success" type="success">
+        <Notification title="Success" type="success" closable={true}>
           Notice updated successfully
         </Notification>
       );

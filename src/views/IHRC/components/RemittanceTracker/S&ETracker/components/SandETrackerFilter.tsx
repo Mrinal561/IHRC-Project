@@ -39,6 +39,7 @@ const SandETrackerFilter: React.FC<NoticeProps> = ({ onFilterChange }) => {
       <Notification
         title={type.charAt(0).toUpperCase() + type.slice(1)}
         type={type}
+        closable={true}
       >
         {message}
       </Notification>

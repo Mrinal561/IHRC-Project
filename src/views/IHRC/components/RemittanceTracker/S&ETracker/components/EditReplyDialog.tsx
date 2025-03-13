@@ -97,7 +97,7 @@ const EditReplyDialog = ({ replyId, onClose, isOpen }) => {
 
             // Show success notification
             toast.push(
-                <Notification title="Success" type="success">
+                <Notification title="Success" type="success" closable={true}>
                     Reply updated successfully.
                 </Notification>
             );
