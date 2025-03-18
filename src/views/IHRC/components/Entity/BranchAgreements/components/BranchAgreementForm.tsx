@@ -168,7 +168,7 @@ const [loading, setLoading] = useState(false)
     const companyId = typeof selectedCompany === 'object' ? selectedCompany.value : selectedCompany;
     
     try {
-      const { data } = await httpClient.get(endpoints.branch.getAll(), {
+      const { data } = await httpClient.get(endpoints.branch.getAllBranch(), {
         params: {
           'company_id[]': companyId
         }

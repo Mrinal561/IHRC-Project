@@ -102,7 +102,7 @@ const PTSetupTable: React.FC<PTSetupTableProps> = ({
                 enableSorting: false,
                 accessorKey: 'enroll_number',
                 cell: (props: any) => (
-                    <div className="w-48 truncate">{props.getValue()}</div>
+                    <div className="w-64 truncate">{props.getValue()}</div>
                 ),
             },
             {
@@ -110,7 +110,7 @@ const PTSetupTable: React.FC<PTSetupTableProps> = ({
                 enableSorting: false,
                 accessorKey: 'register_number',
                 cell: (props: any) => (
-                    <div className="w-48 truncate">{props.getValue()}</div>
+                    <div className="w-64 truncate">{props.getValue()}</div>
                 ),
             },
             {

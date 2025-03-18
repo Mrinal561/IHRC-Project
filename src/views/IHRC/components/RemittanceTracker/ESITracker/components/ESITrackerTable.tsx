@@ -180,7 +180,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                     const date = new Date(props.getValue() as string);
                     return (
                       <div className="w-32 truncate">
-                        {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                         {date.toLocaleString('default', { month: 'long' })}
                       </div>
                     );
                   }

@@ -164,10 +164,10 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
                 }
               },
               dataLabels: {
-                enabled: true,
-                formatter: function (val) {
-                  return isNaN(val) ? '0%' : val.toFixed(1) + '%';
-                }
+                enabled: false,
+                // formatter: function (val) {
+                //   return isNaN(val) ? '0%' : val.toFixed(1) + '%';
+                // }
               },
               tooltip: {
                 y: {

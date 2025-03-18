@@ -27,19 +27,19 @@ const ptSetupSchema = yup.object().shape({
 
     register_number: yup
         .string()
-        .required('Registration number is required')
-        .matches(
-            /^[A-Za-z0-9]+$/,
-            'Registration number must contain only letters and numbers',
-        ),
+        .required('Registration number is required'),
+        // .matches(
+        //     /^[A-Za-z0-9\-_.,:;#@!$%^&*()[\]{}|<>?+=\/\\]+$/,
+        //     'Invalid registration number format',
+        // ),
 
-    enroll_number: yup
+        enroll_number: yup
         .string()
-        .required('Enrollment number is required')
-        .matches(
-            /^[A-Za-z0-9]+$/,
-            'Enrollment number must contain only letters and numbers',
-        ),
+        .required('Enrollment number is required'),
+        // .matches(
+        //     /^[A-Za-z0-9\-_.,:;#@!$%^&*()[\]{}|<>?+=\/\\]+$/,
+        //     'Invalid enrollment number format',
+        // ),
 
     register_date: yup
         .date()

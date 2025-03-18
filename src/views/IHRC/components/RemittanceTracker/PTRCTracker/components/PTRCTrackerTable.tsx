@@ -163,7 +163,7 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
         header: 'PT RC Number',
         enableSorting: false,
         accessorKey: 'PtSetup.register_number',
-        cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
+        cell: (props) => <div className="w-64 truncate">{props.getValue() as string}</div>,
       },
       {
         header: 'Payroll month',
@@ -173,7 +173,7 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
                     const date = new Date(props.getValue() as string);
                     return (
                       <div className="w-32 truncate">
-                        {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                         {date.toLocaleString('default', { month: 'long' })}
                       </div>
                     );
                   }
@@ -209,15 +209,15 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
           </div>
         ),
       },
-      // {
-      //   header: 'PT Amount',
-      //   accessorKey: 'pt',
-      //   cell: (props) => (
-      //     <div className="w-28 truncate">
-      //       ₹{(props.getValue() as number).toLocaleString()}
-      //     </div>
-      //   ),
-      // },
+      {
+        header: 'Salary Register Amount',
+        accessorKey: 'salary_register_amt',
+        cell: (props) => (
+          <div className="w-40 truncate">
+            ₹{(props.getValue() as number).toLocaleString()}
+          </div>
+        ),
+      },
       {
         header: 'Total Amount Paid',
         enableSorting: false,

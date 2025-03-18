@@ -129,14 +129,17 @@ const params: any = {
       //   cell: (props) => <div className="w-28 truncate">{props.getValue() as string}</div>,
       // },
       {
-        header: 'Period',
+        header: 'Payroll month',
         enableSorting: false,
         accessorKey: 'period',
-         cell: (props) => (
-          <div className="w-28 truncate">
-            {dayjs(props.getValue() as string).format('DD-MM-YYYY')}
-          </div>
-        ),
+        cell: (props) => {
+          const date = new Date(props.getValue() as string);
+          return (
+            <div className="w-32 truncate">
+              {date.toLocaleString('default', { month: 'long' })}
+            </div>
+          );
+        }
       },
       {
         header: 'Total Amount (Challan)',

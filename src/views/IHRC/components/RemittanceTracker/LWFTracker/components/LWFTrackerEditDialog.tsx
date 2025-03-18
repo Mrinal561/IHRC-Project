@@ -135,6 +135,7 @@ const LWFTrackerEditDialog: React.FC<LWFTrackerEditDialogProps> = ({
       delay_reason: editedData.delay_reason || '',
       receipt_no: editedData.receipt_no,
       total_paid_amt: editedData.total_paid_amt,
+      difference_reason: editedData.difference_reason || '',
     };
 
     // Dispatch updateTracker with id and updateData
@@ -217,11 +218,11 @@ const handleDateChange = async (field: 'month' | 'dueDate' | 'payment_date', dat
     onClose={onClose}
     onRequestClose={onClose}
     width={800}
-    height={400} // Increased height to accommodate error messages
+    height={450} // Increased height to accommodate error messages
   >
     <h5 className="mb-4">Edit LWF Tracker</h5>
     
-    <div className="p-4 space-y-6"> {/* Increased space between rows */}
+    <div className=" space-y-2"> {/* Increased space between rows */}
       <div className='grid grid-cols-2 gap-4'> {/* Changed to grid layout */}
         <div className='flex flex-col min-h-[90px]'> {/* Added minimum height */}
           <label className="mb-2">Enter Receipt Number</label>
@@ -249,17 +250,19 @@ const handleDateChange = async (field: 'month' | 'dueDate' | 'payment_date', dat
       </div>
 
       <div className='grid grid-cols-2 gap-4'> {/* Changed to grid layout */}
-        <div className='flex flex-col min-h-[90px]'> {/* Added minimum height */}
-          <label className="mb-2">Enter Delay Reason</label>
-          <OutlinedInput
-            label="Delay Reason"
-            value={editedData.delay_reason || ''}
-            onChange={(value) => handleChange('delay_reason', value)}
-          />
-          {validationErrors.delay_reason && (
-            <span className="text-red-500 text-sm mt-1">{validationErrors.delay_reason}</span>
-          )}
-        </div>
+
+      <div className='flex flex-col min-h-[90px]'>
+    <label className="mb-2">Enter Difference Reason</label>
+    <OutlinedInput
+      label="Difference Reason"
+      value={editedData.difference_reason || ''}
+      onChange={(value) => handleChange('difference_reason', value)}
+    />
+    {validationErrors.difference_reason && (
+      <span className="text-red-500 text-sm mt-1">{validationErrors.difference_reason}</span>
+    )}
+  </div>
+       
 
         <div className='flex flex-col min-h-[90px]'> {/* Added minimum height */}
           <label className="mb-2">Select Date of Payment</label>
@@ -274,6 +277,21 @@ const handleDateChange = async (field: 'month' | 'dueDate' | 'payment_date', dat
           />
           {validationErrors.payment_date && (
             <span className="text-red-500 text-sm mt-1">{validationErrors.payment_date}</span>
+          )}
+        </div>
+
+        
+      </div>
+      <div className='grid grid-cols-2 gap-4'>
+      <div className='flex flex-col min-h-[90px]'> {/* Added minimum height */}
+          <label className="mb-2">Enter Delay Reason</label>
+          <OutlinedInput
+            label="Delay Reason"
+            value={editedData.delay_reason || ''}
+            onChange={(value) => handleChange('delay_reason', value)}
+          />
+          {validationErrors.delay_reason && (
+            <span className="text-red-500 text-sm mt-1">{validationErrors.delay_reason}</span>
           )}
         </div>
       </div>

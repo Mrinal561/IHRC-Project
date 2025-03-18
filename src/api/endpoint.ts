@@ -66,6 +66,7 @@ export const endpoints = {
     },
     branch: {
         getAll: () => api('companyadmin/branch'),
+        getAllBranch: () => api('companyadmin/branch/all'),
         getById: (id: string) => api(`companyadmin/branch/${id}`),
         create: () => api('companyadmin/branch'),
         update: (id: string) => api(`companyadmin/branch/${id}`),

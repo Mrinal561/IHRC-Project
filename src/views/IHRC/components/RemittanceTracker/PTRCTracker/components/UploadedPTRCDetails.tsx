@@ -128,14 +128,14 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
         cell: (props) => <div className="w-36 truncate">{props.getValue() as number}</div>,
       },
       {
-        header: 'Month',
+        header: 'Payroll Month',
         enableSorting: false,
         accessorKey: 'payroll_month',
         cell: (props) => {
           const date = new Date(props.getValue() as string);
           return (
             <div className="w-28 truncate">
-              {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
+              {date.toLocaleString('default', { month: 'long' })}
             </div>
           );
         }

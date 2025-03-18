@@ -222,7 +222,7 @@ const validationSchema = yup.object().shape({
                     .required('Register number is required'),
             otherwise: (schema) => schema.notRequired(),
         }),
-    se_validity: yup
+        se_validity: yup
         .string()
         .nullable()
         .when(['type', 'document_validity_type', 'se_status'], {
@@ -234,9 +234,37 @@ const validationSchema = yup.object().shape({
                         /^\d{4}-\d{2}-\d{2}$/,
                         'SE Validity must be in the format YYYY-MM-DD',
                     )
+                    .test(
+                        'is-not-past-date',
+                        'SE Validity cannot be a past date',
+                        function (value) {
+                            if (!value) return true; // Skip validation if the value is empty
+
+                            const selectedDate = new Date(value);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0); // Reset time part to compare only dates
+
+                            return selectedDate >= today;
+                        }
+                    )
                     .required('SE validity is required'),
             otherwise: (schema) => schema.notRequired(),
         }),
+    // se_validity: yup
+    //     .string()
+    //     .nullable()
+    //     .when(['type', 'document_validity_type', 'se_status'], {
+    //         is: (type, docType, seStatus) =>
+    //             type === 'owned' && docType === 'fixed' && seStatus === 'valid',
+    //         then: (schema) =>
+    //             schema
+    //                 .matches(
+    //                     /^\d{4}-\d{2}-\d{2}$/,
+    //                     'SE Validity must be in the format YYYY-MM-DD',
+    //                 )
+    //                 .required('SE validity is required'),
+    //         otherwise: (schema) => schema.notRequired(),
+    //     }),
         gst_number: yup
         .string()
         .nullable()
@@ -364,7 +392,7 @@ const AddBranchForm: React.FC = () => {
     ]
     const officeTypeOption = [
         { value: 'register_office', label: 'Register Office' },
-        { value: 'coorporate_office', label: 'Coorporate Office' },
+        { value: 'coorporate_office', label: 'Corporate Office' },
         { value: 'regional_office', label: 'Regional Office' },
         { value: 'factory', label: 'Factory' },
         { value: 'branch', label: 'Branch Office' },
@@ -959,6 +987,7 @@ const AddBranchForm: React.FC = () => {
                             inputFormat="DD-MM-YYYY"  // Changed to uppercase format tokens
                             yearLabelFormat="YYYY"
                             monthLabelFormat="MMMM YYYY"
+                            maxDate={new Date()} 
                         />{' '}
                         {errors?.opening_date && (
                             <span className="text-red-500 text-sm">
@@ -1291,6 +1320,7 @@ const AddBranchForm: React.FC = () => {
                                                 inputFormat="DD-MM-YYYY"  // Changed to uppercase format tokens
                             yearLabelFormat="YYYY"
                             monthLabelFormat="MMMM YYYY"
+                            minDate={new Date()} 
                                             />
                                             {errors?.se_validity && (
                                                 <span className="text-red-500 text-sm">
@@ -1544,7 +1574,7 @@ const AddBranchForm: React.FC = () => {
                                                         *
                                                     </span>
                                                 </p>
-                                                <DatePicker
+                                                {/* <DatePicker
                                                     size="sm"
                                                     placeholder="Pick a Date"
                                                     onChange={(date) => {
@@ -1565,7 +1595,27 @@ const AddBranchForm: React.FC = () => {
                                                             errors?.se_validity as String
                                                         }
                                                     </span>
-                                                )}
+                                                )} */}
+
+<DatePicker
+    size="sm"
+    placeholder="Pick a Date"
+    onChange={(date) => {
+        setFormData((prev) => ({
+            ...prev,
+            se_validity: date ? format(date, 'yyyy-MM-dd') : '',
+        }));
+    }}
+    inputFormat="DD-MM-YYYY"
+    yearLabelFormat="YYYY"
+    monthLabelFormat="MMMM YYYY"
+    minDate={new Date()} // Ensure that the user cannot select a past date
+/>
+{errors?.se_validity && (
+    <span className="text-red-500 text-sm">
+        {errors?.se_validity as String}
+    </span>
+)}
                                             </div>
                                         )}
 

@@ -188,6 +188,8 @@ const PTRCTrackerFilter: React.FC<PTRCTrackerFilterProps> = ({ onFilterChange })
         }));
 
         setPtCodeOptions(formattedPTCodes);
+        console.log('pt rc code checking', ptCodeOptions);
+        
         if (formattedPTCodes.length === 0) {
           // showNotification('info', 'No PT Codes found for this company');
         }

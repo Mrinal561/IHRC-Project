@@ -154,14 +154,14 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
         header: 'Payroll month',
         enableSorting: false,
         accessorKey: 'period',
-       cell: (props) => {
-                    const date = new Date(props.getValue() as string);
-                    return (
-                      <div className="w-32 truncate">
-                        {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                      </div>
-                    );
-                  }
+        cell: (props) => {
+          const date = new Date(props.getValue() as string);
+          return (
+            <div className="w-32 truncate">
+              {date.toLocaleString('default', { month: 'long' })}
+            </div>
+          );
+        }
       },
       // {
       //   header: 'Date of Enrolment',
@@ -194,15 +194,55 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
       //   accessorKey: 'frequency',
       //   cell: (props) => <div className="w-28 truncate">{props.getValue() as string}</div>,
       // },
+      // {
+      //   header: 'Period',
+      //   enableSorting: false,
+      //   accessorKey: 'period',
+      //    cell: (props) => (
+      //     <div className="w-28 truncate">
+      //       {dayjs(props.getValue() as string).format('DD-MM-YYYY')}
+      //     </div>
+      //   ),
+      // },
       {
         header: 'Period',
         enableSorting: false,
         accessorKey: 'period',
-         cell: (props) => (
-          <div className="w-28 truncate">
-            {dayjs(props.getValue() as string).format('DD-MM-YYYY')}
-          </div>
-        ),
+        cell: (props) => {
+          const periodDate = new Date(props.getValue() as string);
+          const frequency = props.row.original.setup_data.State.ptec_frequency;
+      
+          let periodDisplay = '';
+      
+          if (frequency === 'half_yearly') {
+            const month = periodDate.getMonth() + 1; // getMonth() returns 0-11, so +1 to make it 1-12
+            if (month >= 4 && month <= 9) {
+              periodDisplay = 'Apr-Sep'; // First half of the financial year
+            } else {
+              periodDisplay = 'Oct-Mar'; // Second half of the financial year
+            }
+          } else if (frequency === 'quarterly') {
+            const month = periodDate.getMonth() + 1; // getMonth() returns 0-11, so +1 to make it 1-12
+            if (month >= 4 && month <= 6) {
+              periodDisplay = 'Apr-Jun'; // Q1
+            } else if (month >= 7 && month <= 9) {
+              periodDisplay = 'Jul-Sep'; // Q2
+            } else if (month >= 10 && month <= 12) {
+              periodDisplay = 'Oct-Dec'; // Q3
+            } else {
+              periodDisplay = 'Jan-Mar'; // Q4
+            }
+          } else {
+            // Default to showing the full date if frequency is not recognized
+            periodDisplay = dayjs(periodDate).format('DD-MM-YYYY');
+          }
+      
+          return (
+            <div className="w-28 truncate">
+              {periodDisplay}
+            </div>
+          );
+        }
       },
       {
         header: 'Total Amount (Challan)',

@@ -31,18 +31,18 @@ interface ValidationErrors {
 const ptSchema = yup.object().shape({
     register_number: yup
         .string()
-        .required('Register Number is required')
-        .matches(
-            /^[A-Za-z0-9]+$/,
-            'ESI code must contain only letters and numbers',
-        ),
+        .required('Register Number is required'),
+        // .matches(
+        //     /^[A-Za-z0-9]+$/,
+        //     'rc number must contain only letters and numbers',
+        // ),
     enroll_number: yup
         .string()
-        .required('Enrollment Number is required')
-        .matches(
-            /^[A-Za-z0-9]+$/,
-            'ESI code must contain only letters and numbers',
-        ),
+        .required('Enrollment Number is required'),
+        // .matches(
+        //     /^[A-Za-z0-9]+$/,
+        //     'ec number must contain only letters and numbers',
+        // ),
     // username: yup
     //     .string()
     //     .required('PF User is required')
