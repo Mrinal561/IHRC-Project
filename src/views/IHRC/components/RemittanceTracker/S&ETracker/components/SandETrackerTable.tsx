@@ -311,7 +311,7 @@ const NoticeTrackerTable: React.FC<NoticeTrackerTableProps> = ({
           return (
             <div className="flex items-center gap-2">
               {/* View Reply Button */}
-              <Tooltip title="View Reply">
+              <Tooltip title="View Timeline">
                 <Button
                   size="sm"
                   onClick={() => navigate('/notice-tracker/replyhistory', {
