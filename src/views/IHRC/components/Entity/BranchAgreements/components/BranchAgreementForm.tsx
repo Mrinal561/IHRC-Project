@@ -387,17 +387,23 @@ return (
 
               {/* Office Type */}
               {currentBranchData?.office_type && (
-                <div className="space-y-2">
-                  <label htmlFor="officeType">Office Type</label>
-                  <OutlinedInput
-                    label="Office Type"
-                    value={currentBranchData.office_type === 'coorporate_office' 
-                      ? 'Corporate Office' 
-                      : currentBranchData.office_type}
-                    onChange={() => {}}
-                  />
-                </div>
-              )}
+  <div className="space-y-2">
+    <label htmlFor="officeType">Office Type</label>
+    <OutlinedInput
+      label="Office Type"
+      value={
+        currentBranchData.office_type === 'register_office' ? 'Register Office' :
+        currentBranchData.office_type === 'coorporate_office' ? 'Corporate Office' :
+        currentBranchData.office_type === 'regional_office' ? 'Regional Office' :
+        currentBranchData.office_type === 'factory' ? 'Factory' :
+        currentBranchData.office_type === 'branch' ? 'Branch' :
+        currentBranchData.office_type === 'other' ? 'Other' :
+        currentBranchData.office_type
+      }
+      onChange={() => {}}
+    />
+  </div>
+)}
              {/* Agreement Type */}
           <div className="space-y-2">
             <AgreementTypeAutosuggest
