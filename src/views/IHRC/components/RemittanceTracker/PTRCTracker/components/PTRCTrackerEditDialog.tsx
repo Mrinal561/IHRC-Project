@@ -12,7 +12,7 @@ import * as yup from 'yup';
 // Add this interface for validation errors
 interface ValidationErrors {
   no_of_emp?: string;
-  gross_salary?: string;
+  salary_register_amt?: number;
   total_paid_amt?: string;
   payment_date?: string;
   delay_reason?: string;
@@ -26,11 +26,11 @@ const validationSchema = yup.object().shape({
     .typeError("Number of employees cannot be zero")
     .required('Number of employees is required')
     .positive('Number of employees must be positive'),
-  gross_salary: yup
+    salary_register_amt: yup
     .number()
-    .typeError("Gross salary cannot be zero")
-    .required('Gross salary is required')
-    .positive('Gross salary must be positive'),
+    .typeError("Salary register amount cannot be zero")
+    .required('Salary register amount is required')
+    .positive('Salary register amount must be positive'),
   total_paid_amt: yup
     .number()
     .typeError("Total paid amount cannot be zero")
@@ -49,7 +49,7 @@ const validationSchema = yup.object().shape({
 interface PTRCTrackerData {
   id: number;
   no_of_emp?: number;
-  gross_salary: number;
+  salary_register_amt: number;
   total_paid_amt?: number;
   payment_due_date?: string;
   delay_reason?: string;
@@ -157,7 +157,7 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
       difference_reason: editedData.difference_reason,
       total_paid_amt: editedData.total_paid_amt,
       no_of_emp: editedData.no_of_emp,
-      gross_salary: editedData.gross_salary,
+      salary_register_amt: Number(editedData.salary_register_amt),
     };
 
     // Dispatch updateTracker with id and updateData
@@ -252,11 +252,11 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
   )}
           </div>
           <div className='flex flex-col gap-2 w-full min-h-[90px]'>
-            <label>Gross Salary</label>
+            <label>Salary Register Amount</label>
             <OutlinedInput
-              label="Gross Salary"
-              value={editedData.gross_salary?.toString() || '' }
-              onChange={(value) => handleChange('gross_salary', value)}
+              label="Salary Register Amount"
+              value={editedData.salary_register_amt?.toString() || '' }
+              onChange={(value) => handleChange('salary_register_amt', value)}
             />
              {validationErrors.no_of_emp && (
     <p className="text-red-500 text-sm mt-1">{validationErrors.no_of_emp}</p>

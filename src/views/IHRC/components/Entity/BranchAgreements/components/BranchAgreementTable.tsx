@@ -5,7 +5,7 @@ import { Button, toast, Tooltip, Notification, Dialog } from '@/components/ui';
 import OutlinedInput from '@/components/ui/OutlinedInput';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
 import { MdEdit } from 'react-icons/md';
-import { FiTrash } from 'react-icons/fi';
+import { FiFile, FiTrash } from 'react-icons/fi';
 import dayjs from 'dayjs';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
@@ -39,6 +39,7 @@ const BranchAgreementTable = (canEdit,canDelete) => {
             label: companyName
         } : (user?.company_id || ''),
         sub_category: '',
+        agreement_type: '',
         isFromBranch: !!branchId // Flag to check if coming from branch table
     });
     
@@ -128,6 +129,10 @@ const BranchAgreementTable = (canEdit,canDelete) => {
             if (filters.sub_category) {
                 params.sub_category = filters.sub_category;
             }
+
+            if(filters.agreement_type){
+                params.agreement_type = filters.agreement_type;
+            }
             
             console.log('Final Request params:', params);
             
@@ -186,6 +191,7 @@ const BranchAgreementTable = (canEdit,canDelete) => {
         filters.branch_id,
         filters.company_id,
         filters.sub_category,
+        filters.agreement_type,
         tableData.pageIndex,
         tableData.pageSize,
         tableData.sort
@@ -298,6 +304,37 @@ const BranchAgreementTable = (canEdit,canDelete) => {
               );
             },
           },
+          {
+            header: 'Agreement Copy',
+            enableSorting: false,
+            accessorKey: 'agreement_document',
+            cell: (props) => {
+                const document = props.getValue() as string | null;
+
+                const handleDocumentDownload = (e: React.MouseEvent<HTMLAnchorElement>) => {
+                    e.preventDefault();
+                    if(document) {
+                        const fullPath = `${import.meta.env.VITE_API_GATEWAY}/${document}`;
+                        window.open(fullPath, '_blank');
+                    }
+                };
+                 return (
+                            <div className="w-40 flex items-center">
+                              {document ? (
+                                <a 
+                                  href="#" 
+                                  onClick={handleDocumentDownload} 
+                                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                                >
+                                  <FiFile className="w-5 h-5" />
+                                </a>
+                              ) : (
+                                '--'
+                              )}
+                            </div>
+                          );
+            }
+          },
         {
             header: 'Actions',
             id: 'actions',
@@ -337,7 +374,7 @@ const BranchAgreementTable = (canEdit,canDelete) => {
     return (
         <div className="space-y-4">
             {/* Filters Section */}
-            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <OutlinedSelect
     label="Company"
     value={filters.company_id} // This will now be the full option object
@@ -353,6 +390,11 @@ const BranchAgreementTable = (canEdit,canDelete) => {
     disabled={filters.isFromBranch}
 />
 
+                <OutlinedInput
+                    label="Agreement Type"
+                    value={filters.agreement_type}
+                    onChange={(value) => handleFilterChange('agreement_type', value)}
+                />
                 <OutlinedInput
                     label="Sub Category"
                     value={filters.sub_category}

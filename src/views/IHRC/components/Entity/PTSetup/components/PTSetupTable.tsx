@@ -90,6 +90,14 @@ const PTSetupTable: React.FC<PTSetupTableProps> = ({
             //   ),
             // },
             {
+                header: 'PT State',
+                enableSorting: false,
+                accessorKey: 'State.name',
+                cell: (props: any) => (
+                    <div className="w-36 text-start">{props.getValue()}</div>
+                ),
+            },
+            {
                 header: 'PT Location',
                 enableSorting: false,
                 accessorKey: 'Location.name',
