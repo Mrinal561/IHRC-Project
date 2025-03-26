@@ -63,6 +63,7 @@
             }
         },
             "notice": "Notice Tracker",
+            "return": "Return Tracker",
             "externaluser": "External User",
             "agreement": "Agreement",
         "register": {

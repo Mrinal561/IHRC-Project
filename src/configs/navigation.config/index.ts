@@ -359,8 +359,28 @@ const adminnav: NavigationTree[] = [
                 authority: [],
                 subMenu: [],
             },
+             {
+        key: 'return',
+        path: '/return-tracker',
+        title: 'Return Tracker',
+        translateKey: 'nav.return',
+        icon: '',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
+    },
         ],
     },
+    // {
+    //     key: 'return',
+    //     path: '/return-tracker',
+    //     title: 'Return Tracker',
+    //     translateKey: 'nav.return',
+    //     icon: '',
+    //     type: NAV_ITEM_TYPE_ITEM,
+    //     authority: [],
+    //     subMenu: [],
+    // },
 
     // {
     //     key: 'register.collapse',
@@ -805,6 +825,16 @@ const usernav: NavigationTree[] = [
     //         },
     //     ],
     // },
+    {
+        key: 'return',
+        path: '/return-tracker',
+        title: 'Return Tracker',
+        translateKey: 'nav.return',
+        icon: '',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
+    },
 ]
 console.log('auth')
 const type = login.user.type || ''

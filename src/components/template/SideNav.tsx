@@ -1261,6 +1261,16 @@ const adminnav: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
+    {
+        key: 'return',
+        path: '/return-tracker',
+        title: 'Return Tracker',
+        translateKey: 'nav.return',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
+    },
 ];
 
 const usernav: NavigationTree[] = [
@@ -1365,6 +1375,16 @@ const usernav: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
+    {
+        key: 'return',
+        path: '/return-tracker',
+        title: 'Return Tracker',
+        translateKey: 'nav.return',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
+    },
 ];
 
 const filterNavigation = (
@@ -1434,7 +1454,58 @@ const filterNavigation = (
         return null;
     };
 
-    return navigation.filter((navItem) => {
+    // return navigation.filter((navItem) => {
+    //     // Allow always visible items
+    //     if (alwaysVisibleItems.includes(navItem.title)) {
+    //         return true;
+    //     }
+
+    //     // Special case for Global Settings (admin only)
+    //     if (navItem.key === 'groupMenu.collapse') {
+    //         return isAdmin;
+    //     }
+
+    //     // Find menu item in module list
+    //     const menuInfo = findMenuInModuleList(navItem.title, moduleList);
+        
+    //     // Handle items with submenus
+    //     if (navItem.subMenu && navItem.subMenu.length > 0) {
+    //         // For admin, recursively filter without permission check
+    //         if (isAdmin) {
+    //             const filteredSubMenu = filterNavigation(navItem.subMenu, moduleList, true);
+    //             navItem.subMenu = filteredSubMenu;
+    //             return filteredSubMenu.length > 0;
+    //         }
+
+    //         // For users, check permissions at each level
+    //         let filteredSubMenu;
+    //         if (menuInfo?.parentModule) {
+    //             // For menus like Remittance Tracker with direct submenus
+    //             filteredSubMenu = navItem.subMenu.filter(subItem => {
+    //                 const subMenuInfo = findNestedMenu(subItem.title, moduleList);
+    //                 return subMenuInfo?.access?.can_list === true;
+    //             });
+    //         } else {
+    //             // For deeply nested menus
+    //             filteredSubMenu = filterNavigation(navItem.subMenu, moduleList, false);
+    //         }
+
+    //         navItem.subMenu = filteredSubMenu;
+    //         return filteredSubMenu.length > 0;
+    //     }
+
+    //     // For regular menu items
+    //     if (!menuInfo) return false;
+
+    //     // For admin, only check if menu exists
+    //     if (isAdmin) {
+    //         return true;
+    //     }
+
+    //     // For users, check can_list permission
+    //     return menuInfo.access?.can_list === true;
+    // });
+    const filteredNav = navigation.filter((navItem) => {
         // Allow always visible items
         if (alwaysVisibleItems.includes(navItem.title)) {
             return true;
@@ -1485,6 +1556,29 @@ const filterNavigation = (
         // For users, check can_list permission
         return menuInfo.access?.can_list === true;
     });
+
+    // Ensure "Return Tracker" is always shown after "Notice Tracker"
+    const noticeTrackerIndex = filteredNav.findIndex(item => item.key === 'notice');
+    if (noticeTrackerIndex !== -1) {
+        const returnTrackerItem = {
+            key: 'return',
+            path: '/return-tracker',
+            title: 'Return Tracker',
+            translateKey: 'nav.return',
+            icon: 'remittanceCollapse',
+            type: NAV_ITEM_TYPE_ITEM,
+            authority: [],
+            subMenu: [],
+        };
+
+        // Insert "Return Tracker" after "Notice Tracker"
+        filteredNav.splice(noticeTrackerIndex + 1, 0, returnTrackerItem);
+    }
+
+    return filteredNav;
+
+
+
 };
 
 const SideNav = () => {

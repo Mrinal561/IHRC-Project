@@ -582,6 +582,17 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'return',
+        path: '/return-tracker',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/ReturnTracker/ReturnTracker'
+                ),
+        ),
+        authority: [],
+    },
+    {
         key: 'noticeTracker.response',
         path: '/notice-tracker/response',
         component: lazy(
@@ -621,6 +632,17 @@ export const protectedRoutes = [
             () =>
                 import(
                     '@/views/IHRC/components/RemittanceTracker/S&ETracker/components/NoticeFormPage'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'return.addReturn',
+        path: '/add-return-tracker',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/ReturnTracker/components/ReturnTrackerAddForm'
                 ),
         ),
         authority: [],
@@ -816,6 +838,17 @@ export const protectedRoutes = [
             () =>
                 import(
                     '@/views/IHRC/components/Registers&Return/output/OutputRegisters/OutputRegisters'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'returnTracker.edit',
+        path: '/edit-return-tracker',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/ReturnTracker/components/ReturnTrackerEditForm'
                 ),
         ),
         authority: [],
