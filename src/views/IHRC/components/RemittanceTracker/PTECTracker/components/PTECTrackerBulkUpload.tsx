@@ -196,15 +196,15 @@ const PTECTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
             console.error('Download error:', error)
             toast.push(
                 <Notification
-                    title="error"
+                    title="info"
                     closable={true}
-                    type="error"
+                    type="info"
                 >
                     {/* No PT Setup data found for your company */}
                     No eligible data found for export
                 </Notification>,
             )
-            // throw error;
+            // throw error.message;
         }
     }
 
