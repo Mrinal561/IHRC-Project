@@ -67,23 +67,33 @@ const PFTrackerTool: React.FC<{
     setStartDate(start);
     setEndDate(end);
     // console.log(startDate, endDate)
+
+    const formatDateWithoutTimezone = (date: Date | null) => {
+      if (!date) return null;
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+
     setFilters(prevFilters => ({
-      ...prevFilters,
-      startDate:start ? start.toISOString().split('T')[0] : null, // Format: YYYY-MM-DD
-      endDate:end ? end.toISOString().split('T')[0] : null
-    }));
+    ...prevFilters,
+    startDate: formatDateWithoutTimezone(start),
+    endDate: formatDateWithoutTimezone(end)
+  }));
+
   
     // Also call onFilterChange to notify parent component
     onFilterChange({
       ...filters,
-      startDate:start?  start.toISOString().split('T')[0] : null,
-      endDate:end? end.toISOString().split('T')[0] : null
+      startDate: formatDateWithoutTimezone(start),
+      endDate: formatDateWithoutTimezone(end)
     });
   };
 
   const handleDownload = async () => {
     try {
-
       if (!filters.groupId && !filters.pfCode && !filters.companyId) {
         toast.push(
           <Notification title='Warning' type='warning' closable={true} duration={10000}>
@@ -92,9 +102,20 @@ const PFTrackerTool: React.FC<{
         )
         return;
       }
-      const formattedStartDate = filters.startDate ? new Date(filters.startDate).toISOString().split('T')[0].replace(/-/g, '/') : '';
-      const formattedEndDate = filters.endDate ? new Date(filters.endDate).toISOString().split('T')[0].replace(/-/g, '/') : '';
-
+  
+      // Helper function to format date without timezone issues
+      const formatDateForDownload = (dateString: string | null) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}/${month}/${day}`;
+      };
+  
+      const formattedStartDate = formatDateForDownload(filters.startDate);
+      const formattedEndDate = formatDateForDownload(filters.endDate);
+  
       const res = await httpClient.get(endpoints.tracker.downloadALl(), {
         responseType: 'blob',
         params: {
@@ -104,20 +125,19 @@ const PFTrackerTool: React.FC<{
           'to_date': formattedEndDate,
           'from_date': formattedStartDate
         }
-      })
-      if(res){
-
-    
-      const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', 'PFData.xlsx')
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url) // Clean up the URL object
-    }
+      });
+  
+      if (res) {
+        const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'PFData.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url) // Clean up the URL object
+      }
     } catch (error) {
       throw error;
     }

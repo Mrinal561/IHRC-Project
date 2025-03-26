@@ -75,7 +75,10 @@ const Branch = () => {
                             onChange={(e) => handleSearch(e)}
                         />
                         <div className="flex-shrink-0">
-                            <BranchTool onTableRefresh={handleTableRefresh} />
+                            <BranchTool 
+                            onTableRefresh={handleTableRefresh} 
+                            companyGroupId={selectedCompanyGroup?.value}
+                            companyId={selectedCompany?.value} />
                         </div>
                     </div>
                 </div>

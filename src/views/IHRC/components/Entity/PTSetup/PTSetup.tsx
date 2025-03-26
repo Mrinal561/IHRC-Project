@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button, Dialog, toast, Notification } from '@/components/ui';
-import { HiArrowLeft, HiPlusCircle } from 'react-icons/hi';
+import { HiArrowLeft, HiDownload, HiPlusCircle } from 'react-icons/hi';
 import PTSetupTable from './components/PTSetupTable';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
@@ -14,6 +14,8 @@ import PTBulkUpload from './components/PTBulkUpload';
 interface LocationState {
   companyName?: string;
   companyGroupName?: string;
+  companyId?: string;
+  groupId?: string;
 }
 
 const PTSetupPage: React.FC = () => {
@@ -117,6 +119,53 @@ const handlePageSizeChange = (newPageSize: number) => {
     );
   };
 
+  const handleDownload = async () => {
+    if (!actualCompanyId || !actualGroupId) {
+      toast.push(
+        <Notification title="Error" type="error">
+          Company information is incomplete
+        </Notification>
+      );
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams();
+      params.append('company_id[]', actualCompanyId);
+      params.append('group_id[]', actualGroupId);
+
+      const response = await httpClient.get(endpoints.ptSetup.downloadData(), {
+        params,
+        responseType: 'blob'
+      });
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'pt_setup_data.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.push(
+        <Notification title="Success" type="success">
+          PT Setup data downloaded successfully
+        </Notification>
+      );
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast.push(
+        <Notification title="Error" type="error">
+          Failed to download PT Setup data
+        </Notification>
+      );
+    }
+  };
+
   return (
     <div className="">
       <div className="flex justify-between items-center mb-6">
@@ -132,10 +181,21 @@ const handlePageSizeChange = (newPageSize: number) => {
           <h1 className="text-2xl font-bold">{actualCompanyName}-PT Setup</h1>
         </div>
         <div className="flex items-center">
+          <div className="flex gap-3">
+
+        <Button 
+            variant='solid' 
+            size='sm' 
+            icon={<HiDownload />}
+            onClick={handleDownload}
+            >
+            Download
+          </Button>
         <PTBulkUpload
                         companyId={actualCompanyId}
                         onUploadSuccess={refreshPTSetupData}
-                    />
+                        />
+                        </div>
            <Button
           variant="solid"
           size="sm"

@@ -434,6 +434,9 @@ const BranchAgreementTable = (canEdit,canDelete) => {
         order: prev.sort.order === 'desc' ? 'asc' : 'desc'
       }
     }))}
+    stickyHeader={true}
+    stickyFirstColumn={true}
+    stickyLastColumn={true}
   />
 )}
 

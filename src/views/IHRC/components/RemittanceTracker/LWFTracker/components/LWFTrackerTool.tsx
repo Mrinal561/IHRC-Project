@@ -60,17 +60,26 @@ const LWFTrackerTool: React.FC<{
     setEndDate(end);
 
         // console.log(startDate, endDate)
+        const formatDateWithoutTimezone = (date: Date | null) => {
+          if (!date) return null;
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+    
+    
         setFilters(prevFilters => ({
           ...prevFilters,
-          startDate:start ? start.toISOString().split('T')[0] : null, // Format: YYYY-MM-DD
-          endDate:end ? end.toISOString().split('T')[0] : null
+          startDate: formatDateWithoutTimezone(start),
+          endDate: formatDateWithoutTimezone(end)
         }));
       
         // Also call onFilterChange to notify parent component
         onFilterChange({
           ...filters,
-          startDate: start ? start.toISOString().split('T')[0] :  null,
-          endDate:end ? end.toISOString().split('T')[0] : null
+          startDate: formatDateWithoutTimezone(start),
+          endDate: formatDateWithoutTimezone(end)
         });
   };
 
@@ -85,8 +94,18 @@ const LWFTrackerTool: React.FC<{
         )
         return;
       }
-      const formattedStartDate = filters.startDate ? new Date(filters.startDate).toISOString().split('T')[0].replace(/-/g, '/') : '';
-      const formattedEndDate = filters.endDate ? new Date(filters.endDate).toISOString().split('T')[0].replace(/-/g, '/') : '';
+      const formatDateForDownload = (dateString: string | null) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}/${month}/${day}`;
+      };
+
+
+      const formattedStartDate = formatDateForDownload(filters.startDate);
+      const formattedEndDate = formatDateForDownload(filters.endDate);
 
       const res = await httpClient.get(endpoints.lwftracker.downlaodAll(), {
         responseType: 'blob',

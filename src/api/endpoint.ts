@@ -45,7 +45,8 @@ export const endpoints = {
         delete: (id: string) => api(`companyadmin/user/${id}`),
         updatePermission:(id:any)=> api(`companyadmin/user/permissions/${id}`),
         bulkCreate:()=> api(`companyadmin/user/user-bulkUpload`),
-        downloadFormat:()=> api(`companyadmin/user/user-template`)
+        downloadFormat:()=> api(`companyadmin/user/user-template`),
+        downloadData: () => api('companyadmin/user/user-data/export')
 
     },
     complianceSuperadmin: {
@@ -74,6 +75,7 @@ export const endpoints = {
         delete: (id: string) => api(`companyadmin/branch/${id}`),
         downloadFormat: () => api(`companyadmin/branch/download-template`),
         bulkCreate: () => api(`/companyadmin/branch/bulk-upload`),
+        downloadData: () => api('companyadmin/branch/branch-data/export')
     },
     role: {
         getAll: () => api('companyadmin/role'),
@@ -116,7 +118,8 @@ export const endpoints = {
         getAllCodes:()=> api('ptec-code'),
         rcCodes:()=>  api('ptrc-code'),
         downloadFormat:(id:any)=> api(`companyadmin/ptsetup/template/download?company_id=${id}`),
-        bulkCreate:()=> api('companyadmin/ptsetup/bulk-create')
+        bulkCreate:()=> api('companyadmin/ptsetup/bulk-create'),
+        downloadData: () => api('companyadmin/ptsetup/ptsetup-data/export')
     },
     tracker: {
         downloadFormat: () => api('/companyadmin/pfsetup/pf-tracker/exportdata'),
@@ -247,7 +250,8 @@ export const endpoints = {
         create: () => api('companyadmin/agreement/agreement'),
         update: (id: any) => api(`/companyadmin/agreement/agreement/${id}`),
         detail: (id: any) => api(`/companyadmin/agreement/agreement/${id}`),
-        delete: (id: any) => api(`/companyadmin/agreement/agreement/${id}`)
+        delete: (id: any) => api(`/companyadmin/agreement/agreement/${id}`),
+        download: () => api('companyadmin/agreement/agreement-data/export')
 
     },
         notification:{

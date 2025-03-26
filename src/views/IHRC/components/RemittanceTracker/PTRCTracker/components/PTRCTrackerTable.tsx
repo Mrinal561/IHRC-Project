@@ -210,7 +210,8 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
         ),
       },
       {
-        header: 'Salary Register Amount',
+        header: 'PT Amount As Per Salary Register',
+        enableSorting: false,
         accessorKey: 'salary_register_amt',
         cell: (props) => (
           <div className="w-40 truncate">
