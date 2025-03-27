@@ -184,16 +184,18 @@ const LWFTrackerBulkUpload: React.FC<LWFTrackerBulkUploadProps> = ({
             console.error('Download error:', error)
             toast.push(
                 <Notification
-                    title="Error"
+                    title="Info"
                     closable={true}
-                    type="error"
+                    type="info"
                 >
-                    No LWF Setup data found for your company
+                    No eligible LWF setups found for the month to export.
                 </Notification>,
             )
+           
             // throw error;
         }
     }
+  
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
