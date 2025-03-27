@@ -160,6 +160,7 @@ const LWFTrackerBulkUpload: React.FC<LWFTrackerBulkUploadProps> = ({
         try {
             const selectedDate = parse(currentGroup, 'yyyy-MM', new Date())
             const payrollMonth = format(selectedDate, 'yyyy-MM')
+            const monthName = format(selectedDate, 'MMMM').toLowerCase() 
             // const reqBody = {
             //   month: selectedDate.getMonth() + 1, // Adding 1 because getMonth() returns 0-11
             //   year: selectedDate.getFullYear()
@@ -176,7 +177,7 @@ const LWFTrackerBulkUpload: React.FC<LWFTrackerBulkUploadProps> = ({
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', `lwftracker.xlsx`)
+            link.setAttribute('download', `lwftracker-${monthName}.xlsx`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)

@@ -161,6 +161,7 @@ const PTRCTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
         try {
             const selectedDate = parse(currentGroup, 'yyyy-MM', new Date())
             const payrollMonth = format(selectedDate, 'yyyy-MM')
+            const monthName = format(selectedDate, 'MMMM').toLowerCase() 
             // const reqBody = {
             //   month: selectedDate.getMonth() + 1, // Adding 1 because getMonth() returns 0-11
             //   year: selectedDate.getFullYear()
@@ -177,7 +178,7 @@ const PTRCTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', 'PTRCTrackerData.xlsx')
+            link.setAttribute('download', `PTRCTrackerData-${monthName}.xlsx`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)

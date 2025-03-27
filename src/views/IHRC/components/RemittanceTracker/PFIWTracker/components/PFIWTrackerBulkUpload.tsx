@@ -217,6 +217,8 @@ const PFIWTrackerBulkUpload: React.FC<PFIWTrackerBulkUploadProps> = ({
 
         try {
             const selectedDate = parse(currentGroup, 'yyyy-MM', new Date())
+            const monthName = format(selectedDate, 'MMMM').toLowerCase() 
+            
             const reqBody = {
                 month: selectedDate.getMonth() + 1, // Adding 1 because getMonth() returns 0-11
                 year: selectedDate.getFullYear(),
@@ -230,7 +232,7 @@ const PFIWTrackerBulkUpload: React.FC<PFIWTrackerBulkUploadProps> = ({
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', `pfiwtracker.xlsx`)
+            link.setAttribute('download', `pfiwtracker-${monthName}.xlsx`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)

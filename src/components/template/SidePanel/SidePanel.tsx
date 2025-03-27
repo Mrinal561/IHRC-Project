@@ -35,6 +35,102 @@ const getCurrentFinancialYear = () => {
     return `${fyYear}-${(fyYear + 1).toString().slice(-2)}`;
 };
 
+// const FinancialYearFilter: React.FC<FinancialYearFilterProps> = ({ onChange }) => {
+//     // Function to get display format of year
+//     const getYearDisplay = (yearValue: string) => {
+//         const [startYear] = yearValue.split('-');
+//         return `${startYear}-${Number(startYear) + 1}`;
+//     };
+
+//     // Get available years based on current date
+//     const getAvailableYears = () => {
+//         const today = new Date();
+//         const isAfterApril = today.getMonth() >= 3;
+//         const currentFY = getCurrentFinancialYear();
+        
+//         if (isAfterApril) {
+//             // After April 1st, show current and previous FY
+//             return [
+//                 { value: currentFY, label: getYearDisplay(currentFY) },
+//                 { 
+//                     value: `${Number(currentFY.split('-')[0]) - 1}-${currentFY.split('-')[0].slice(-2)}`, 
+//                     label: `${Number(currentFY.split('-')[0]) - 1}-${currentFY.split('-')[0]}` 
+//                 }
+//             ];
+//         } else {
+//             // Before April 1st, show only current FY
+//             return [
+//                 { value: currentFY, label: getYearDisplay(currentFY) }
+//             ];
+//         }
+//     };
+
+//     const [selectedYear, setSelectedYear] = useState<string>(() => {
+//         const savedYear = sessionStorage.getItem(FINANCIAL_YEAR_KEY);
+//         const currentFY = getCurrentFinancialYear();
+//         if (!savedYear || !getAvailableYears().some(year => year.value === savedYear)) {
+//             sessionStorage.setItem(FINANCIAL_YEAR_KEY, currentFY);
+//             return currentFY;
+//         }
+//         return savedYear;
+//     });
+
+//     // Check for financial year change every day
+//     useEffect(() => {
+//         const checkFinancialYear = () => {
+//             const currentFY = getCurrentFinancialYear();
+//             if (selectedYear !== currentFY) {
+//                 setSelectedYear(currentFY);
+//                 sessionStorage.setItem(FINANCIAL_YEAR_KEY, currentFY);
+//                 onChange(currentFY);
+//                 window.dispatchEvent(new CustomEvent(FINANCIAL_YEAR_CHANGE_EVENT, {
+//                     detail: currentFY
+//                 }));
+//             }
+//         };
+
+//         // Check on component mount
+//         checkFinancialYear();
+
+//         // Set up daily check at midnight
+//         const interval = setInterval(() => {
+//             checkFinancialYear();
+//         }, 24 * 60 * 60 * 1000); // 24 hours
+
+//         return () => clearInterval(interval);
+//     }, [selectedYear, onChange]);
+
+//     const handleChange = (selectedOption: Option | null) => {
+//         if (selectedOption) {
+//             setSelectedYear(selectedOption.value);
+//             sessionStorage.setItem(FINANCIAL_YEAR_KEY, selectedOption.value);
+//             onChange(selectedOption.value);
+//             window.dispatchEvent(new CustomEvent(FINANCIAL_YEAR_CHANGE_EVENT, {
+//                 detail: selectedOption.value
+//             }));
+//         }
+//     };
+
+//     return (
+//         <div className="w-52">
+//             <OutlinedBadgeSelect
+//                 label="Financial Year"
+//                 value={getAvailableYears().find(option => option.value === selectedYear)}
+//                 options={getAvailableYears()}
+//                 onChange={handleChange}
+//                 optionRenderer={(option, isSelected) => (
+//                     <div className="flex items-center justify-between w-full">
+//                         <span>{option.label}</span>
+//                         {isSelected && (
+//                             <Badge className="w-2 h-2 rounded-full bg-emerald-500" />
+//                         )}
+//                     </div>
+//                 )}
+//             />
+//         </div>
+//     );
+// };
+
 const FinancialYearFilter: React.FC<FinancialYearFilterProps> = ({ onChange }) => {
     // Function to get display format of year
     const getYearDisplay = (yearValue: string) => {
@@ -42,63 +138,65 @@ const FinancialYearFilter: React.FC<FinancialYearFilterProps> = ({ onChange }) =
         return `${startYear}-${Number(startYear) + 1}`;
     };
 
-    // Get available years based on current date
+    // Get available years - current year and previous 4 years
     const getAvailableYears = () => {
-        const today = new Date();
-        const isAfterApril = today.getMonth() >= 3;
         const currentFY = getCurrentFinancialYear();
+        const [currentStartYearStr] = currentFY.split('-');
+        const currentStartYear = parseInt(currentStartYearStr, 10);
+        const years: Option[] = [];
         
-        if (isAfterApril) {
-            // After April 1st, show current and previous FY
-            return [
-                { value: currentFY, label: getYearDisplay(currentFY) },
-                { 
-                    value: `${Number(currentFY.split('-')[0]) - 1}-${currentFY.split('-')[0].slice(-2)}`, 
-                    label: `${Number(currentFY.split('-')[0]) - 1}-${currentFY.split('-')[0]}` 
-                }
-            ];
-        } else {
-            // Before April 1st, show only current FY
-            return [
-                { value: currentFY, label: getYearDisplay(currentFY) }
-            ];
+        // Generate 5 years (current + previous 4)
+        for (let i = 0; i < 5; i++) {
+            const year = currentStartYear - i;
+            const nextYearShort = (year + 1).toString().slice(-2).padStart(2, '0');
+            const yearValue = `${year}-${nextYearShort}`;
+            years.push({
+                value: yearValue,
+                label: getYearDisplay(yearValue)
+            });
         }
+        
+        return years;
     };
 
     const [selectedYear, setSelectedYear] = useState<string>(() => {
         const savedYear = sessionStorage.getItem(FINANCIAL_YEAR_KEY);
         const currentFY = getCurrentFinancialYear();
-        if (!savedYear || !getAvailableYears().some(year => year.value === savedYear)) {
+        const availableYears = getAvailableYears().map(y => y.value);
+        
+        // Only use currentFY if no valid saved year exists
+        if (!savedYear || !availableYears.includes(savedYear)) {
             sessionStorage.setItem(FINANCIAL_YEAR_KEY, currentFY);
             return currentFY;
         }
         return savedYear;
     });
 
-    // Check for financial year change every day
+    // Check for financial year change only when the component mounts
     useEffect(() => {
-        const checkFinancialYear = () => {
-            const currentFY = getCurrentFinancialYear();
-            if (selectedYear !== currentFY) {
-                setSelectedYear(currentFY);
-                sessionStorage.setItem(FINANCIAL_YEAR_KEY, currentFY);
-                onChange(currentFY);
-                window.dispatchEvent(new CustomEvent(FINANCIAL_YEAR_CHANGE_EVENT, {
-                    detail: currentFY
-                }));
-            }
-        };
+        const currentFY = getCurrentFinancialYear();
+        const savedYear = sessionStorage.getItem(FINANCIAL_YEAR_KEY);
+        
+        if (!savedYear) {
+            setSelectedYear(currentFY);
+            sessionStorage.setItem(FINANCIAL_YEAR_KEY, currentFY);
+            onChange(currentFY);
+            return;
+        }
 
-        // Check on component mount
-        checkFinancialYear();
-
-        // Set up daily check at midnight
-        const interval = setInterval(() => {
-            checkFinancialYear();
-        }, 24 * 60 * 60 * 1000); // 24 hours
-
-        return () => clearInterval(interval);
-    }, [selectedYear, onChange]);
+        // Parse the years for comparison
+        const [currentStartYearStr] = currentFY.split('-');
+        const [savedStartYearStr] = savedYear.split('-');
+        const currentStartYear = parseInt(currentStartYearStr, 10);
+        const savedStartYear = parseInt(savedStartYearStr, 10);
+        
+        // Only auto-update if the saved year is the previous financial year
+        if (savedStartYear === currentStartYear - 1) {
+            setSelectedYear(currentFY);
+            sessionStorage.setItem(FINANCIAL_YEAR_KEY, currentFY);
+            onChange(currentFY);
+        }
+    }, []); // Empty dependency array means this runs only on mount
 
     const handleChange = (selectedOption: Option | null) => {
         if (selectedOption) {
@@ -130,6 +228,8 @@ const FinancialYearFilter: React.FC<FinancialYearFilterProps> = ({ onChange }) =
         </div>
     );
 };
+
+
 
 const _SidePanel = (props: SidePanelProps) => {
     const { className, ...rest } = props;

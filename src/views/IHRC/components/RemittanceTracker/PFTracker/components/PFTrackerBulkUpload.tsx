@@ -170,6 +170,8 @@ const PFTrackerBulkUpload: React.FC<PFTrackerBulkUploadProps> = ({
 
         try {
             const selectedDate = parse(currentGroup, 'yyyy-MM', new Date())
+            const monthName = format(selectedDate, 'MMMM').toLowerCase() 
+            
             const reqBody = {
                 month: selectedDate.getMonth() + 1, // Adding 1 because getMonth() returns 0-11
                 year: selectedDate.getFullYear(),
@@ -204,7 +206,7 @@ const PFTrackerBulkUpload: React.FC<PFTrackerBulkUploadProps> = ({
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', `pftracker.xlsx`)
+            link.setAttribute('download', `pftracker-${monthName}.xlsx`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)

@@ -166,6 +166,7 @@ const PTECTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
         try {
             const selectedDate = parse(currentGroup, 'yyyy-MM', new Date())
             const payrollMonth = format(selectedDate, 'yyyy-MM')
+            const monthName = format(selectedDate, 'MMMM').toLowerCase() 
             const res = await httpClient.get(endpoints.ptec.download(), {
                 responseType: 'blob',
                 params: {
@@ -187,7 +188,7 @@ const PTECTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
                 const url = window.URL.createObjectURL(blob)
                 const link = document.createElement('a')
                 link.href = url
-                link.setAttribute('download', 'PTECTracker.xlsx')
+                link.setAttribute('download', `PTECTracker-${monthName}.xlsx`)
                 document.body.appendChild(link)
                 link.click()
                 document.body.removeChild(link)
