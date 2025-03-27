@@ -196,6 +196,9 @@ const PTRCTrackerBulkUpload: React.FC<PTTrackerBulkUploadProps> = ({
         }
     }
 
+
+    
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             setFile(event.target.files[0])

@@ -141,14 +141,11 @@ const ESITrackerTool: React.FC<{
     }
   };
   return (
-    <div className="w-full px-4">
-      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center mb-4 w-full">
-        <div className="w-full lg:flex-1">
+    <div className="w-full">
+      <div className="flex gap-4 items-center mb-4 w-full">
           <ESITrackerFilter 
             onFilterChange={handleFilterChange} 
           />
-        </div>
-        <div className="flex flex-wrap gap-2 items-center">
           <CustomDateRangePicker onApply={handleDateRangeApply} />
           <Button  
             variant="solid" 
@@ -157,7 +154,7 @@ const ESITrackerTool: React.FC<{
             onClick={handleDownload}
             className="whitespace-nowrap"
           >
-            Download ESI Data
+            Download Data
           </Button>
           <ESITrackerBulkUpload 
             onUploadConfirm={handleUploadConfirm} 
@@ -165,7 +162,6 @@ const ESITrackerTool: React.FC<{
           />
         </div>
       </div>
-    </div>
   );
 };
 

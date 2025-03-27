@@ -150,7 +150,7 @@ const PFIWTrackerTool: React.FC<{
           size="sm" 
           icon={<HiDownload />}
           onClick={handleDownload}>
-          Download PF IW Data
+          Download Data
         </Button>
         <PFIWTrackerBulkUpload onUploadConfirm={handleUploadConfirm} canCreate={canCreate} />
       </div>

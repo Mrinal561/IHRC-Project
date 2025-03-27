@@ -156,7 +156,7 @@ const PFTrackerTool: React.FC<{
           size="sm" 
           icon={<HiDownload />}
           onClick={handleDownload}>
-          Download PF Data
+          Download Data
         </Button>
         <PFTrackerBulkUpload onUploadConfirm={handleUploadConfirm} canCreate={canCreate}/>
       </div>

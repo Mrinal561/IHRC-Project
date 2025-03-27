@@ -148,7 +148,7 @@ const LWFTrackerTool: React.FC<{
           icon={<HiDownload />}
           onClick={handleDownload}
         >
-          Download LWF Data
+          Download Data
         </Button>
         <LWFTrackerBulkUpload onUploadConfirm={handleUploadConfirm} canCreate={canCreate}/>
       </div>

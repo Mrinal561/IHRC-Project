@@ -8,6 +8,7 @@ import httpClient from '@/api/http-client'
 import { endpoints } from '@/api/endpoint'
 import { LWFSetupData } from '@/@types/lwfData'
 import LWFBulkUpload from './components/LWFBulkUpload'
+import OutlinedInput from '@/components/ui/OutlinedInput'
 
 interface LocationState {
     companyName?: string
@@ -21,6 +22,8 @@ const LWFSetupPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [lwfSetupData, setLWFSetupData] = useState<LWFSetupData[]>([])
+      const [stateSearch, setStateSearch] = useState('');
+    
     const locationState = location.state as {
         companyName?: string
         companyGroupName?: string
@@ -45,6 +48,8 @@ const LWFSetupPage: React.FC = () => {
                     'company_id[]': actualCompanyId,
                     page: pagination.pageIndex,
                     page_size: pagination.pageSize,
+                    ...(stateSearch && { 'state_name[]': stateSearch }),
+
                 },
             })
             if (response?.data.data) {
@@ -78,11 +83,21 @@ const LWFSetupPage: React.FC = () => {
         // showNotification('PF Setup data refreshed successfully');
     }
 
+    const handleStateSearch = (value: string) => {
+        setStateSearch(value);
+      };
+    
+      // Handle state search submit
+      const handleStateSearchSubmit = () => {
+        setPagination(prev => ({ ...prev, pageIndex: 1 })); // Reset to first page when searching
+        fetchLWFSetupData();
+      };
+
     useEffect(() => {
         if (actualCompanyName) {
             fetchLWFSetupData()
         }
-    }, [actualCompanyName, pagination.pageIndex, pagination.pageSize])
+    }, [actualCompanyName, pagination.pageIndex, pagination.pageSize, stateSearch])
 
     const handleBack = () => {
         navigate(-1)
@@ -124,31 +139,41 @@ const LWFSetupPage: React.FC = () => {
         <div className="">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center">
+                    {/* <div className="flex gap-3"> */}
+
                     <Button
                         variant="plain"
                         size="sm"
                         icon={<HiArrowLeft />}
                         onClick={handleBack}
                         className="mr-2"
-                    ></Button>
+                        ></Button>
                     <h1 className="text-2xl font-bold">
                         {actualCompanyName}-LWF Setup
                     </h1>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-3">
+                <div className="relative">
+              <OutlinedInput
+                label="Search by state..."
+                value={stateSearch}
+                onChange={handleStateSearch}
+                />
+            </div>
                     <LWFBulkUpload
                         companyId={actualCompanyId}
                         onUploadSuccess={refreshLWFSetupData}
-                    />
+                        />
                     <Button
                         variant="solid"
                         size="sm"
                         icon={<HiPlusCircle />}
                         onClick={() => setIsOpen(true)}
-                    >
+                        >
                         Add LWF Setup
                     </Button>
                 </div>
+                        {/* </div> */}
             </div>
 
             <LWFSetupTable

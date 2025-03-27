@@ -152,7 +152,7 @@ const PTECTrackerTool: React.FC<{
                     icon={<HiDownload />}
                     onClick={handleDownload}
                 >
-                    Download PT EC Data
+                    Download Data
                 </Button>
                 <PTRCTrackerBulkUpload
                     onUploadConfirm={handleUploadConfirm}

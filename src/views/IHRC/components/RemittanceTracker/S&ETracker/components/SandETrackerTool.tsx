@@ -1,56 +1,3 @@
-// import React, { useState } from 'react'
-// import SandETrackerFilter from './SandETrackerFilter';
-// import SandETrackerBulkUpload from './SandETrackerBulkUpload';
-// import { Button } from '@/components/ui';
-// import CustomDateRangePicker from '../../PFTracker/components/CustomDateRangePicker';
-// import { HiDownload } from 'react-icons/hi';
-// import NoticeUploadDialog from './SandETrackerBulkUpload';
-
-// interface SandETrackerToolProps {
-//   onRefresh: () => void;
-//   onFilterChange: (filters: {
-//     groupName: string;
-//     groupId: string;
-//     companyName: string;
-//     companyId: string;
-//     startDate: string;
-//     endDate: string;
-//   }) => void;
-// }
-
-
-// const SandETrackerTool: React.FC<SandETrackerToolProps> = ({ onRefresh, onFilterChange }) => {
-//   const [showUploadedDetails, setShowUploadedDetails] = useState(false);
-
-
-
-//   const handleUploadConfirm = () => {
-//     setShowUploadedDetails(true);
-//   };
-
-//   const handleDateRangeApply = (start: Date, end: Date) => {
-//     setStartDate(start);
-//     setEndDate(end);
-//   };
-
-
-//   return (
-//     <div>
-//       <div className='flex gap-3 items-center mb-4'>
-//         <SandETrackerFilter />
-//         <CustomDateRangePicker onApply={handleDateRangeApply} />
-//         <Button  
-//         variant="solid" 
-//         size="sm" 
-//         icon={<HiDownload />}>Download Notice Data</Button>
-//         {/* <SandETrackerBulkUpload onUploadConfirm={handleUploadConfirm} /> */}
-//         <NoticeUploadDialog onSuccess={onRefresh} />
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default SandETrackerTool
 
 import React, { useState } from 'react'
 import SandETrackerFilter from './SandETrackerFilter';
@@ -110,8 +57,8 @@ const SandETrackerTool: React.FC<SandETrackerToolProps> = ({ onRefresh, onFilter
     
     const updatedFilters = {
       ...filters,
-      startDate: start.toISOString().split('T')[0],
-      endDate: end.toISOString().split('T')[0]
+      startDate: start ? start.toISOString().split('T')[0] : '',
+      endDate: end ? end.toISOString().split('T')[0] : ''
     };
     
     setFilters(updatedFilters);
@@ -177,7 +124,7 @@ const SandETrackerTool: React.FC<SandETrackerToolProps> = ({ onRefresh, onFilter
           icon={<HiDownload />}
           onClick={handleDownload}
         >
-          Download Notice Data
+          Download Data
         </Button>
         {canCreate && (
         <Button

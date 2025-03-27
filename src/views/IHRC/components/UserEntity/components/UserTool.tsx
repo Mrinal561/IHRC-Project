@@ -244,7 +244,7 @@ const UserTool: React.FC<{ onUploadSuccess?: () => void }> = ({ onUploadSuccess 
                 icon={<HiDownload />}
                 onClick={handleDownload}
             >
-                Download
+                Download Data
             </Button>
             <Bu onUploadSuccess={onUploadSuccess} />
             <Button

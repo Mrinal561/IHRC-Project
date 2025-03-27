@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button, Dialog, toast, Notification } from '@/components/ui';
-import { HiArrowLeft, HiDownload, HiPlusCircle } from 'react-icons/hi';
+import { HiArrowLeft, HiDownload, HiPlusCircle, HiSearch } from 'react-icons/hi';
 import PTSetupTable from './components/PTSetupTable';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
@@ -10,6 +10,7 @@ import { PTSetupData } from '@/@types/PtSetup';
 import { fetchptsetup } from '@/store/slices/ptSetup/ptSetupSlice';
 import { useDispatch } from 'react-redux';
 import PTBulkUpload from './components/PTBulkUpload';
+import OutlinedInput from '@/components/ui/OutlinedInput';
 
 interface LocationState {
   companyName?: string;
@@ -25,6 +26,7 @@ const PTSetupPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [ptSetupData, setPTSetupData] = useState<PTSetupData[]>([]);
   const dispatch = useDispatch();
+  const [stateSearch, setStateSearch] = useState('');
     const locationState = location.state as { 
     companyName?: string; 
     companyGroupName?: string; 
@@ -50,7 +52,8 @@ const PTSetupPage: React.FC = () => {
         params: {
           'company_id[]': actualCompanyId,
           page: pagination.pageIndex,
-          page_size: pagination.pageSize
+          page_size: pagination.pageSize,
+          ...(stateSearch && { 'state_name[]': stateSearch }),
       }
       });
       if (response?.data.data) {
@@ -87,12 +90,23 @@ const handlePageSizeChange = (newPageSize: number) => {
     // showNotification('PF Setup data refreshed successfully');
   };
 
+  const handleStateSearch = (value: string) => {
+    setStateSearch(value);
+  };
+
+  // Handle state search submit
+  const handleStateSearchSubmit = () => {
+    setPagination(prev => ({ ...prev, pageIndex: 1 })); // Reset to first page when searching
+    fetchPTSetupData();
+  };
+
+
   useEffect(() => {
     console.log(actualCompanyId,actualCompanyName, actualGroupId, actualGroupName)
     if(actualCompanyName){
       fetchPTSetupData();
     }
-  }, [actualCompanyName, pagination.pageIndex, pagination.pageSize]);
+  }, [actualCompanyName, pagination.pageIndex, pagination.pageSize, stateSearch]);
 
   const handleBack = () => {
     navigate(-1);
@@ -182,6 +196,13 @@ const handlePageSizeChange = (newPageSize: number) => {
         </div>
         <div className="flex items-center">
           <div className="flex gap-3">
+          <div className="relative">
+              <OutlinedInput
+                label="Search by state..."
+                value={stateSearch}
+                onChange={handleStateSearch}
+              />
+            </div>
 
         <Button 
             variant='solid' 
@@ -189,7 +210,7 @@ const handlePageSizeChange = (newPageSize: number) => {
             icon={<HiDownload />}
             onClick={handleDownload}
             >
-            Download
+            Download Data
           </Button>
         <PTBulkUpload
                         companyId={actualCompanyId}

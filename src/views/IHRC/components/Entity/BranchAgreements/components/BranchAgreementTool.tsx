@@ -132,7 +132,7 @@ const BranchAgreementTool = ({ canCreate, filters }: BranchAgreementToolProps) =
         onClick={handleDownload}
         loading={loading}
       >
-        Download
+        Download Data
       </Button>
       <div>
         {canCreate && (

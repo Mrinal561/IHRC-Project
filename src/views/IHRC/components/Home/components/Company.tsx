@@ -388,19 +388,14 @@ const Company: React.FC<CompanyProps> = ({
 
   return (
     <div className="w-full flex items-center gap-3">
-      <div className="flex-1 min-w-[140px]">
-        {/* <OutlinedSelect
-          label="Company Group"
-          options={companyGroups}
-          value={selectedCompanyGroup}
-          onChange={handleCompanyGroupChange}
-        /> */}
+      {/* <div className="flex-1 min-w-[140px]">
+        
         <OutlinedInput
           label="Company Group"
           value={companyGroupName} 
           onChange={() => {}}
         />
-      </div>
+      </div> */}
 
       <div className="flex-1 min-w-[140px]">
         <OutlinedSelect

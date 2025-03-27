@@ -50,6 +50,10 @@ interface NoticeData {
     id: number;
     name: string;
   };
+  Branch: {
+    id: number;
+    name: string;
+  };
   Location: {
     id: number;
     name: string;
@@ -170,13 +174,23 @@ const NoticeTrackerTable: React.FC<NoticeTrackerTableProps> = ({
         cell: (props) => <div className="w-28 truncate">{props.getValue() as string}</div>,
       },
       {
+        header: 'Branch',
+        enableSorting: false,
+        accessorKey: 'Branch.name',
+        cell: (props) => <Tooltip title={`${props.getValue()}`}>
+          <div className="w-40 truncate">{props.getValue() as string}</div>
+          </Tooltip>
+      },
+      {
         header: 'Notice Type',
         enableSorting: false,
         accessorKey: 'notice_type',
         cell: (props) => (
-          <div className="w-32 truncate capitalize">
+          <Tooltip title={`${props.getValue()}`}>
+          <div className="w-40 truncate capitalize">
             {(props.getValue() as string).replace(/_/g, ' ')}
           </div>
+          </Tooltip>
         ),
       },
       {

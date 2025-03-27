@@ -245,7 +245,7 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
         }
       },
       {
-        header: 'Total Amount (Challan)',
+        header: 'PT Amount As Per Salary Register',
         enableSorting: false,
         accessorKey: 'total_challan_amt',
         cell: (props) => (

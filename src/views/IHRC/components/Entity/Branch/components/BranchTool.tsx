@@ -75,7 +75,7 @@ const BranchTool: React.FC<BranchToolProps> = ({ onTableRefresh,  companyGroupId
     <div className='flex gap-2 items-center w-full'>
       {/* <Company/> */}
       <div>
-        <Button variant='solid' icon={<HiDownload />} size='sm' onClick={handleDownload}>Download</Button>
+        <Button variant='solid' icon={<HiDownload />} size='sm' onClick={handleDownload}>Download Data</Button>
       </div>
       <div>
       <Bu onUploadSuccess={onTableRefresh} />
