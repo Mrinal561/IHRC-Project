@@ -264,12 +264,22 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
           </div>
         ),
       },
-      // {
-      //   header: 'Difference',
-      //   enableSorting: false,
-      //   accessorKey: 'difference_amt',
-      //   cell: (props) => <div className="w-52 truncate">{(props.getValue() as number).toLocaleString()}</div>,
-      // },
+      {
+        header: 'Difference in Amount',
+        enableSorting: false,
+        accessorKey: 'difference_amt',
+        cell: (props) => (
+          <div className="w-44 truncate">
+            ₹{(props.getValue() as number).toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        header: 'Difference Reason',
+        enableSorting: false,
+        accessorKey: 'difference_reason',
+        cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
+      },
       {
         header: 'Due Date',
         enableSorting: false,

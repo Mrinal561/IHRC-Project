@@ -154,15 +154,16 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
           </div>
         ),
       },
-      // {
-      //   header: 'PT Amount',
-      //   accessorKey: 'pt',
-      //   cell: (props) => (
-      //     <div className="w-28 truncate">
-      //       ₹{(props.getValue() as number).toLocaleString()}
-      //     </div>
-      //   ),
-      // },
+      {
+        header: 'PT Amount As Per Salary Register',
+        enableSorting: false,
+        accessorKey: 'salary_register_amt',
+        cell: (props) => (
+          <div className="w-40 truncate">
+            ₹{(props.getValue() as number).toLocaleString()}
+          </div>
+        ),
+      },
       {
         header: 'Total Amount Paid',
         enableSorting: false,

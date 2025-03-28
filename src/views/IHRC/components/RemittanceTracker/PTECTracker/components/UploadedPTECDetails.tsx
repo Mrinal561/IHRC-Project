@@ -142,7 +142,7 @@ const params: any = {
         }
       },
       {
-        header: 'Total Amount (Challan)',
+        header: 'PT Amount As Per Salary Register',
         enableSorting: false,
         accessorKey: 'total_challan_amt',
         cell: (props) => (
@@ -160,6 +160,22 @@ const params: any = {
             ₹{(props.getValue() as number).toLocaleString()}
           </div>
         ),
+      },
+      {
+        header: 'Difference in Amount',
+        enableSorting: false,
+        accessorKey: 'difference_amt',
+        cell: (props) => (
+          <div className="w-44 truncate">
+            ₹{(props.getValue() as number).toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        header: 'Difference Reason',
+        enableSorting: false,
+        accessorKey: 'difference_reason',
+        cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
       },
       {
         header: 'Due Date',
