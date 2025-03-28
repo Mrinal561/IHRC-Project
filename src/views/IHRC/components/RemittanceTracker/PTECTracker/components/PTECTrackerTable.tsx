@@ -163,47 +163,6 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
           );
         }
       },
-      // {
-      //   header: 'Date of Enrolment',
-      //   accessorKey: 'dateOfEnrolment',
-      //   cell: (props) => (
-      //     <div className="w-36 truncate">
-      //       {dayjs(props.getValue() as string).format('DD-MM-YYYY')}
-      //     </div>
-      //   ),
-      // },
-      // {
-      //   header: 'PT EC Enrolment Address',
-      //   accessorKey: 'ptEcEnrolmentAddress',
-      //   cell: (props) => {
-      //     const value = props.getValue() as string;
-      //     return (
-      //       <Tooltip title={value}>
-      //         <div className="w-52 truncate">{value}</div>
-      //       </Tooltip>
-      //     );
-      //   }
-      // },
-      // {
-      //   header: 'Remittance Mode',
-      //   accessorKey: 'remittanceMode',
-      //   cell: (props) => <div className="w-36 truncate">{props.getValue() as string}</div>,
-      // },
-      // {
-      //   header: 'Frequency',
-      //   accessorKey: 'frequency',
-      //   cell: (props) => <div className="w-28 truncate">{props.getValue() as string}</div>,
-      // },
-      // {
-      //   header: 'Period',
-      //   enableSorting: false,
-      //   accessorKey: 'period',
-      //    cell: (props) => (
-      //     <div className="w-28 truncate">
-      //       {dayjs(props.getValue() as string).format('DD-MM-YYYY')}
-      //     </div>
-      //   ),
-      // },
       {
         header: 'Period',
         enableSorting: false,
