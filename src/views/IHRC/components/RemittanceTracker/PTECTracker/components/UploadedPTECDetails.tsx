@@ -141,6 +141,46 @@ const params: any = {
           );
         }
       },
+       {
+              header: 'Period',
+              enableSorting: false,
+              accessorKey: 'period',
+              cell: (props) => {
+                const periodDate = new Date(props.getValue() as string);
+                const frequency = props.row.original.setup_data.State.ptec_frequency;
+            
+                let periodDisplay = '';
+            
+                if (frequency === 'half_yearly') {
+                  const month = periodDate.getMonth() + 1; // getMonth() returns 0-11, so +1 to make it 1-12
+                  if (month >= 4 && month <= 9) {
+                    periodDisplay = 'Apr-Sep'; // First half of the financial year
+                  } else {
+                    periodDisplay = 'Oct-Mar'; // Second half of the financial year
+                  }
+                } else if (frequency === 'quarterly') {
+                  const month = periodDate.getMonth() + 1; // getMonth() returns 0-11, so +1 to make it 1-12
+                  if (month >= 4 && month <= 6) {
+                    periodDisplay = 'Apr-Jun'; // Q1
+                  } else if (month >= 7 && month <= 9) {
+                    periodDisplay = 'Jul-Sep'; // Q2
+                  } else if (month >= 10 && month <= 12) {
+                    periodDisplay = 'Oct-Dec'; // Q3
+                  } else {
+                    periodDisplay = 'Jan-Mar'; // Q4
+                  }
+                } else {
+                  // Default to showing the full date if frequency is not recognized
+                  periodDisplay = dayjs(periodDate).format('DD-MM-YYYY');
+                }
+            
+                return (
+                  <div className="w-28 truncate">
+                    {periodDisplay}
+                  </div>
+                );
+              }
+            },
       {
         header: 'PT Amount As Per Salary Register',
         enableSorting: false,
@@ -175,7 +215,7 @@ const params: any = {
         header: 'Difference Reason',
         enableSorting: false,
         accessorKey: 'difference_reason',
-        cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
+        cell: (props) => <div className="w-40 truncate">{props.getValue() as string || '--'}</div>,
       },
       {
         header: 'Due Date',
@@ -207,7 +247,7 @@ const params: any = {
         header: 'Delay Reason',
         enableSorting: false,
         accessorKey: 'delay_reason',
-        cell: (props) => <div className="w-36 truncate">{props.getValue() as string}</div>,
+        cell: (props) => <div className="w-36 truncate">{props.getValue() as string || '--'}</div>,
       },
       {
         header: 'Receipt No',
@@ -263,7 +303,7 @@ const params: any = {
       //   },
       // },
       {
-        header: 'Payment',
+        header: 'Payment Receipt',
         enableSorting: false,
         accessorKey: 'payment_document',
         cell: (props) => {
@@ -296,6 +336,7 @@ const params: any = {
       },
       {
         header: 'Return',
+        enableSorting: false,
         accessorKey: 'pt_return_document',
         cell: (props) => {
           const returnDocument = props.getValue() as string | null;
@@ -323,6 +364,16 @@ const params: any = {
               )}
             </div>
           );
+        },
+      },
+      {
+        header: 'Upload Status',
+        enableSorting: false,
+        id: 'uploadStatus',
+        cell: ({ row }) => {
+          const { payment_document, pt_return_document } = row.original;
+          const uploadedCount = [payment_document, pt_return_document].filter(Boolean).length;
+          return <div className="w-32 truncate">{`${uploadedCount}/2`}</div>;
         },
       },
     {

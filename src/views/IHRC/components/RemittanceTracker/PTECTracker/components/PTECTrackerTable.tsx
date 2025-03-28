@@ -278,7 +278,7 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
         header: 'Difference Reason',
         enableSorting: false,
         accessorKey: 'difference_reason',
-        cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
+        cell: (props) => <div className="w-40 truncate">{props.getValue() as string || '--'}</div>,
       },
       {
         header: 'Due Date',

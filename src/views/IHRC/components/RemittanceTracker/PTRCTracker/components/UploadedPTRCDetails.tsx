@@ -220,7 +220,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
         header: 'Delay Reason',
         enableSorting: false,
         accessorKey: 'delay_reason',
-        cell: (props) => <div className="w-28 truncate">{props.getValue() as string}</div>,
+        cell: (props) => <div className="w-28 truncate">{props.getValue() as string || '--'}</div>,
       },
       {
         header: 'Challan Type',
