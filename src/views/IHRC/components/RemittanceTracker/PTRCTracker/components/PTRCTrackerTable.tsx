@@ -240,6 +240,12 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
         ),
       },
       {
+        header: 'Difference Reason',
+        accessorKey: 'difference_reason',
+        enableSorting: false,
+        cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
+      },
+      {
         header: 'Due Date',
         enableSorting: false,
         accessorKey: 'payment_due_date',

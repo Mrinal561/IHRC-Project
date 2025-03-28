@@ -77,6 +77,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
     () => [
       {
         header: 'Company',
+        enableSorting: false,
         accessorKey: 'PtSetup.Company.name',
         cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
       },
@@ -92,6 +93,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
       // },
       {
         header: 'PT RC Location',
+        enableSorting: false,
         accessorKey: 'PtSetup.Location.name',
         cell: (props) => <div className="w-36 truncate">{props.getValue() as string}</div>,
       },
@@ -109,6 +111,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
       // },
       {
         header: 'PT RC Number',
+        enableSorting: false,
         accessorKey: 'PtSetup.register_number',
         cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
       },
@@ -124,6 +127,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
       // },
       {
         header: 'No. of Employees',
+        enableSorting: false,
         accessorKey: 'no_of_emp',
         cell: (props) => <div className="w-36 truncate">{props.getValue() as number}</div>,
       },
@@ -142,6 +146,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
       },
       {
         header: 'Gross Salary',
+        enableSorting: false,
         accessorKey: 'gross_salary',
         cell: (props) => (
           <div className="w-32 truncate">
@@ -160,6 +165,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
       // },
       {
         header: 'Total Amount Paid',
+        enableSorting: false,
         accessorKey: 'total_paid_amt',
         cell: (props) => (
           <div className="w-40 truncate">
@@ -169,6 +175,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
       },
       {
         header: 'Difference in Amount',
+        enableSorting: false,
         accessorKey: 'difference_amt',
         cell: (props) => (
           <div className="w-44 truncate">
@@ -177,7 +184,14 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
         ),
       },
       {
+        header: 'Difference Reason',
+        enableSorting: false,
+        accessorKey: 'difference_reason',
+        cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
+      },
+      {
         header: 'Due Date',
+        enableSorting: false,
         accessorKey: 'payment_due_date',
         cell: (props) => (
           <div className="w-28 truncate">
@@ -187,6 +201,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
       },
       {
         header: 'Date of Payment',
+        enableSorting: false,
         accessorKey: 'payment_date',
         cell: (props) => (
           <div className="w-36 truncate">
@@ -196,11 +211,13 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
       },
       {
         header: 'Delay',
+        enableSorting: false,
         accessorKey: 'delay_in_days',
         cell: (props) => <div className="w-28 truncate">{props.getValue() as string}</div>,
       },
       {
         header: 'Delay Reason',
+        enableSorting: false,
         accessorKey: 'delay_reason',
         cell: (props) => <div className="w-28 truncate">{props.getValue() as string}</div>,
       },
@@ -222,6 +239,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
     },
       {
         header: 'Payment',
+        enableSorting: false,
         accessorKey: 'ptrc_document',
         cell: (props) => {
           const paymentDocument = props.getValue() as string | null;
@@ -253,6 +271,7 @@ const UploadedPTRCDetails: React.FC<UploadedPTDetailsProps> = ({ onBack }) => {
       },
       {
         header: 'Return',
+        enableSorting: false,
         accessorKey: 'ptrc_return_document',
         cell: (props) => {
           const returnDocument = props.getValue() as string | null;
