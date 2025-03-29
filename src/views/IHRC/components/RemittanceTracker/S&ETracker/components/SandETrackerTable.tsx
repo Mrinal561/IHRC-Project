@@ -84,6 +84,7 @@ interface NoticeTrackerTableProps {
   };
   onPaginationChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
+  canCreate: boolean;
   canEdit:boolean;
   canDelete: boolean;
 }
@@ -96,6 +97,7 @@ const NoticeTrackerTable: React.FC<NoticeTrackerTableProps> = ({
   onPaginationChange,
   onPageSizeChange,
   companyName,
+  canCreate,
   canEdit,
   canDelete
 }) => {
@@ -329,7 +331,7 @@ const NoticeTrackerTable: React.FC<NoticeTrackerTableProps> = ({
                 <Button
                   size="sm"
                   onClick={() => navigate('/notice-tracker/replyhistory', {
-                    state: { noticeId: row.original.id }
+                    state: { noticeId: row.original.id, canCreate: canCreate }
                   })} 
                   icon={<FaEye />}
                 />
@@ -337,27 +339,31 @@ const NoticeTrackerTable: React.FC<NoticeTrackerTableProps> = ({
       
               {/* Conditional Button */}
               {status === 'open' ? (
-                // Show Reply Button if status is "open"
-                <Tooltip title="Add Reply">
+                canCreate && (
+                  // Show Reply Button if status is "open"
+                  <Tooltip title="Add Reply">
                   <Button
                     size="sm"
                     onClick={() => navigate('/notice-tracker/response', { 
                       state: { noticeId: row.original.id }
                     })}
                     icon={<FaComments />}
-                  />
+                    />
                 </Tooltip>
+                  )
               ) : (
-                // Show Add Notice Button if status is "closed"
-                <Tooltip title="Add Notice">
+                canCreate && (
+                  // Show Add Notice Button if status is "closed"
+                  <Tooltip title="Add Notice">
                   <Button
                     size="sm"
                     onClick={() => navigate('/notice-tracker/followUpNotice', { 
                       state: { noticeId: row.original.id }
                     })}
                     icon={<FaEnvelopeOpen />}
-                  />
+                    />
                 </Tooltip>
+                  )
               )}
       
              {/* Edit Button (if iseditable is true and is_requested is false) */}

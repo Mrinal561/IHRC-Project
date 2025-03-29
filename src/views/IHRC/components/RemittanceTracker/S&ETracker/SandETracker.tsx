@@ -254,6 +254,7 @@ const SandETracker = () => {
                 pagination={pagination}
                 onPaginationChange={handlePaginationChange}
                 onPageSizeChange={handlePageSizeChange}
+                canCreate={permissions.canCreate}
                 canEdit={permissions.canEdit}
                 canDelete={permissions.canDelete}
                 />

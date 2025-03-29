@@ -12,7 +12,15 @@ import { endpoints } from '@/api/endpoint';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { HiOutlineViewGrid } from 'react-icons/hi';
 
-const BranchAgreementTable = (canEdit,canDelete) => {
+
+
+interface BranchAgreementTableProps {
+    canEdit: boolean;
+    canDelete: boolean;
+}
+
+
+const BranchAgreementTable: React.FC<BranchAgreementTableProps> = ({ canEdit, canDelete }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
