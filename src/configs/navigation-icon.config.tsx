@@ -6,9 +6,10 @@ import {
     HiOutlineHome,
     HiOutlineCog,
     HiOutlineUser,
-    HiOutlineGlobeAlt ,
+    HiOutlineGlobeAlt, 
+    HiOutlineClipboardList,
 } from 'react-icons/hi'
-import { HiOutlineBuildingOffice2 } from 'react-icons/hi2'
+import { HiOutlineBellSnooze, HiOutlineBuildingOffice2 } from 'react-icons/hi2'
 import { AiOutlineAudit } from "react-icons/ai";
 import { MdOutlineMonitorHeart } from 'react-icons/md';
 
@@ -25,7 +26,10 @@ const navigationIcon: NavigationIcons = {
     globeCollapse: <HiOutlineGlobeAlt  />,
     buildingCollapse: <HiOutlineBuildingOffice2  />,
     auditCollapse: <AiOutlineAudit />,
-    remittanceCollapse: <MdOutlineMonitorHeart />
+    remittanceCollapse: <MdOutlineMonitorHeart />,
+    agreement: <HiOutlineClipboardList />,
+    notice: <HiOutlineBellSnooze />
+
 
 
 }
