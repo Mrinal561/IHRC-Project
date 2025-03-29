@@ -24,6 +24,7 @@ import { MultiValue } from 'react-select'
 interface LocationState {
     companyName?: string
     companyId?: string
+    groupId?: string
 }
 
 interface UserFormData {
@@ -124,6 +125,8 @@ const UserAddForm = () => {
     const locationState = location.state as LocationState
     const companyName = locationState?.companyName
     const companyId = locationState?.companyId
+    const groupId = locationState?.groupId
+
     const [companyGroups, setCompanyGroups] = useState<SelectOption[]>([])
     const [selectedCompanyGroup, setSelectedCompanyGroup] =
         useState<SelectOption | null>(null)
@@ -182,7 +185,7 @@ const UserAddForm = () => {
             console.log('Loading companies for group:', groupId)
             const { data } = await httpClient.get(endpoints.company.getAll(), {
                 params: {
-                    'group_id[]': groupId,
+                    'group_id[]': Array.isArray(groupId) ? groupId : [groupId],
                 },
             })
             const formattedCompanies = data?.data?.map((company: any) => ({
@@ -228,10 +231,10 @@ const UserAddForm = () => {
     useEffect(() => {
         loadCompanyGroups()
         loadUserRoles()
-        if (companyId) {
-            loadCompanies(companyId)
+        if (groupId) {
+            loadCompanies([groupId])
         }
-    }, [])
+    }, [groupId])
 
     const handleAddUser = async (values: UserFormData) => {
         const data = {
@@ -275,6 +278,8 @@ const UserAddForm = () => {
 
             <Formik
     initialValues={{
+        group_id: groupId ? Number(groupId) : 0,
+        Company_Group_Name: companyName || '',
         company_id: 0,
         name: '',
         email: '',

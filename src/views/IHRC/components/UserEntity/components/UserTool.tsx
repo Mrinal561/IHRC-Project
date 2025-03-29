@@ -212,6 +212,7 @@ const UserTool: React.FC<{ onUploadSuccess?: () => void }> = ({ onUploadSuccess 
         try {
             // Use your existing company endpoint to get the first company
             const response = await httpClient.get(endpoints.company.getAll(''))
+            console.log('Company data:', response.data.data)
             const companies = response.data.data
             
             if (companies && companies.length > 0) {
@@ -251,7 +252,13 @@ const UserTool: React.FC<{ onUploadSuccess?: () => void }> = ({ onUploadSuccess 
                 variant="solid"
                 icon={<HiPlusCircle />}
                 size="sm"
-                onClick={() => navigate('/add-user')}
+                onClick={() => navigate('/add-user', { 
+                    state: { 
+                        companyName: companyDetails?.name,
+                        companyId: companyDetails?.id,
+                        groupId: companyDetails?.group_id
+                    } 
+                })}
             >
                 Add User
             </Button>

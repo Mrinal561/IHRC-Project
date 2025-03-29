@@ -380,7 +380,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
               header: 'Actions',
               id: 'actions',
               cell: ({ row }) => {
-                const { iseditable, uploaded_by } = row.original;
+                const { iseditable, uploaded_by, is_requested } = row.original;
       
                 // Check if user is admin or if they're the uploader
                 const canShowActions = type === 'admin' || (type === 'user' && userId === uploaded_by);
@@ -392,6 +392,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                 
                 return (
                   <div className="flex items-center gap-2">
+                    
                     {iseditable ? (
                       // Show all actions when iseditable is true
                       <>
@@ -417,22 +418,23 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                         )}
                         
                         <ESIConfigDropdown
-                          companyName={row.original.EsiSetup.Company.name}
-                          companyGroupName={row.original.EsiSetup.CompanyGroup.name}
-                          trackerId={row.original.id}
-                          onRefresh={onRefresh}
+                        companyName={row.original.EsiSetup.Company.name}
+                        companyGroupName={row.original.EsiSetup.CompanyGroup.name}
+                        trackerId={row.original.id}
+                        onRefresh={onRefresh}
                         />
-                      </>
-                    ) : (
-                      // Show only Request to Admin button when iseditable is false
-                      <Tooltip title="Request to Admin">
+                        </>
+                      ) : (
+                        // Show only Request to Admin button when iseditable is false
+                        <Tooltip title="Request to Admin">
                         <Button
-                          size="sm"
-                          onClick={() => handleRequestToAdmin(row.original.id)}
-                          icon={<FaUserShield />}
-                          className="text-blue-500"
+                        size="sm"
+                        onClick={() => handleRequestToAdmin(row.original.id)}
+                        icon={<FaUserShield />}
+                        className="text-blue-500"
                         />
-                      </Tooltip>
+                        </Tooltip>
+                      
                     )}
                   </div>
                 );

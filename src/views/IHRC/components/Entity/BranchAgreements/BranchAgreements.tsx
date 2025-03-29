@@ -23,7 +23,9 @@ const getPermissions = (menuItem: any): Permissions => {
         canEdit: !!permissionsObject.can_edit,
         canDelete: !!permissionsObject.can_delete,
     }
+    
 }
+
 
 const BranchAgreements: React.FC = () => {
     const location = useLocation();
