@@ -1,15 +1,23 @@
 import classNames from 'classnames'
 import { HEADER_HEIGHT_CLASS } from '@/constants/theme.constant'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { CommonProps } from '@/@types/common'
 import Select, { ActionMeta, SingleValue, components } from 'react-select'
 import { FaChevronDown } from 'react-icons/fa'
 import { useLocation } from 'react-router-dom'
+import OutlinedInput from '../ui/OutlinedInput'
+import httpClient from '@/api/http-client'
+import { endpoints } from '@/api/endpoint'
 
 interface OptionType {
     value: string;
     label: string;
 }
+
+interface SelectOption {
+    value: string;
+    label: string;
+  }
 
 interface HeaderProps extends CommonProps {
     headerStart?: ReactNode
@@ -50,13 +58,44 @@ const DropdownIndicator = (props: any) => {
 };
 
 const Header = (props: HeaderProps) => {
+    const [isLoading, setIsLoading] = useState(true);
     const { headerStart, headerEnd, headerMiddle, className, container } = props
     const [companyGroup, setCompanyGroup] = useState<OptionType | null>(null)
     const [company, setCompany] = useState<OptionType | null>(null)
     const [state, setState] = useState<OptionType | null>(null)
     const [branch, setBranch] = useState<OptionType | null>(null)
+    const [selectedCompanyGroup, setSelectedCompanyGroup] = useState<SelectOption | null>(null);
+    const [companyGroupName, setCompanyGroupName] = useState('');
+    const [companyGroupId, setCompanyGroupId] = useState('');
 
     const location = useLocation();
+
+
+    const loadCompanyGroups = async () => {
+
+        try {
+          const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
+            params: { ignorePlatform: true },
+          });
+          
+          if (data.data && data.data.length > 0) {
+            const defaultGroup = data.data[0];
+            setCompanyGroupName(defaultGroup.name);
+            setCompanyGroupId(String(defaultGroup.id));
+            
+            
+            // Notify parent component if needed
+          } else {
+          }
+        } catch (error) {
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+       useEffect(() => {
+          loadCompanyGroups();
+        }, []);
 
     const handleSelectChange = (
         setValue: React.Dispatch<React.SetStateAction<OptionType | null>>
@@ -125,6 +164,11 @@ const Header = (props: HeaderProps) => {
             >
                 <div className="header-action header-action-start flex items-center">
                     {headerStart}
+                    <OutlinedInput
+                        label="Company Group"
+                        value={companyGroupName} 
+                        onChange={() => {}}
+                    />
                 </div>
                 {/* {renderMiddleSection()} */}
                 <div className="header-action header-action-end flex items-center">
