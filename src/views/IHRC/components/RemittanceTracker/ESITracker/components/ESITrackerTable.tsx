@@ -16,6 +16,7 @@ import { FaUserShield } from 'react-icons/fa';
 import { requestCompanyEdit } from '@/store/slices/request/requestSLice';
 import store from '@/store';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
+import RequestToAdminDialog from '../../PTRCTracker/components/RequestToAdminDialog';
 
 interface EsiTrackerTableProps {
     dataSent: esiChallanData[];
@@ -54,6 +55,9 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
     const [editingData, setEditingData] = useState<esiChallanData | null>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [trackerToDelete, setTrackerToDelete] = useState<string | null>(null);
+     const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+        const [selectedTrackerId, setSelectedTrackerId] = useState<string | null>(null);
+        const [requestLoading, setRequestLoading] = useState(false);
     const userId = login?.user?.user?.id;
     const type = login?.user?.user?.type;
     const handleEdit = (row: esiChallanData) => {
@@ -95,29 +99,61 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
       }
       };
 
-      const handleRequestToAdmin = async (id: any) => {
-        try {
-          // Dispatch the request with the required type
-          const res = await dispatch(requestCompanyEdit({
-            id: id,
-            payload: {
-              type: "esi" 
-            }
-          })).unwrap().catch((error:any)=> {
-            throw error;
-          }); 
+    const isEditPermissionExpired = (tracker: esiChallanData) => {
+      if (!tracker.updated_at) return true;
       
-          if (res) {
-            console.log('Requested Successfully')
-              if (onRefresh) {
-                  onRefresh()
-              }
-          }
+      const updatedAt = new Date(tracker.updated_at);
+      const expiryTime = new Date(updatedAt.getTime() + 24 * 60 * 60 * 1000); // 24 hours from last update
+      return new Date() > expiryTime;
+    };
+    
+    // Function to check if user can edit
+    const canUserEditTracker = (tracker: esiChallanData) => {
+      // Admin can always edit
+      if (type === 'admin') return true;
       
-        } catch (error) {
-          console.log("Admin request error:", error);
-        }
+      // Check if user is the uploader and has valid edit permission
+      return (
+        userId === tracker.uploaded_by && 
+        !isEditPermissionExpired(tracker)
+      );
+    };
+
+      // Function to check if request is pending
+      const isRequestPending = (tracker: esiChallanData) => {
+        return tracker.is_requested;
       };
+    
+
+
+  const handleRequestToAdmin = async (id: any, reason: string) => {
+    try {
+      // Dispatch the request with the required type
+      const res = await dispatch(requestCompanyEdit({
+        id: id,
+        payload: {
+          type: "esi" ,
+          reason_for_request: reason
+        }
+      })).unwrap(); 
+  
+     if (res) {
+            toast.push(
+              <Notification title="Success" type="success">
+                Request sent to admin successfully
+              </Notification>
+            );
+            setRequestDialogOpen(false);
+          onRefresh?.();
+          }
+  
+    } catch (error: any) {
+            showErrorNotification(error.message || 'Failed to send request to admin');
+      
+    } finally {
+      setRequestLoading(false);
+    }
+  };
       
     
 
@@ -380,20 +416,16 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
               header: 'Actions',
               id: 'actions',
               cell: ({ row }) => {
-                const { iseditable, uploaded_by, is_requested } = row.original;
+                const tracker = row.original;
+                const canEdit = canUserEditTracker(tracker);
+                const requestPending = isRequestPending(tracker);
+                const isUploader = userId === tracker.uploaded_by;
+            
+                if (!isUploader && type !== 'admin') return null;
       
-                // Check if user is admin or if they're the uploader
-                const canShowActions = type === 'admin' || (type === 'user' && userId === uploaded_by);
-            
-                if (!canShowActions) {
-                  return null; // Don't show any actions
-                }
-            
-                
-                return (
-                  <div className="flex items-center gap-2">
-                    
-                    {iseditable ? (
+                return(
+                <div className="flex items-center gap-2">
+                  {canEdit ? (
                       // Show all actions when iseditable is true
                       <>
                         {canEdit && (
@@ -425,51 +457,39 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                         />
                         </>
                       ) : (
-                        // Show only Request to Admin button when iseditable is false
-                        <Tooltip title="Request to Admin">
-                        <Button
-                        size="sm"
-                        onClick={() => handleRequestToAdmin(row.original.id)}
-                        icon={<FaUserShield />}
-                        className="text-blue-500"
-                        />
-                        </Tooltip>
-                      
-                    )}
-                  </div>
-                );
-              },
-            }
-            // {
-            //     header: 'Actions',
-            //     id: 'actions',
-            //     cell: ({ row }) => (
-            //         <div className="flex items-center gap-2">
-            //             <Tooltip title="Edit">
-            //                 <Button
-            //                     size="sm"
-            //                     onClick={() => handleEdit(row.original)}
-            //                     icon={<MdEdit />}
-            //                 />
-            //             </Tooltip>
-            //             <Tooltip title="Delete">
-            //                 <Button
-            //                     size="sm"
-            //                     onClick={() => handleDeleteConfirmation(row.original.id)}
-
-            //                     icon={<FiTrash />}
-            //                     className="text-red-500"
-            //                 />
-            //             </Tooltip>
-            //             <ESIConfigDropdown  companyName={row.original.EsiSetup.Company.name} 
-            //   companyGroupName={row.original.EsiSetup.CompanyGroup.name} 
-            //   trackerId={row.original.id}  
-            //   onRefresh={onRefresh}           />
-            //         </div>
-            //     ),
-            // },
-        ],
-        [onRefresh]
+                        <>
+                                      {requestPending ? (
+                                        <Tooltip title="Pending Approval">
+                                                           <Button
+                                                             size="sm"
+                                                             disabled
+                                                             icon={<FaUserShield />}
+                                                             className="text-yellow-500"
+                                                           />
+                                                         </Tooltip>
+                                                       ) : (
+                                                         <Tooltip title="Request to Admin">
+                                                           <Button
+                                                             size="sm"
+                                                             onClick={() => {
+                                                               setSelectedTrackerId(tracker.id);
+                                                               setRequestDialogOpen(true);
+                                                             }}
+                                                             icon={<FaUserShield />}
+                                                             className="text-blue-500"
+                                                             />
+                                                         </Tooltip>
+                                                       )}
+                                     
+                                    
+                                                       </>
+                                   )}
+                                 </div>
+                                 )
+                               },
+                             },
+                           ],
+                           [onRefresh]
     )
     const documentPath = "../store/AllMappedCompliancesDetails.xls";
 
@@ -585,6 +605,15 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
           </div>
         </div>
       </Dialog>
+      <RequestToAdminDialog
+      isOpen={requestDialogOpen}
+      onClose={() => {
+        setRequestDialogOpen(false);
+        setSelectedTrackerId(null);
+      }}
+      onConfirm={(reason) => handleRequestToAdmin(selectedTrackerId, reason)}
+      loading={requestLoading}
+    />
         </div>
     )
 };

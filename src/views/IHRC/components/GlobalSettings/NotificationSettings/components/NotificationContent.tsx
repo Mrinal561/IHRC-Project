@@ -579,7 +579,7 @@ const NotificationContent: React.FC = () => {
         label: (i + 1).toString() 
     }))
     
-    const timesOptions = Array.from({ length: 4 }, (_, i) => ({ 
+    const timesOptions = Array.from({ length: 2 }, (_, i) => ({ 
         value: (i + 1).toString(), 
         label: (i + 1).toString() 
     }))
@@ -872,11 +872,11 @@ const NotificationContent: React.FC = () => {
     }
 
     return (
-        <div className="space-y-8">
-            <div className="flex space-x-4">
-                <div className="w-1/2">
-                    <div className="space-y-8">
-                        <div className="flex items-center mb-6">
+        <div className="space-y-4">
+            {/* <div className="flex space-x-4"> */}
+                {/* <div className="w-1/2"> */}
+                    {/* <div className="space-y-8"> */}
+                        {/* <div className="flex items-center mb-6">
                             <Checkbox
                                 checked={selectAll}
                                 onChange={handleSelectAll}
@@ -884,8 +884,8 @@ const NotificationContent: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-700">
                                 Notification Types:
                             </h3>
-                        </div>
-                        {Object.entries(notificationTypes).map(
+                        </div> */}
+                        {/* {Object.entries(notificationTypes).map(
                             ([key, value]) => (
                                 <div
                                     key={key}
@@ -905,11 +905,11 @@ const NotificationContent: React.FC = () => {
                                     </label>
                                 </div>
                             ),
-                        )}
-                    </div>
-                </div>
+                        )} */}
+                    {/* </div> */}
+                {/* </div> */}
 
-                <div className="w-1/2">
+                {/* <div className="w-1/2">
                     <h3 className="text-lg font-semibold text-gray-700 mb-4">
                         Notification Previews:
                     </h3>
@@ -930,13 +930,13 @@ const NotificationContent: React.FC = () => {
                             <EmptyPreviewMessage />
                         )}
                     </div>
-                </div>
-            </div>
+                </div> */}
+            {/* </div> */}
 
-            <div className="w-full max-w-lg bg-white rounded-lg shadow-sm p-6 space-y-6">
+            <div className="w-full max-w-lg bg-white rounded-lg shadow-sm space-y-6">
                 {/* Header */}
                 <div className="border-b pb-4">
-                    <h2 className="text-2xl font-semibold text-gray-900">
+                    <h2 className="text-xl font-semibold text-gray-900">
                         Compliance Deadline Reminder
                     </h2>
                     <p className="mt-1 text-sm text-gray-500">
@@ -987,7 +987,9 @@ const NotificationContent: React.FC = () => {
                                     handleInputChange('totalTimes', option.value)
                                 }
                             />
-                            <span className="text-gray-600">times</span>
+                            <span className="text-gray-600">times <span className='text-gray-400'>
+                                (1st time:- 9:00 AM, 2nd time:- 12:00 PM)</span>
+                                </span>
                         </div>
                     </div>
 

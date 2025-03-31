@@ -1,4 +1,5 @@
 export type PTTrackerData = {
+    created_at: string | number | Date;
     id: number;
     uuid: string;
     state: number;
@@ -21,7 +22,9 @@ export type PTTrackerData = {
     payment: string;
     ret:string;
     iseditable?:boolean;
+    is_requested?: boolean;
     uploaded_by?:any;
+    updated_at?:any;
     UploadBy: {
         id: number;
         first_name: string;

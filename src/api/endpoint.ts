@@ -212,7 +212,9 @@ export const endpoints = {
         request: (id: any) => api(`companyadmin/company/edit-request/${id}`),
         getAll:() => api(`companyadmin/company/tracker-edit-permission`),
         requestEdit: () => api('companyadmin/noticetracker/request-edit-permission'),
-        getAllNoticeRequest: () => api(`companyadmin/noticetracker/edit-history`)
+        getAllNoticeRequest: () => api(`companyadmin/noticetracker/edit-history`),
+        canEdit: (id: any) => api(`companyadmin/company/can-edit/${id}`),
+        requestEditApproval: () => api('companyadmin/company/request-edit')
     },
     certificate:{
         list: ()=> api('/companyadmin/certificate/list'),

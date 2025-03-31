@@ -19,8 +19,16 @@ export type PfiwChallanData = {
   delay_reason: string;
   challan_document: string;
   status: string;
-  UploadBy: {
-    first_name: string;
-    last_name: string;
+  uploaded_by: number;
+  is_requested?: boolean;
+  iseditable?: boolean;
+  created_at: string; // or Date if parsed
+    updated_at: string;
+    UploadBy: {
+      id: number;
+      first_name: string;
+      last_name: string;
+      email: string;
+      mobile: string | null;
   };
 }

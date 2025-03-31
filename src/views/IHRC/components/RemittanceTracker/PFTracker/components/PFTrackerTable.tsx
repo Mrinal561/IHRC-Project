@@ -17,6 +17,7 @@ import { FaUserShield } from 'react-icons/fa';
 import { requestCompanyEdit } from '@/store/slices/request/requestSLice';
 import store from '@/store';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
+import RequestToAdminDialog from '../../PTRCTracker/components/RequestToAdminDialog';
 const documentPath = "../store/AllMappedCompliancesDetails.xls";
 
 interface PfTrackerTableProps {
@@ -56,8 +57,15 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
   const [pfTrackerData, setPfTrackerData] = useState<PfChallanData[]>([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [trackerToDelete, setTrackerToDelete] = useState<string | null>(null);
+   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+    const [selectedTrackerId, setSelectedTrackerId] = useState<string | null>(null);
+    const [requestLoading, setRequestLoading] = useState(false);
+
+
  const userId = login?.user?.user?.id;
  const type = login?.user?.user?.type;
+
+
   const handleDeleteConfirmation = (trackerId: string) => {
     console.log(userId, type)
     setTrackerToDelete(trackerId);
@@ -92,25 +100,55 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
   }
   };
 
-  const handleRequestToAdmin = async (id: any) => {
+  const isEditPermissionExpired = (tracker: PfChallanData) => {
+      if (!tracker.updated_at) return true;
+      
+      const updatedAt = new Date(tracker.updated_at);
+      const expiryTime = new Date(updatedAt.getTime() + 24 * 60 * 60 * 1000); // 24 hours from last update
+      return new Date() > expiryTime;
+    };
+    
+    // Function to check if user can edit
+    const canUserEditTracker = (tracker: PfChallanData) => {
+      // Admin can always edit
+      if (type === 'admin') return true;
+      
+      // Check if user is the uploader and has valid edit permission
+      return (
+        userId === tracker.uploaded_by && 
+        !isEditPermissionExpired(tracker)
+      );
+    };
+    
+    // Function to check if request is pending
+    const isRequestPending = (tracker: PfChallanData) => {
+      return tracker.is_requested;
+    };
+
+  const handleRequestToAdmin = async (id: any, reason: string) => {
   try {
     // Dispatch the request with the required type
     const res = await dispatch(requestCompanyEdit({
       id: id,
       payload: {
-        type: "pf" 
+        type: "pf",
+        reason_for_request: reason
+ 
       }
     })).unwrap(); 
 
     if (res) {
-      console.log('Requested Successfully')
-        if (onRefresh) {
-            onRefresh()
-        }
+           toast.push(
+             <Notification title="Success" type="success">
+               Request sent to admin successfully
+             </Notification>
+           );
+           setRequestDialogOpen(false);
+         onRefresh?.();
     }
 
-  } catch (error) {
-    console.log("Admin request error:", error);
+  } catch (error: any) {
+      showErrorNotification(error.message || 'Failed to send request to admin');
   }
 };
   
@@ -370,30 +408,16 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
         header: 'Actions',
         id: 'actions',
         cell: ({ row }) => {
-          const { iseditable, uploaded_by, is_requested } = row.original;
-          console.log(iseditable, is_requested);
-      
-          // Check if user is admin or if they're the uploader
-          const canShowActions = type === 'admin' || (type === 'user' && userId === uploaded_by);
-      
-          // If is_requested is true, don't show any actions
-          
-          // If user cannot show actions, return null
-          if (!canShowActions) {
-            return null;
-          }
-          
-          // if (is_requested) {
-          //   return null;
-          // }
+          const tracker = row.original;
+          const canEdit = canUserEditTracker(tracker);
+          const requestPending = isRequestPending(tracker);
+          const isUploader = userId === tracker.uploaded_by;
 
+          if (!isUploader && type !== 'admin') return null;
 
           return (
             <div className="flex items-center gap-2">
-              {!is_requested &&
-              <>
-              {iseditable ? (
-                // Show all actions when iseditable is true
+              {canEdit ? (
                 <>
                   {canEdit && (
                     <Tooltip title="Edit">
@@ -424,25 +448,37 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
                   />
                 </>
               ) : (
-                // Show only Request to Admin button when iseditable is false
-                <Tooltip title="Request to Admin">
-                  <Button
-                    size="sm"
-                    onClick={() => handleRequestToAdmin(row.original.id)}
-                    icon={<FaUserShield />}
-                    className="text-blue-500"
-                  />
-                </Tooltip>
-              )}
-              </>
-              }
-              
-            </div>
-          );
-        },
-      }
-    ],
-    [onRefresh]
+               <>
+                                 {requestPending ? (
+                                   <Tooltip title="Pending Approval">
+                                     <Button
+                                       size="sm"
+                                       disabled
+                                       icon={<FaUserShield />}
+                                       className="text-yellow-500"
+                                     />
+                                   </Tooltip>
+                                 ) : (
+                                   <Tooltip title="Request to Admin">
+                                     <Button
+                                       size="sm"
+                                       onClick={() => {
+                                         setSelectedTrackerId(tracker.id);
+                                         setRequestDialogOpen(true);
+                                       }}
+                                       icon={<FaUserShield />}
+                                       className="text-blue-500"
+                                     />
+                                   </Tooltip>
+                                 )}
+                               </>
+                             )}
+                           </div>
+                         );
+                       },
+                     },
+                   ],
+                   [onRefresh]
   );
 
   if (loading) {
@@ -532,6 +568,15 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
           </div>
         </div>
       </Dialog>
+      <RequestToAdminDialog
+      isOpen={requestDialogOpen}
+      onClose={() => {
+        setRequestDialogOpen(false);
+        setSelectedTrackerId(null);
+      }}
+      onConfirm={(reason) => handleRequestToAdmin(selectedTrackerId, reason)}
+      loading={requestLoading}
+    />
     </div>
   );
 };

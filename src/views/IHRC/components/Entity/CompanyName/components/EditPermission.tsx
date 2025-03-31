@@ -16,6 +16,7 @@ interface PermissionData {
   tracker_id: number;
   update_by: number;
   tracker_type: string;
+  reason_for_request: string;
   is_requested: boolean;
   count: number;
   created_at: string;
@@ -160,10 +161,23 @@ const EditPermission = () => {
         },
       },
       {
-        header: 'Edit Count',
+        header: 'Reason For Request',
         enableSorting: false,
-        accessorKey: 'count',
+        accessorKey: 'reason_for_request',
+        cell: (props) => {
+          const reason = props.getValue() as string;
+          return (
+            <Tooltip title={reason}>
+              <div className="w-52 truncate">{reason}</div>
+            </Tooltip>
+          );
+        },
       },
+      // {
+      //   header: 'Edit Count',
+      //   enableSorting: false,
+      //   accessorKey: 'count',
+      // },
       {
         header: 'Tracker Type',
         enableSorting: false,

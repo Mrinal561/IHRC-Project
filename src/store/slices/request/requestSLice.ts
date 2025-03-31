@@ -5,6 +5,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 // Define the interface for the request payload
 interface CompanyAdminRequestPayload {
   type: string;
+  reason_for_request: string;
 }
 
 // Define the initial state type
@@ -35,9 +36,9 @@ export const requestCompanyEdit = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await httpClient.put(
-        endpoints.request.request(id), 
-        payload
+      const response = await httpClient.post(
+        endpoints.request.requestEditApproval(), 
+        { ...payload, tracker_id: id }
       );
       return response.data;
     } catch (error: any) {

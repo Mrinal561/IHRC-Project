@@ -19,6 +19,7 @@ import { FaUserShield } from 'react-icons/fa';
 import { requestCompanyEdit } from '@/store/slices/request/requestSLice';
 import store from '@/store';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
+import RequestToAdminDialog from '../../PTRCTracker/components/RequestToAdminDialog';
 
 const documentPath = "../store/AllMappedCompliancesDetails.xls";
 
@@ -58,8 +59,15 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
   const [editingData, setEditingData] = useState<PTTrackerData | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [trackerToDelete, setTrackerToDelete] = useState<string | null>(null);
+   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+    const [selectedTrackerId, setSelectedTrackerId] = useState<string | null>(null);
+    const [requestLoading, setRequestLoading] = useState(false);
+
+
   const userId = login?.user?.user?.id;
   const type = login?.user?.user?.type;
+
+
     const handleDeleteConfirmation = (trackerId: string) => {
     setTrackerToDelete(trackerId);
     setDeleteConfirmOpen(true);
@@ -103,25 +111,60 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
       onRefresh();
     }
   };
-  const handleRequestToAdmin = async (id: any) => {
+
+    const isEditPermissionExpired = (tracker: PTTrackerData) => {
+      if (!tracker.updated_at) return true;
+      
+      const updatedAt = new Date(tracker.updated_at);
+      const expiryTime = new Date(updatedAt.getTime() + 24 * 60 * 60 * 1000); // 24 hours from last update
+      return new Date() > expiryTime;
+    };
+    
+    // Function to check if user can edit
+    const canUserEditTracker = (tracker: PTTrackerData) => {
+      // Admin can always edit
+      if (type === 'admin') return true;
+      
+      // Check if user is the uploader and has valid edit permission
+      return (
+        userId === tracker.uploaded_by && 
+        !isEditPermissionExpired(tracker)
+      );
+    };
+
+      // Function to check if request is pending
+      const isRequestPending = (tracker: PTTrackerData) => {
+        return tracker.is_requested;
+      };
+    
+
+
+  const handleRequestToAdmin = async (id: any, reason: string) => {
     try {
       // Dispatch the request with the required type
       const res = await dispatch(requestCompanyEdit({
         id: id,
         payload: {
-          type: "ptec" 
+          type: "ptec" ,
+          reason_for_request: reason
         }
       })).unwrap(); 
   
-      if (res) {
-        console.log('Requested Successfully')
-          if (onRefresh) {
-              onRefresh()
+     if (res) {
+            toast.push(
+              <Notification title="Success" type="success">
+                Request sent to admin successfully
+              </Notification>
+            );
+            setRequestDialogOpen(false);
+          onRefresh?.();
           }
-      }
   
-    } catch (error) {
-      console.log("Admin request error:", error);
+    } catch (error: any) {
+            showErrorNotification(error.message || 'Failed to send request to admin');
+      
+    } finally {
+      setRequestLoading(false);
     }
   };
 
@@ -402,15 +445,16 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
         header: 'Actions',
         id: 'actions',
         cell: ({ row }) => {
-          const { iseditable, uploaded_by } = row.original;
-          const canShowActions = type === 'admin' || (type === 'user' && userId === uploaded_by);
+          const tracker = row.original;
+          const canEdit = canUserEditTracker(tracker);
+          const requestPending = isRequestPending(tracker);
+          const isUploader = userId === tracker.uploaded_by;
       
-          if (!canShowActions) {
-            return null; // Don't show any actions
-          }
+          if (!isUploader && type !== 'admin') return null;
+
           return(
           <div className="flex items-center gap-2">
-            {iseditable ? (
+            {canEdit ? (
               <>
               {canEdit && (
               <Tooltip title="Edit">
@@ -441,17 +485,33 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
             />
               </>
             ) : (
-              <Tooltip title="Request to Admin">
-              <Button
-                size="sm"
-                onClick={() => handleRequestToAdmin(row.original.id)}
-                icon={<FaUserShield />}
-                className="text-blue-500"
-              />
-            </Tooltip>
-            )}
+              <>
+               {requestPending ? (
+                 <Tooltip title="Pending Approval">
+                                    <Button
+                                      size="sm"
+                                      disabled
+                                      icon={<FaUserShield />}
+                                      className="text-yellow-500"
+                                    />
+                                  </Tooltip>
+                                ) : (
+                                  <Tooltip title="Request to Admin">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedTrackerId(tracker.id);
+                                        setRequestDialogOpen(true);
+                                      }}
+                                      icon={<FaUserShield />}
+                                      className="text-blue-500"
+                                      />
+                                  </Tooltip>
+                                )}
               
              
+                                </>
+            )}
           </div>
           )
         },
@@ -555,6 +615,15 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
           </div>
         </div>
       </Dialog>
+      <RequestToAdminDialog
+      isOpen={requestDialogOpen}
+      onClose={() => {
+        setRequestDialogOpen(false);
+        setSelectedTrackerId(null);
+      }}
+      onConfirm={(reason) => handleRequestToAdmin(selectedTrackerId, reason)}
+      loading={requestLoading}
+    />
     </div>
   );
 };
