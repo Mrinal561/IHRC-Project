@@ -237,7 +237,7 @@ const EditPermission = () => {
         if (response) {
          fetchData();
           toast.push(
-            <Notification title="Copy Success" type="success" duration={3000} closable={true}>
+            <Notification title="Success" type="success" duration={3000} closable={true}>
             Permission has been given successfully
         </Notification>,
           );
