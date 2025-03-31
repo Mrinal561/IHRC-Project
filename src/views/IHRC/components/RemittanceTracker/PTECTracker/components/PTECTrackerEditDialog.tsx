@@ -30,7 +30,8 @@ const validationSchema = yup.object().shape({
     .max(new Date(), 'Payment date cannot be in the future'),
   delay_reason: yup
     .string()
-    .nullable()
+    .nullable(),
+  difference_reason: yup.string().nullable()
 });
 interface PTTrackerData {
   id: number;
@@ -39,6 +40,7 @@ interface PTTrackerData {
   total_paid_amt?: number;
   total_challan_amt?: number;
   differenceInAmount?: number;
+  difference_reason?: string;
   month?: string;
   // dueDate?: string;
   payment_due_date?: string;
@@ -54,6 +56,8 @@ interface ValidationErrors {
   total_challan_amt?: string;
   payment_date?: string;
   delay_reason?: string;
+  difference_reason?: string;
+
 }
 
 interface PTTrackerEditDialogProps {
@@ -149,6 +153,8 @@ const validateForm = async (): Promise<boolean> => {
       receipt_no: editedData.receipt_no,
       total_paid_amt: editedData.total_paid_amt,
       total_challan_amt: editedData.total_challan_amt,
+      difference_reason: editedData.difference_reason || '',
+
     };
 
     // Dispatch updateTracker with id and updateData
@@ -266,6 +272,7 @@ const validateForm = async (): Promise<boolean> => {
     <p className="text-red-500 text-sm mt-1">{validationErrors.receipt_no}</p>
   )}
           </div>
+          
            <div className="flex flex-col gap-2 w-full  min-h-[90px]">
             <label>Date of Payment</label>
             <DatePicker
@@ -285,9 +292,9 @@ const validateForm = async (): Promise<boolean> => {
 
         <div className="flex gap-4 items-center">
           <div className="flex flex-col gap-2 w-full  min-h-[90px]">
-            <label>Total Challan Amount</label>
+            <label>Salary Register Amount</label>
             <OutlinedInput
-              label="Total Challan Amount"
+              label="Salary Register Amount"
               value={editedData.total_challan_amt?.toString() || ''}
               onChange={(value) => handleChange('total_challan_amt', parseFloat(value))}
             />
@@ -365,14 +372,8 @@ const validateForm = async (): Promise<boolean> => {
         </div> */}
 
         <div className="flex gap-4 items-center mb-5">
-          <div className="flex flex-col gap-2 w-full">
-            {/* <label>Delay</label>
-            <OutlinedInput
-              label="Delay"
-              value={editedData.delay_in_days || ''}
-              onChange={(value) => handleChange('delay_in_days', value)}
-            />
-          </div> */}
+          <div className="flex gap-2 w-full">
+
           <div className="flex flex-col gap-2 w-full  min-h-[90px]">
             <label>Delay Reason</label>
             <OutlinedInput
@@ -384,6 +385,19 @@ const validateForm = async (): Promise<boolean> => {
     <p className="text-red-500 text-sm mt-1">{validationErrors.delay_reason}</p>
   )}
           </div>
+
+          <div className='flex flex-col gap-2 w-full min-h-[90px]'>
+            <label>Difference Amount Reason</label>
+            <OutlinedInput
+              label="Reason"
+              value={editedData.difference_reason?.toString() || ''  }
+              onChange={(value) => handleChange('difference_reason', value)}
+            />
+           {validationErrors.difference_reason && (
+    <p className="text-red-500 text-sm mt-1">{validationErrors.difference_reason}</p>
+  )}
+          </div>
+
         </div>
       </div>
 

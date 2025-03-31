@@ -154,7 +154,7 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
     const updateData = {
       payment_date: editedData.payment_date || '',
       delay_reason: editedData.delay_reason || '',
-      difference_reason: editedData.difference_reason,
+      difference_reason: editedData.difference_reason || '',
       total_paid_amt: editedData.total_paid_amt,
       no_of_emp: editedData.no_of_emp,
       salary_register_amt: Number(editedData.salary_register_amt),
@@ -258,8 +258,8 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
               value={editedData.salary_register_amt?.toString() || '' }
               onChange={(value) => handleChange('salary_register_amt', value)}
             />
-             {validationErrors.no_of_emp && (
-    <p className="text-red-500 text-sm mt-1">{validationErrors.no_of_emp}</p>
+             {validationErrors.salary_register_amt && (
+    <p className="text-red-500 text-sm mt-1">{validationErrors.salary_register_amt}</p>
   )}
           </div>
         </div>
@@ -273,8 +273,8 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
               value={editedData.total_paid_amt?.toString() || ''  }
               onChange={(value) => handleChange('total_paid_amt', parseFloat(value))}
             />
-             {validationErrors.no_of_emp && (
-    <p className="text-red-500 text-sm mt-1">{validationErrors.no_of_emp}</p>
+             {validationErrors.total_paid_amt && (
+    <p className="text-red-500 text-sm mt-1">{validationErrors.total_paid_amt}</p>
   )}
           </div>
           <div className='flex flex-col gap-2 w-full min-h-[90px]'>
@@ -288,8 +288,8 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
               yearLabelFormat="YYYY"
               monthLabelFormat="MMMM YYYY"
             />
-             {validationErrors.no_of_emp && (
-    <p className="text-red-500 text-sm mt-1">{validationErrors.no_of_emp}</p>
+             {validationErrors.payment_date && (
+    <p className="text-red-500 text-sm mt-1">{validationErrors.payment_date}</p>
   )}
           </div>
           <div className='flex flex-col gap-2 w-full min-h-[90px]'>
@@ -299,8 +299,8 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
               value={editedData.delay_reason?.toString() || ''  }
               onChange={(value) => handleChange('delay_reason', value)}
             />
-             {validationErrors.no_of_emp && (
-    <p className="text-red-500 text-sm mt-1">{validationErrors.no_of_emp}</p>
+             {validationErrors.delay_reason && (
+    <p className="text-red-500 text-sm mt-1">{validationErrors.delay_reason}</p>
   )}
           </div>
         </div>
@@ -313,8 +313,8 @@ const PTRCTrackerEditDialog: React.FC<PTRCTrackerEditDialogProps> = ({
               value={editedData.difference_reason?.toString() || ''  }
               onChange={(value) => handleChange('difference_reason', value)}
             />
-             {validationErrors.no_of_emp && (
-    <p className="text-red-500 text-sm mt-1">{validationErrors.no_of_emp}</p>
+             {validationErrors.difference_reason && (
+    <p className="text-red-500 text-sm mt-1">{validationErrors.difference_reason}</p>
   )}
           </div>
         </div>
