@@ -214,7 +214,10 @@ export const endpoints = {
         requestEdit: () => api('companyadmin/noticetracker/request-edit-permission'),
         getAllNoticeRequest: () => api(`companyadmin/noticetracker/edit-history`),
         canEdit: (id: any) => api(`companyadmin/company/can-edit/${id}`),
-        requestEditApproval: () => api('companyadmin/company/request-edit')
+        requestEditApproval: () => api('companyadmin/company/request-edit'),
+        rejectRequest: (id: any) => api(`companyadmin/company/reject/${id}`),
+        requestDetail: (id: any) => api(`companyadmin/company/edit-request-details/${id}`),
+        trackerTimeline: () => api('companyadmin/company/trackerTimeline')
     },
     certificate:{
         list: ()=> api('/companyadmin/certificate/list'),
@@ -244,7 +247,7 @@ export const endpoints = {
         updateReplyNotice: (id: any) => api(`companyadmin/noticetracker/reply/${id}`),
     },
     permission:{
-        approve:(id:any)=> api(`companyadmin/company/tracker-edit-permission/${id}`),
+        approveRequest:(id: any) => api(`companyadmin/company/approve/${id}`),
         approveNoticeEdit: (id:any) => api(`companyadmin/noticetracker/approve-edit-request/${id}`)
     },
     branchAgreement: {

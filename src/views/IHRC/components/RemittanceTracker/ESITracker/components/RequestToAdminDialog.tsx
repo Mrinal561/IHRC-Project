@@ -1,25 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, Button, Input, toast, Notification, DatePicker } from '@/components/ui';
-import { FaUserShield } from 'react-icons/fa';
+import { Button, Dialog, Input, Notification, toast, DatePicker } from '@/components/ui';
 import OutlinedInput from '@/components/ui/OutlinedInput';
 import dayjs from 'dayjs';
-
-interface PTRCChallanData {
-  id: number;
-  no_of_emp?: string;
-  salary_register_amt?: number;
-  total_paid_amt?: string;
-  payment_date?: string;
-  delay_reason?: string;
-  difference_reason?: string;
-}
+import { esiChallanData } from '@/@types/esiTracker';
 
 interface RequestToAdminDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (reason: string, updateData?: Record<string, any>) => Promise<void>;
+  onConfirm: (reason: string, updateData: Record<string, any>) => Promise<void>;
   loading?: boolean;
-  trackerData?: PTRCChallanData | null;
+  trackerData?: esiChallanData | null;
 }
 
 const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
@@ -37,12 +27,16 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
   useEffect(() => {
     if (isOpen && trackerData) {
       setFormData({
-        no_of_emp: trackerData.no_of_emp || 0,
-        salary_register_amt: trackerData.salary_register_amt || 0,
-        total_paid_amt: trackerData.total_paid_amt || 0,
-        payment_date: trackerData.payment_date || '',
-        delay_reason: trackerData.delay_reason || '',
-        difference_reason: trackerData.difference_reason || ''
+        no_of_emp: trackerData.no_of_emp,
+        gross_wage: trackerData.gross_wage,
+        employee_esi: trackerData.employee_esi,
+        employer_esi: trackerData.employer_esi,
+        total_esi: trackerData.total_esi,
+        challan_amt: trackerData.challan_amt,
+        payment_date: trackerData.payment_date,
+        challan_no: trackerData.challan_no,
+        delay_reason: trackerData.delay_reason,
+        difference_reason: trackerData.difference_reason
       });
       setReason('');
       setValidationErrors({});
@@ -83,7 +77,10 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
     const changedFields: Record<string, any> = {};
     if (trackerData) {
       Object.keys(formData).forEach(key => {
-        if (JSON.stringify(formData[key]) !== JSON.stringify(trackerData[key as keyof PTRCChallanData])) {
+        // Skip system fields and unchanged values
+        if (['id', 'created_at', 'updated_at', 'uploaded_by'].includes(key)) return;
+        
+        if (JSON.stringify(formData[key]) !== JSON.stringify(trackerData[key as keyof esiChallanData])) {
           changedFields[key] = formData[key];
         }
       });
@@ -118,56 +115,40 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
   };
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} shouldCloseOnOverlayClick={false} width={800}>
+    <Dialog isOpen={isOpen} onClose={onClose} shouldCloseOnOverlayClick={false} width={1000} height={560}>
       <div className="">
+        
+
         <h4 className="mb-2">Edit Fields</h4>
         
-        <div className="">
+        <div className="space-y-1">
           {/* First Row */}
           <div className='grid grid-cols-3 gap-4'>
             <div className='flex flex-col min-h-[90px]'>
-              <label className="mb-2">No. of Employees</label>
+              <label className="mb-2">Enter Number of Employees</label>
               <OutlinedInput
                 label="No. of Employees"
-                value={formData.no_of_emp?.toString() || '0'}
-                onChange={(value) => handleChange('no_of_emp', parseInt(value, 10))}
+                value={formData.no_of_emp || "0"}
+                onChange={(value) => handleChange('no_of_emp', parseFloat(value))}
               />
               {validationErrors.no_of_emp && (
                 <p className="text-red-500 text-sm mt-1">{validationErrors.no_of_emp}</p>
               )}
             </div>
-            
             <div className='flex flex-col min-h-[90px]'>
-              <label className="mb-2">Salary Register Amount</label>
+              <label className="mb-2">Enter Challan No.</label>
               <OutlinedInput
-                label="Salary Register Amount"
-                value={formData.salary_register_amt?.toString() || '0'}
-                onChange={(value) => handleChange('salary_register_amt', parseFloat(value))}
+                label="Challan No"
+                value={formData.challan_no || ''}
+                onChange={(value) => handleChange('challan_no', value)}
               />
-              {validationErrors.salary_register_amt && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.salary_register_amt}</p>
+              {validationErrors.challan_no && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.challan_no}</p>
               )}
             </div>
 
             <div className='flex flex-col min-h-[90px]'>
-              <label className="mb-2">Total Amount Paid</label>
-              <OutlinedInput
-                label="Total Amount Paid"
-                value={formData.total_paid_amt?.toString() || '0'}
-                onChange={(value) => handleChange('total_paid_amt', parseFloat(value))}
-              />
-              {validationErrors.total_paid_amt && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.total_paid_amt}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Second Row */}
-          <div className='grid grid-cols-3 gap-4'>
-            
-            
-            <div className='flex flex-col min-h-[90px]'>
-              <label className="mb-2">Date of Payment</label>
+              <label className="mb-2">Select Date of Payment</label>
               <DatePicker
                 size='sm'
                 placeholder="Date of Payment"
@@ -181,7 +162,82 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
                 <p className="text-red-500 text-sm mt-1">{validationErrors.payment_date}</p>
               )}
             </div>
+          </div>
 
+          {/* Second Row */}
+          <div className='grid grid-cols-4 gap-4'>
+           
+            <div className='flex flex-col min-h-[90px]'>
+              <label className="mb-2">ESI Gross Wages</label>
+              <OutlinedInput
+                label="ESI Gross Wages"
+                value={formData.gross_wage || '0'}
+                onChange={(value) => handleChange('gross_wage', parseFloat(value))}
+              />
+              {validationErrors.gross_wage && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.gross_wage}</p>
+              )}
+            </div>
+            <div className='flex flex-col min-h-[90px]'>
+              <label className="mb-2">EE ESI</label>
+              <OutlinedInput
+                label="EE ESI"
+                value={formData.employee_esi || '0'}
+                onChange={(value) => handleChange('employee_esi', parseFloat(value))}
+              />
+              {validationErrors.employee_esi && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.employee_esi}</p>
+              )}
+            </div>
+            <div className='flex flex-col min-h-[90px]'>
+              <label className="mb-2">ER ESI</label>
+              <OutlinedInput
+                label="ER ESI"
+                value={formData.employer_esi || '0'}
+                onChange={(value) => handleChange('employer_esi', parseFloat(value))}
+              />
+              {validationErrors.employer_esi && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.employer_esi}</p>
+              )}
+            </div>
+            <div className='flex flex-col min-h-[90px]'>
+              <label className="mb-2">Total ESI</label>
+              <OutlinedInput
+                label="Total Esi"
+                value={formData.total_esi || '0'}
+                onChange={(value) => handleChange('total_esi', parseFloat(value))}
+              />
+              {validationErrors.total_esi && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.total_esi}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Third Row */}
+          <div className="grid grid-cols-3 gap-4">
+           
+            <div className='flex flex-col min-h-[90px]'>
+              <label className="mb-2">Total Challan Amount</label>
+              <OutlinedInput
+                label="Total Amount As per Challan"
+                value={formData.challan_amt || '0'}
+                onChange={(value) => handleChange('challan_amt', parseFloat(value))}
+              />
+              {validationErrors.challan_amt && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.challan_amt}</p>
+              )}
+            </div>
+            <div className='flex flex-col min-h-[90px]'>
+              <label className="mb-2">Difference Reason</label>
+              <OutlinedInput
+                label="Difference Reason"
+                value={formData.difference_reason || ''}
+                onChange={(value) => handleChange('difference_reason', value)}
+              />
+              {validationErrors.difference_reason && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.difference_reason}</p>
+              )}
+            </div>
             <div className='flex flex-col min-h-[90px]'>
               <label className="mb-2">Delay Reason</label>
               <OutlinedInput
@@ -193,23 +249,8 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
                 <p className="text-red-500 text-sm mt-1">{validationErrors.delay_reason}</p>
               )}
             </div>
-
-            <div className='flex flex-col min-h-[90px]'>
-              <label className="mb-2">Difference Amount Reason</label>
-              <OutlinedInput
-                label="Difference Reason"
-                value={formData.difference_reason || ''}
-                onChange={(value) => handleChange('difference_reason', value)}
-              />
-              {validationErrors.difference_reason && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.difference_reason}</p>
-              )}
-            </div>
-
           </div>
-
-        </div>
-
+        
         <div className="mb-2">
           <p className="mb-2">Please provide a reason for requesting edit access:</p>
           <Input
@@ -219,6 +260,7 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
             onChange={(e) => setReason(e.target.value)}
             placeholder="Enter reason why you need to edit this record..."
           />
+        </div>
         </div>
 
         <div className="flex justify-end mt-4">
@@ -230,7 +272,7 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
             onClick={handleSubmit}
             loading={loading}
           >
-Confirm
+            Confirm
           </Button>
         </div>
       </div>

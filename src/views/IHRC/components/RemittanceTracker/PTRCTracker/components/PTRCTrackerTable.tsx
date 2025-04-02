@@ -10,17 +10,18 @@ import { PTTrackerData } from '@/@types/PTTracker';
 import dayjs from 'dayjs';
 import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json'
 import Lottie from 'lottie-react';
-import { HiOutlineViewGrid } from 'react-icons/hi';
+import { HiOutlineClock, HiOutlineViewGrid } from 'react-icons/hi';
 import { deletePtrcTracker } from '@/store/slices/ptSetup/ptrcTrackerSlice';
 import { useDispatch } from 'react-redux';
 import { FaUserShield } from 'react-icons/fa';
 import { requestCompanyEdit } from '@/store/slices/request/requestSLice';
 import store from '@/store';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
-import RequestToAdminDialog from './RequestToAdminDialog';
+import RequestToAdminDialog from '../components/RequestToAdminDialog';
+import { useNavigate } from 'react-router-dom';
 
 interface PTTrackerTableProps {
-  dataSent: PTTrackerData[];
+  dataSent: PTRCChallanData[];
   loading: boolean;
   onRefresh?: () => void;
   companyName: string;
@@ -34,6 +35,16 @@ interface PTTrackerTableProps {
   onPageSizeChange: (pageSize: number) => void;
   canEdit:boolean;
   canDelete:boolean;
+}
+
+interface PTRCChallanData {
+  id: number;
+  no_of_emp?: string;
+  salary_register_amt?: number;
+  total_paid_amt?: string;
+  payment_date?: string;
+  delay_reason?: string;
+  difference_reason?: string;
 }
 
 const { login } = store.getState()
@@ -57,8 +68,11 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [trackerToDelete, setTrackerToDelete] = useState<string | null>(null);
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
-  const [selectedTrackerId, setSelectedTrackerId] = useState<string | null>(null);
-  const [requestLoading, setRequestLoading] = useState(false);
+        const [selectedTrackerId, setSelectedTrackerId] = useState<number | null>(null);        const [requestLoading, setRequestLoading] = useState(false);
+
+
+          const navigate = useNavigate()
+        
 
   const handleDeleteConfirmation = (trackerId: string) => {
     setTrackerToDelete(trackerId);
@@ -156,7 +170,7 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
 
 
 
-  const handleRequestToAdmin = async (id: any, reason: string) => {
+  const handleRequestToAdmin = async (id: any, reason: string, updateData: Record<string, any> = {}) => {
     try {
       setRequestLoading(true);
       // Dispatch the request with the required type and reason
@@ -164,7 +178,9 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
         id: id,
         payload: {
           type: "ptrc",
-          reason_for_request: reason
+          reason_for_request: reason,
+          update_data: updateData
+
         }
       })).unwrap(); 
   
@@ -504,11 +520,26 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
           const canEdit = canUserEditTracker(tracker);
           const requestPending = isRequestPending(tracker);
           const isUploader = userId === tracker.uploaded_by;
+          const editExpired = isEditPermissionExpired(tracker);
+
 
           if (!isUploader && type !== 'admin') return null;
 
           return (
             <div className="flex items-center gap-2">
+              <Tooltip title="View Timeline">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => navigate('/trackerTimeline', {
+                                          state: { 
+                                            trackerId: tracker.id,
+                                            trackerType: 'ptrc' 
+                                          }
+                                        })}
+                                        icon={<HiOutlineClock />}
+                                        className="text-purple-500"
+                                      />
+                                    </Tooltip>
               {canEdit ? (
                 <>
                   {canEdit && (
@@ -538,6 +569,8 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
                   />
                 </>
               ) : (
+                editExpired && (
+
                 <>
                   {requestPending ? (
                     <Tooltip title="Pending Approval">
@@ -562,6 +595,7 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
                     </Tooltip>
                   )}
                 </>
+                )
               )}
             </div>
           );
@@ -671,8 +705,10 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
         setRequestDialogOpen(false);
         setSelectedTrackerId(null);
       }}
-      onConfirm={(reason) => handleRequestToAdmin(selectedTrackerId, reason)}
+      onConfirm={(reason, updateData) => handleRequestToAdmin(selectedTrackerId, reason, updateData)}
       loading={requestLoading}
+      trackerData={dataSent.find(tracker => tracker.id === selectedTrackerId)}
+
     />
     </div>
   );

@@ -820,4 +820,27 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+
+    {
+        key: 'editRequestDetail',
+        path: '/request-tracker-detail',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Entity/CompanyName/components/EditRequestDetails'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'trackerTimeline',
+        path: '/trackerTimeline',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/RemittanceTracker/PFIWTracker/components/TrackerTimeline'
+                ),
+        ),
+        authority: [],
+    },
 ]

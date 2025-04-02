@@ -7,7 +7,7 @@ import ESITrackerEditDialog from './ESITrackerEditDialog';
 import ESIConfigDropdown from './ESIConfigDropDown'
 import { esiChallanData } from '@/@types/esiTracker';
 import dayjs from 'dayjs';
-import { HiOutlineViewGrid } from 'react-icons/hi';
+import { HiOutlineClock, HiOutlineViewGrid } from 'react-icons/hi';
 import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json'
 import { deleteTracker } from '@/store/slices/esitracker/esitrackerSlice';
 import Lottie from 'lottie-react';
@@ -16,7 +16,8 @@ import { FaUserShield } from 'react-icons/fa';
 import { requestCompanyEdit } from '@/store/slices/request/requestSLice';
 import store from '@/store';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
-import RequestToAdminDialog from '../../PTRCTracker/components/RequestToAdminDialog';
+import RequestToAdminDialog from '../components/RequestToAdminDialog';
+import { useNavigate } from 'react-router-dom';
 
 interface EsiTrackerTableProps {
     dataSent: esiChallanData[];
@@ -56,8 +57,9 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [trackerToDelete, setTrackerToDelete] = useState<string | null>(null);
      const [requestDialogOpen, setRequestDialogOpen] = useState(false);
-        const [selectedTrackerId, setSelectedTrackerId] = useState<string | null>(null);
-        const [requestLoading, setRequestLoading] = useState(false);
+     const [selectedTrackerId, setSelectedTrackerId] = useState<number | null>(null);        const [requestLoading, setRequestLoading] = useState(false);
+
+     const navigate = useNavigate();
     const userId = login?.user?.user?.id;
     const type = login?.user?.user?.type;
     const handleEdit = (row: esiChallanData) => {
@@ -70,6 +72,11 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
       console.log(login, type)
         setTrackerToDelete(trackerId);
         setDeleteConfirmOpen(true);
+      };
+
+      const handleRequestClick = (trackerId: number) => {
+        setSelectedTrackerId(trackerId);
+        setRequestDialogOpen(true);
       };
 
       const confirmDelete = async () => {
@@ -112,9 +119,18 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
       // Admin can always edit
       if (type === 'admin') return true;
       
+      // Ensure both values are numbers before comparison
+      const uploadedBy = typeof tracker.uploaded_by === 'string' 
+        ? parseInt(tracker.uploaded_by) 
+        : tracker.uploaded_by;
+      
+      const currentUserId = typeof userId === 'string' 
+        ? parseInt(userId) 
+        : userId;
+    
       // Check if user is the uploader and has valid edit permission
       return (
-        userId === tracker.uploaded_by && 
+        currentUserId === uploadedBy && 
         !isEditPermissionExpired(tracker)
       );
     };
@@ -126,34 +142,33 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
     
 
 
-  const handleRequestToAdmin = async (id: any, reason: string) => {
-    try {
-      // Dispatch the request with the required type
-      const res = await dispatch(requestCompanyEdit({
-        id: id,
-        payload: {
-          type: "esi" ,
-          reason_for_request: reason
-        }
-      })).unwrap(); 
-  
-     if (res) {
+      const handleRequestToAdmin = async (id: any, reason: string, updateData: Record<string, any>) => {
+        try {
+          setRequestLoading(true);
+          const res = await dispatch(requestCompanyEdit({
+            id: id,
+            payload: {
+              type: "esi",
+              reason_for_request: reason,
+              update_data: updateData
+            }
+          })).unwrap();
+          
+          if (res) {
             toast.push(
               <Notification title="Success" type="success">
                 Request sent to admin successfully
               </Notification>
             );
             setRequestDialogOpen(false);
-          onRefresh?.();
+            onRefresh?.();
           }
-  
-    } catch (error: any) {
-            showErrorNotification(error.message || 'Failed to send request to admin');
-      
-    } finally {
-      setRequestLoading(false);
-    }
-  };
+        } catch (error: any) {
+          showErrorNotification(error.message || 'Failed to send request to admin');
+        } finally {
+          setRequestLoading(false);
+        }
+      };
       
     
 
@@ -420,11 +435,25 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                 const canEdit = canUserEditTracker(tracker);
                 const requestPending = isRequestPending(tracker);
                 const isUploader = userId === tracker.uploaded_by;
-            
+                const editExpired = isEditPermissionExpired(tracker);
+
                 if (!isUploader && type !== 'admin') return null;
       
                 return(
                 <div className="flex items-center gap-2">
+                  <Tooltip title="View Timeline">
+                                          <Button
+                                            size="sm"
+                                            onClick={() => navigate('/trackerTimeline', {
+                                              state: { 
+                                                trackerId: tracker.id,
+                                                trackerType: 'esi' 
+                                              }
+                                            })}
+                                            icon={<HiOutlineClock />}
+                                            className="text-purple-500"
+                                          />
+                                        </Tooltip>
                   {canEdit ? (
                       // Show all actions when iseditable is true
                       <>
@@ -457,7 +486,9 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                         />
                         </>
                       ) : (
-                        <>
+                        editExpired && (
+
+                          <>
                                       {requestPending ? (
                                         <Tooltip title="Pending Approval">
                                                            <Button
@@ -471,10 +502,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                                                          <Tooltip title="Request to Admin">
                                                            <Button
                                                              size="sm"
-                                                             onClick={() => {
-                                                               setSelectedTrackerId(tracker.id);
-                                                               setRequestDialogOpen(true);
-                                                             }}
+                                                             onClick={() => handleRequestClick(tracker.id)}
                                                              icon={<FaUserShield />}
                                                              className="text-blue-500"
                                                              />
@@ -483,6 +511,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                                      
                                     
                                                        </>
+                                                      )
                                    )}
                                  </div>
                                  )
@@ -611,8 +640,9 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
         setRequestDialogOpen(false);
         setSelectedTrackerId(null);
       }}
-      onConfirm={(reason) => handleRequestToAdmin(selectedTrackerId, reason)}
+      onConfirm={(reason, updateData) => handleRequestToAdmin(selectedTrackerId, reason, updateData)}
       loading={requestLoading}
+      trackerData={dataSent.find(tracker => tracker.id === selectedTrackerId)}
     />
         </div>
     )

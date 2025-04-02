@@ -7,7 +7,7 @@ import PFTrackerEditDialog from './PFTrackerEditDialog';
 import ConfigDropdown from './ConfigDropdown';
 import { PfChallanData } from '@/@types/pfTracker';
 import dayjs from 'dayjs';
-import { HiOutlineViewGrid } from 'react-icons/hi';
+import { HiOutlineClock, HiOutlineViewGrid } from 'react-icons/hi';
 import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json'
 import Lottie from 'lottie-react';
 import { useDispatch } from 'react-redux';
@@ -17,7 +17,8 @@ import { FaUserShield } from 'react-icons/fa';
 import { requestCompanyEdit } from '@/store/slices/request/requestSLice';
 import store from '@/store';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
-import RequestToAdminDialog from '../../PTRCTracker/components/RequestToAdminDialog';
+import RequestToAdminDialog from '../components/RequestToAdminDialog';
+import { useNavigate } from 'react-router-dom';
 const documentPath = "../store/AllMappedCompliancesDetails.xls";
 
 interface PfTrackerTableProps {
@@ -58,9 +59,9 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [trackerToDelete, setTrackerToDelete] = useState<string | null>(null);
    const [requestDialogOpen, setRequestDialogOpen] = useState(false);
-    const [selectedTrackerId, setSelectedTrackerId] = useState<string | null>(null);
-    const [requestLoading, setRequestLoading] = useState(false);
+        const [selectedTrackerId, setSelectedTrackerId] = useState<number | null>(null);        const [requestLoading, setRequestLoading] = useState(false);
 
+  const navigate = useNavigate()
 
  const userId = login?.user?.user?.id;
  const type = login?.user?.user?.type;
@@ -125,15 +126,15 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
       return tracker.is_requested;
     };
 
-  const handleRequestToAdmin = async (id: any, reason: string) => {
-  try {
+    const handleRequestToAdmin = async (id: any, reason: string, updateData: Record<string, any> = {}) => {
+      try {
     // Dispatch the request with the required type
     const res = await dispatch(requestCompanyEdit({
       id: id,
       payload: {
         type: "pf",
-        reason_for_request: reason
- 
+        reason_for_request: reason,
+        update_data: updateData
       }
     })).unwrap(); 
 
@@ -412,11 +413,26 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
           const canEdit = canUserEditTracker(tracker);
           const requestPending = isRequestPending(tracker);
           const isUploader = userId === tracker.uploaded_by;
+          const editExpired = isEditPermissionExpired(tracker);
+
 
           if (!isUploader && type !== 'admin') return null;
 
           return (
             <div className="flex items-center gap-2">
+                            <Tooltip title="View Timeline">
+                        <Button
+                          size="sm"
+                          onClick={() => navigate('/trackerTimeline', {
+                            state: { 
+                              trackerId: tracker.id,
+                              trackerType: 'pf' 
+                            }
+                          })}
+                          icon={<HiOutlineClock />}
+                          className="text-purple-500"
+                        />
+                      </Tooltip>
               {canEdit ? (
                 <>
                   {canEdit && (
@@ -448,6 +464,8 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
                   />
                 </>
               ) : (
+                editExpired && (
+
                <>
                                  {requestPending ? (
                                    <Tooltip title="Pending Approval">
@@ -472,6 +490,7 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
                                    </Tooltip>
                                  )}
                                </>
+                )
                              )}
                            </div>
                          );
@@ -529,6 +548,8 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
           }}
           onPaginationChange={onPaginationChange}
           onSelectChange={onPageSizeChange}
+
+          
         />
       )}
       
@@ -574,8 +595,10 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
         setRequestDialogOpen(false);
         setSelectedTrackerId(null);
       }}
-      onConfirm={(reason) => handleRequestToAdmin(selectedTrackerId, reason)}
+      onConfirm={(reason, updateData) => handleRequestToAdmin(selectedTrackerId, reason, updateData)}
       loading={requestLoading}
+      trackerData={dataSent.find(tracker => tracker.id === selectedTrackerId)}
+
     />
     </div>
   );

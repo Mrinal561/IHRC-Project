@@ -321,7 +321,8 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
                     pageSizes={[]}
                     onPaginationChange={() => {}}
                     onSelectChange={() => {}}
-                />
+                    showPageSizeSelector={companyGroupTableData.length > 10}
+                    />
             )}
             <Dialog
                 isOpen={dialogIsOpen}

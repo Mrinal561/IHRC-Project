@@ -6,6 +6,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 interface CompanyAdminRequestPayload {
   type: string;
   reason_for_request: string;
+  update_data?: Record<string, any>;
 }
 
 // Define the initial state type
@@ -13,13 +14,15 @@ interface CompanyAdminRequestState {
   loading: boolean;
   success: boolean;
   error: string | null;
+  data: any | null;
 }
 
 // Initial state
 const initialState: CompanyAdminRequestState = {
   loading: false,
   success: false,
-  error: null
+  error: null,
+  data: null
 };
 
 // Create the async thunk for the admin request
@@ -70,16 +73,19 @@ const companyAdminRequestSlice = createSlice({
         state.loading = true;
         state.success = false;
         state.error = null;
+        state.data = null;
       })
-      .addCase(requestCompanyEdit.fulfilled, (state) => {
+      .addCase(requestCompanyEdit.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
         state.error = null;
+        state.data = action.payload;
       })
       .addCase(requestCompanyEdit.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
         state.error = action.payload as string;
+        state.data = null;
       });
   }
 });
