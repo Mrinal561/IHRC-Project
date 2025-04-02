@@ -323,8 +323,8 @@ const TrackerTimeline = () => {
                 </span>
           </div>
           <div className='flex items-center gap-2'>
-            <span className="font-medium">Action:</span><span className='capitalize'>
-                {event.action}
+            <span className="font-medium">Status:</span><span className='capitalize'>
+            {formatActionText(event.action)}
                 </span> 
           </div>
           <div className='flex items-center gap-2'>
@@ -353,6 +353,11 @@ const TrackerTimeline = () => {
           </div>
           <div>
             <span className="font-medium">Performed At:</span> {formatDateTime(event.performed_at)}
+          </div>
+          <div className='flex items-center gap-2'>
+            <span className="font-medium">Status:</span><span className='capitalize'>
+            {formatActionText(event.action)}
+                </span> 
           </div>
           <div>
             <span className="font-medium">Request Reason:</span> {event.reason}
