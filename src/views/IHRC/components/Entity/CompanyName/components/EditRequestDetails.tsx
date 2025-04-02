@@ -166,7 +166,7 @@ const EditPermissionDetails = () => {
 
   const handleApprove = async () => {
     try {
-      const response = await httpClient.delete(
+      const response = await httpClient.put(
         endpoints.permission.approveRequest(requestId)
       );
       if (response) {
@@ -175,7 +175,8 @@ const EditPermissionDetails = () => {
             Request has been approved successfully
           </Notification>
         );
-        fetchDetails();
+        // fetchDetails();
+        navigate('/edit-permission');
       }
     } catch (err) {
       console.error('Error approving request:', err);
@@ -210,7 +211,8 @@ const EditPermissionDetails = () => {
         );
         setRejectDialogOpen(false);
         setRejectReason('');
-        fetchDetails();
+        // fetchDetails();
+        navigate('/edit-permission');
       }
     } catch (err) {
       console.error('Error rejecting request:', err);

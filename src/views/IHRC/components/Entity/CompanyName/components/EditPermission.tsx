@@ -437,7 +437,6 @@ const EditPermission = () => {
 
   const [filter, setFilter] = useState('');
   const [data, setData] = useState<PermissionData[]>([]);
-  const [filteredData, setFilteredData] = useState<PermissionData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -452,11 +451,21 @@ const EditPermission = () => {
     sort: { order: '', key: '' },
   });
 
+  const filteredData = useMemo(() => {
+    return filter 
+      ? data.filter(item => item.tracker_type === filter)
+      : data;
+  }, [data, filter]);
+
   // Fetch data from API
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await httpClient.get(endpoints.request.getAll());
+      const response = await httpClient.get(endpoints.request.getAll(), {
+        params: {
+          tracker_type: filter || undefined // Only send if filter exists
+        }
+      });
       const fetchedData: PermissionData[] = response.data.data;
       setData(fetchedData);
       setTableData(prev => ({ ...prev, total: fetchedData.length }));
@@ -470,27 +479,29 @@ const EditPermission = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [filter]);
 
   // Filter effect
-  useEffect(() => {
-    if (filter) {
-      const filtered = data.filter((item) =>
-        item.tracker_type.toLowerCase() === filter.toLowerCase()
-      );
-      setFilteredData(filtered);
-      setTableData((prev) => ({ ...prev, total: filtered.length }));
-    } else {
-      setFilteredData(data);
-      setTableData((prev) => ({ ...prev, total: data.length }));
-    }
-  }, [data, filter]);
+  // useEffect(() => {
+  //   if (filter) {
+  //     const filtered = data.filter((item) =>
+  //       item.tracker_type.toLowerCase() === filter.toLowerCase()
+  //     );
+  //     setFilteredData(filtered);
+  //     setTableData((prev) => ({ ...prev, total: filtered.length }));
+  //   } else {
+  //     setFilteredData(data);
+  //     setTableData((prev) => ({ ...prev, total: data.length }));
+  //   }
+  // }, [data, filter]);
 
   const handleViewDetails = (request: PermissionData) => {
     navigate('/request-tracker-detail', { 
       state: { requestId: request.id } 
     });
   };
+
+
 
   const handleApprove = async (id: number) => {
     try {
@@ -739,8 +750,13 @@ const EditPermission = () => {
             <OutlinedSelect
               label="Filter"
               options={filterOptions}
-              value={filter}
-              onChange={(value) => setFilter(value)}
+              value={filterOptions.find(opt => opt.value === filter)}
+              onChange={(selectedOption) => {
+                // Extract just the value from the selected option
+                const selectedValue = selectedOption.value;
+                setFilter(selectedValue);
+                setTableData(prev => ({ ...prev, pageIndex: 1 }));
+              }}
             />
           </div>
         </div>
