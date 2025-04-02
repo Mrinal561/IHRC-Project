@@ -13,7 +13,7 @@ import Lottie from 'lottie-react';
 import { useDispatch } from 'react-redux';
 import { deleteTracker } from '@/store/slices/pftracker/pfTrackerSlice';
 import { VscGitPullRequestGoToChanges } from 'react-icons/vsc';
-import { FaUserShield } from 'react-icons/fa';
+import { FaEye, FaUserShield } from 'react-icons/fa';
 import { requestCompanyEdit } from '@/store/slices/request/requestSLice';
 import store from '@/store';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
@@ -429,8 +429,7 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
                               trackerType: 'pf' 
                             }
                           })}
-                          icon={<HiOutlineClock />}
-                          className="text-purple-500"
+                          icon={<FaEye />}
                         />
                       </Tooltip>
               {canEdit ? (

@@ -13,7 +13,7 @@ import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-
 import Lottie from 'lottie-react';
 import { deleteLwfTracker, LwfTrackerData } from '@/store/slices/lwfTracker/lwfTracker';
 import { useDispatch } from 'react-redux';
-import { FaUserShield } from 'react-icons/fa';
+import { FaEye, FaUserShield } from 'react-icons/fa';
 import { requestCompanyEdit } from '@/store/slices/request/requestSLice';
 import store from '@/store';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
@@ -409,8 +409,7 @@ const LWFTrackerTable: React.FC<LWFTrackerTableProps> = ({
                                               trackerType: 'lwf' 
                                             }
                                           })}
-                                          icon={<HiOutlineClock />}
-                                          className="text-purple-500"
+                                          icon={<FaEye />}
                                         />
                                       </Tooltip>
                 {canEdit ? (

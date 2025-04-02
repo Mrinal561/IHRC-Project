@@ -15,7 +15,7 @@ import Lottie from 'lottie-react';
 import { HiOutlineClock, HiOutlineViewGrid } from 'react-icons/hi';
 import { useDispatch } from 'react-redux';
 import { deletePtecTracker } from '@/store/slices/ptSetup/ptecTrackerSlice';
-import { FaUserShield } from 'react-icons/fa';
+import { FaEye, FaUserShield } from 'react-icons/fa';
 import { requestCompanyEdit } from '@/store/slices/request/requestSLice';
 import store from '@/store';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
@@ -468,8 +468,7 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
                                           trackerType: 'ptec' 
                                         }
                                       })}
-                                      icon={<HiOutlineClock />}
-                                      className="text-purple-500"
+                                      icon={<FaEye />}
                                     />
                                   </Tooltip>
             {canEdit ? (
