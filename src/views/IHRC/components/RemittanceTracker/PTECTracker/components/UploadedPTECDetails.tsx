@@ -441,7 +441,7 @@ import { HiArrowLeft } from 'react-icons/hi';
 import { FiFile, FiTrash } from 'react-icons/fi';
 import DataTable, { ColumnDef } from '@/components/shared/DataTable';
 import { useNavigate } from 'react-router-dom';
-import ConfigDropdown from './ConfigDropDown';
+import ConfigDropdown from './ConfigDropdown';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 import dayjs from 'dayjs';
