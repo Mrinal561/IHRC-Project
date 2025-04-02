@@ -1,9 +1,9 @@
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Tooltip } from '@/components/ui';
 import { HiArrowLeft } from 'react-icons/hi';
 import DataTable, { ColumnDef } from '@/components/shared/DataTable';
 import { useNavigate } from 'react-router-dom';
-import { PFTrackerData } from './PFTrackerTable';
 import { MdEdit } from 'react-icons/md';
 import { FiFile, FiTrash } from 'react-icons/fi';
 import ConfigDropdown from './ConfigDropdown';
@@ -13,173 +13,70 @@ import { endpoints } from '@/api/endpoint';
 import dayjs from 'dayjs';
 import store from '@/store';
 import { useDispatch } from 'react-redux';
-import { fetchAuthUser } from '@/store/slices/login';
-import toast from '@/components/ui/toast';
-import { Notification } from '@/components/ui';
-import Loading from '@/components/shared/Loading';
 
-const FINANCIAL_YEAR_KEY = 'selectedFinancialYear';
-const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged';
+
+
 
 interface UploadedPFDetailsProps {
   onBack: () => void;
 }
 
-const documentPath = "../store/AllMappedCompliancesDetails.xls";
+
+const FINANCIAL_YEAR_KEY = 'selectedFinancialYear'
+const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged';
 
 
 const UploadedPFDetails: React.FC<UploadedPFDetailsProps> = ({ onBack }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { login } = store.getState();
+        const [financialYear, setFinancialYear] = useState(sessionStorage.getItem(FINANCIAL_YEAR_KEY));
   const [data, setData] = useState<PfChallanData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [permissions, setPermissions] = useState({
-    canList: false,
-    canCreate: false,
-    canEdit: false,
-    canDelete: false,
-  });
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [financialYear, setFinancialYear] = useState(
-    sessionStorage.getItem(FINANCIAL_YEAR_KEY)
-  );
+  const {login} = store.getState();
   const [pagination, setPagination] = useState({
     total: 0,
     pageIndex: 1,
     pageSize: 10,
   });
+const params: any = {
+  'group_id[]': login.user.user?.group_id,
+  'company_id[]': login.user.user?.company_id,
+};
 
-  // Listen for financial year changes
-  useEffect(() => {
-    const handleFinancialYearChange = (event: CustomEvent) => {
-      const newFinancialYear = event.detail;
-      setFinancialYear(newFinancialYear);
-    };
 
-    window.addEventListener(
-      FINANCIAL_YEAR_CHANGE_EVENT,
-      handleFinancialYearChange as EventListener
-    );
 
-    return () => {
-      window.removeEventListener(
-        FINANCIAL_YEAR_CHANGE_EVENT,
-        handleFinancialYearChange as EventListener
-      );
-    };
-  }, []);
-
-  // Initialize auth and permissions
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const response = await dispatch(fetchAuthUser());
-        
-        if (!response.payload?.moduleAccess) {
-          toast.push(
-            <Notification title="Permission" type="error" closable duration={2000}>
-              You don't have access to any modules
-            </Notification>
-          );
-          navigate('/home');
-          setIsInitialized(true);
-          return;
-        }
-
-        // Find Remittance Tracker module
-        const remittanceModule = response.payload.moduleAccess?.find(
-          (module: any) => module.id === 3
-        );
-        
-        if (!remittanceModule) {
-          toast.push(
-            <Notification title="Permission" type="error" closable duration={2000}>
-              You don't have access to this module
-            </Notification>
-          );
-          navigate('/home');
-          setIsInitialized(true);
-          return;
-        }
-
-        // Find PF Tracker menu item
-        const pfTrackerMenu = remittanceModule.menus?.find(
-          (menu: any) => menu.id === 9
-        );
-
-        if (!pfTrackerMenu) {
-          toast.push(
-            <Notification title="Permission" type="error" closable duration={2000}>
-              You don't have access to this menu
-            </Notification>
-          );
-          navigate('/home');
-          setIsInitialized(true);
-          return;
-        }
-
-        // Set permissions
-        setPermissions({
-          canList: !!pfTrackerMenu.permissions?.can_list,
-          canCreate: !!pfTrackerMenu.permissions?.can_create,
-          canEdit: !!pfTrackerMenu.permissions?.can_edit,
-          canDelete: !!pfTrackerMenu.permissions?.can_delete,
-        });
-
-        setIsInitialized(true);
-      } catch (error) {
-        console.error('Error fetching auth user:', error);
-        setIsInitialized(true);
-      }
-    };
-
-    if (!isInitialized) {
-      initializeAuth();
+  const fetchPFTrackerData =  useCallback(async (page: number, pageSize: number) => {
+    try {
+      setLoading(true);
+      const params: any = {
+        page,
+        page_size: pageSize,
+        'group_id[]': login.user.user?.group_id,
+        'company_id[]': login.user.user?.company_id,
+      };
+      if (financialYear) {
+        params['financial_year'] = financialYear
     }
-  }, [dispatch, isInitialized, navigate]);
-
-  const fetchPFTrackerData = useCallback(
-    async (page: number, pageSize: number) => {
-      if (!permissions.canList || !isInitialized) return;
-
-      try {
-        setLoading(true);
-        
-        const params: any = {
-          page,
-          page_size: pageSize,
-          'group_id[]': login.user.user?.group_id,
-          'company_id[]': login.user.user?.company_id,
-        };
-
-        if (financialYear) {
-          params.financial_year = financialYear;
-        }
-
-        const res = await httpClient.get(endpoints.tracker.pfGetALl(), {
-          params,
-        });
-
-        setData(res.data.data);
-        setPagination((prev) => ({
-          ...prev,
-          total: res.data.paginate_data.totalResults,
-        }));
-      } catch (error) {
-        console.error('Error fetching PF tracker data:', error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [login.user.user?.group_id, login.user.user?.company_id, permissions.canList, isInitialized, financialYear]
-  );
-
-  useEffect(() => {
-    if (isInitialized && permissions.canList) {
-      fetchPFTrackerData(pagination.pageIndex, pagination.pageSize);
+      const res = await httpClient.get(endpoints.tracker.pfGetALl(), {
+        params,
+      });
+      console.log(res.data.data);
+      setData(res.data.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.data.paginate_data.totalResults,
+      }));
+    } catch (error) {
+      console.error('Error fetching PF tracker data:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [fetchPFTrackerData, pagination.pageIndex, pagination.pageSize, isInitialized, permissions.canList]);
+  },     [login.user.user?.group_id, login.user.user?.company_id]
+);
+  
+    useEffect(() => {
+    fetchPFTrackerData(pagination.pageIndex, pagination.pageSize);
+  }, [fetchPFTrackerData,pagination.pageIndex, pagination.pageSize]);
 
   const handlePaginationChange = (page: number) => {
     setPagination((prev) => ({ ...prev, pageIndex: page }));
@@ -192,7 +89,7 @@ const UploadedPFDetails: React.FC<UploadedPFDetailsProps> = ({ onBack }) => {
       pageIndex: 1,
     }));
   };
-  const columns: ColumnDef<PFTrackerData>[] = useMemo(
+  const columns: ColumnDef<PfChallanData>[] = useMemo(
     () => [
       {
         header: 'PF Code',
@@ -392,7 +289,6 @@ const UploadedPFDetails: React.FC<UploadedPFDetailsProps> = ({ onBack }) => {
 },
 {
   header: 'ECR',
-  enableSorting: false,
   accessorKey: 'ecr_document',
   cell: (props) => {
     const ecrDocument = props.getValue() as string | null;
@@ -424,7 +320,6 @@ const UploadedPFDetails: React.FC<UploadedPFDetailsProps> = ({ onBack }) => {
 },
 {
   header: 'Payment Receipt',
-  enableSorting: false,
   accessorKey: 'receipt_document',
   cell: (props) => {
     const paymentReceiptDocument = props.getValue() as string | null;
@@ -471,18 +366,6 @@ const UploadedPFDetails: React.FC<UploadedPFDetailsProps> = ({ onBack }) => {
     navigate('/pf-tracker');
   };
 
-  if (!isInitialized) {
-    return (
-      <Loading loading={true} type="default">
-        <div className="h-full" />
-      </Loading>
-    );
-  }
-
-  if (!permissions.canList) {
-    return null;
-  }
-
 
   const handleDownload = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -512,7 +395,8 @@ const UploadedPFDetails: React.FC<UploadedPFDetailsProps> = ({ onBack }) => {
           icon={<HiArrowLeft />}
           onClick={backFunction}
           className="mr-4"
-        />
+        >
+        </Button>
         <h2 className="text-2xl font-bold">Uploaded PF Tracker Details</h2>
       </div>
       <DataTable
