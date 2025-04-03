@@ -23,6 +23,17 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+    {
+        key: 'nav.posh',
+        path: '/posh',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/POSH/Posh'
+                ),
+        ),
+        authority: [],
+    },
     // {
     //     key: 'Reset Password',
     //     path: '/reset-password',
