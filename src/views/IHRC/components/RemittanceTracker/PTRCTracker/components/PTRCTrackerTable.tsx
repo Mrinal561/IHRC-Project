@@ -195,7 +195,8 @@ const PTRCTrackerTable: React.FC<PTTrackerTableProps> = ({
       }
     } catch (error: any) {
       console.log("Admin request error:", error);
-      showErrorNotification(error.message || 'Failed to send request to admin');
+      // showErrorNotification(error.message || 'Failed to send request to admin');
+      throw error
     } finally {
       setRequestLoading(false);
     }

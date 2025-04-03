@@ -149,7 +149,8 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
     }
 
   } catch (error: any) {
-      showErrorNotification(error.message || 'Failed to send request to admin');
+      // showErrorNotification(error.message);
+      throw error
   }
 };
   

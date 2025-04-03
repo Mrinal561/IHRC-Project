@@ -101,6 +101,7 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
       onClose();
     } catch (error) {
       console.error('Request failed:', error);
+      throw error
     }
   };
 

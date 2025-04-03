@@ -164,7 +164,8 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
             onRefresh?.();
           }
         } catch (error: any) {
-          showErrorNotification(error.message || 'Failed to send request to admin');
+          // showErrorNotification(error.message || 'Failed to send request to admin');
+          throw error
         } finally {
           setRequestLoading(false);
         }

@@ -83,7 +83,7 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
   const handleSubmit = async () => {
     if (!reason.trim()) {
       toast.push(
-        <Notification title="Error" type="danger">
+        <Notification title="Error" type="danger" closable={true}>
           Please enter a reason for the request
         </Notification>
       );
@@ -106,7 +106,7 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
     // If no fields actually changed
     if (Object.keys(changedFields).length === 0) {
       toast.push(
-        <Notification title="Error" type="danger">
+        <Notification title="Error" type="danger" closable={true}>
           Please make at least one change to request edit
         </Notification>
       );
@@ -114,15 +114,11 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
     }
 
     try {
-      await onConfirm(reason, changedFields);
-      toast.push(
-        <Notification title="Success" type="success">
-          Request sent to admin successfully
-        </Notification>
-      );
+     await onConfirm(reason, changedFields);
       onClose();
     } catch (error) {
       console.error('Request failed:', error);
+      throw error
     }
   };
 
