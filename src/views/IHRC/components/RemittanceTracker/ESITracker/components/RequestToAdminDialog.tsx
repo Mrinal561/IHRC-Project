@@ -33,7 +33,9 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
         employer_esi: trackerData.employer_esi,
         total_esi: trackerData.total_esi,
         challan_amt: trackerData.challan_amt,
-        payment_date: trackerData.payment_date,
+         payment_date: trackerData.payment_date 
+                ? dayjs(trackerData.payment_date).toISOString() 
+                : '',
         challan_no: trackerData.challan_no,
         delay_reason: trackerData.delay_reason,
         difference_reason: trackerData.difference_reason
@@ -58,8 +60,9 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
 
   const handleDateChange = (field: string, date: Date | null) => {
     if (date) {
-      const formattedDate = dayjs(date).format('YYYY-MM-DD');
-      handleChange(field, formattedDate);
+      // Convert to ISO string (includes timezone info)
+      const isoDate = dayjs(date).toISOString();
+      handleChange(field, isoDate);
     }
   };
 
@@ -110,9 +113,14 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
     }
   };
 
+
   const formatDateForDisplay = (dateString: string | undefined): Date | undefined => {
     if (!dateString) return undefined;
-    return dayjs(dateString).toDate();
+    
+    // Parse both ISO format and simple YYYY-MM-DD format
+    return dayjs(dateString).isValid() 
+      ? dayjs(dateString).toDate()
+      : undefined;
   };
 
   return (

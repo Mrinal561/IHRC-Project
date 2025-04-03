@@ -49,7 +49,9 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
         eps_wage: trackerData.eps_wage || 0,
         edli_wage: trackerData.edli_wage || 0,
         total_challan_amt: trackerData.total_challan_amt || 0,
-        payment_date: trackerData.payment_date || '',
+        payment_date: trackerData.payment_date 
+        ? dayjs(trackerData.payment_date).toISOString() 
+        : '',
         no_of_emp: trackerData.no_of_emp || 0,
         delay_reason: trackerData.delay_reason || '',
         difference_reason: trackerData.difference_reason || '',
@@ -75,8 +77,9 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
 
   const handleDateChange = (field: string, date: Date | null) => {
     if (date) {
-      const formattedDate = dayjs(date).format('YYYY-MM-DD');
-      handleChange(field, formattedDate);
+      // Convert to ISO string (includes timezone info)
+      const isoDate = dayjs(date).toISOString();
+      handleChange(field, isoDate);
     }
   };
 
@@ -113,6 +116,15 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
       return;
     }
 
+    if (changedFields.payment_date && !dayjs(changedFields.payment_date).isValid()) {
+      toast.push(
+        <Notification title="Error" type="danger" closable={true}>
+          Invalid payment date format
+        </Notification>
+      );
+      return;
+    }
+
     try {
      await onConfirm(reason, changedFields);
       onClose();
@@ -124,7 +136,11 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
 
   const formatDateForDisplay = (dateString: string | undefined): Date | undefined => {
     if (!dateString) return undefined;
-    return dayjs(dateString).toDate();
+    
+    // Parse both ISO format and simple YYYY-MM-DD format
+    return dayjs(dateString).isValid() 
+      ? dayjs(dateString).toDate()
+      : undefined;
   };
 
   return (

@@ -9,7 +9,7 @@ interface PTRCChallanData {
   no_of_emp?: string;
   salary_register_amt?: number;
   total_paid_amt?: string;
-  payment_date?: string;
+  payment_date?: string | null;
   delay_reason?: string;
   difference_reason?: string;
 }
@@ -40,7 +40,9 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
         no_of_emp: trackerData.no_of_emp || 0,
         salary_register_amt: trackerData.salary_register_amt || 0,
         total_paid_amt: trackerData.total_paid_amt || 0,
-        payment_date: trackerData.payment_date || '',
+        payment_date: trackerData.payment_date 
+               ? dayjs(trackerData.payment_date).toISOString() 
+               : '',
         delay_reason: trackerData.delay_reason || '',
         difference_reason: trackerData.difference_reason || ''
       });
@@ -64,10 +66,12 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
 
   const handleDateChange = (field: string, date: Date | null) => {
     if (date) {
-      const formattedDate = dayjs(date).format('YYYY-MM-DD');
-      handleChange(field, formattedDate);
+      // Convert to ISO string (includes timezone info)
+      const isoDate = dayjs(date).toISOString();
+      handleChange(field, isoDate);
     }
   };
+
 
   const handleSubmit = async () => {
     if (!reason.trim()) {
@@ -113,9 +117,14 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
     }
   };
 
+
   const formatDateForDisplay = (dateString: string | undefined): Date | undefined => {
     if (!dateString) return undefined;
-    return dayjs(dateString).toDate();
+    
+    // Parse both ISO format and simple YYYY-MM-DD format
+    return dayjs(dateString).isValid() 
+      ? dayjs(dateString).toDate()
+      : undefined;
   };
 
   return (

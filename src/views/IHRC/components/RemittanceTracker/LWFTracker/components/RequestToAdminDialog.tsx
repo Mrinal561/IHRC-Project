@@ -12,7 +12,7 @@ interface LWFTrackerDatas {
     delay_in_days?: string;
     delay_reason?: string;
     difference_reason?: string;
-    payment_date?: string;
+    payment_date?: string | null;
   }
 
 interface RequestToAdminDialogProps {
@@ -42,7 +42,9 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
         total_paid_amt: trackerData. total_paid_amt,
         delay_reason: trackerData. delay_reason,
         difference_reason: trackerData. difference_reason,
-        payment_date: trackerData. payment_date,
+        payment_date: trackerData.payment_date 
+               ? dayjs(trackerData.payment_date).toISOString() 
+               : '',
         
       });
       setReason('');
@@ -63,12 +65,13 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
       }));
     };
 
-      const handleDateChange = (field: string, date: Date | null) => {
-        if (date) {
-          const formattedDate = dayjs(date).format('YYYY-MM-DD');
-          handleChange(field, formattedDate);
-        }
-      };
+  const handleDateChange = (field: string, date: Date | null) => {
+    if (date) {
+      // Convert to ISO string (includes timezone info)
+      const isoDate = dayjs(date).toISOString();
+      handleChange(field, isoDate);
+    }
+  };
 
 
   const handleSubmit = () => {
@@ -103,11 +106,15 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
     onConfirm(reason, changedFields);
   };
 
+
   const formatDateForDisplay = (dateString: string | undefined): Date | undefined => {
     if (!dateString) return undefined;
-    return dayjs(dateString).toDate();
+    
+    // Parse both ISO format and simple YYYY-MM-DD format
+    return dayjs(dateString).isValid() 
+      ? dayjs(dateString).toDate()
+      : undefined;
   };
-
   
   return (
     <Dialog

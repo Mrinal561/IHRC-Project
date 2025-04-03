@@ -9,7 +9,7 @@ interface PTECChallanData {
   receipt_no?: string;
   total_paid_amt?: number;
   total_challan_amt?: number;
-  payment_date?: string;
+  payment_date?: string | null;
   delay_reason?: string;
   difference_reason?: string;
 }
@@ -40,7 +40,9 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
         receipt_no: trackerData.receipt_no || '',
         total_paid_amt: trackerData.total_paid_amt || 0,
         total_challan_amt: trackerData.total_challan_amt || 0,
-        payment_date: trackerData.payment_date || '',
+        payment_date: trackerData.payment_date 
+                ? dayjs(trackerData.payment_date).toISOString() 
+                : '',
         delay_reason: trackerData.delay_reason || '',
         difference_reason: trackerData.difference_reason || ''
       });
@@ -64,8 +66,9 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
 
   const handleDateChange = (field: string, date: Date | null) => {
     if (date) {
-      const formattedDate = dayjs(date).format('YYYY-MM-DD');
-      handleChange(field, formattedDate);
+      // Convert to ISO string (includes timezone info)
+      const isoDate = dayjs(date).toISOString();
+      handleChange(field, isoDate);
     }
   };
 
@@ -115,7 +118,11 @@ const RequestToAdminDialog: React.FC<RequestToAdminDialogProps> = ({
 
   const formatDateForDisplay = (dateString: string | undefined): Date | undefined => {
     if (!dateString) return undefined;
-    return dayjs(dateString).toDate();
+    
+    // Parse both ISO format and simple YYYY-MM-DD format
+    return dayjs(dateString).isValid() 
+      ? dayjs(dateString).toDate()
+      : undefined;
   };
 
   return (
