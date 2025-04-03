@@ -68,96 +68,96 @@ const RecommendedList = () => {
     const [permissionCheckComplete, setPermissionCheckComplete] = useState(false)
 
     //permission check section 
-    useEffect(() => {
-        const initializeAuth = async () => {
-            try {
-                const response = await dispatch(fetchAuthUser())
+    // useEffect(() => {
+    //     const initializeAuth = async () => {
+    //         try {
+    //             const response = await dispatch(fetchAuthUser())
 
-                if (!response.payload?.moduleAccess) {
-                    toast.push(
-                        <Notification
-                            title="Permission"
-                            type="danger"
-                        >
-                            You don't have access to any modules
-                        </Notification>
-                    )
-                    navigate('/home')
-                    setPermissionCheckComplete(true)
-                    setIsInitialized(true)
-                    return
-                }
+    //             if (!response.payload?.moduleAccess) {
+    //                 toast.push(
+    //                     <Notification
+    //                         title="Permission"
+    //                         type="danger"
+    //                     >
+    //                         You don't have access to any modules
+    //                     </Notification>
+    //                 )
+    //                 navigate('/home')
+    //                 setPermissionCheckComplete(true)
+    //                 setIsInitialized(true)
+    //                 return
+    //             }
                 
-                // Find Remittance Tracker module
-                const remittanceModule = response.payload.moduleAccess?.find(
-                    (module: any) => module.id === 2
-                )
+    //             // Find Remittance Tracker module
+    //             const remittanceModule = response.payload.moduleAccess?.find(
+    //                 (module: any) => module.id === 2
+    //             )
                 
-                if (!remittanceModule) {
-                    toast.push(
-                        <Notification
-                            title="Permission"
-                            type="danger"
-                        >
-                            You don't have access to this module
-                        </Notification>
-                    )
-                    navigate('/home')
-                    setPermissionCheckComplete(true)
-                    setIsInitialized(true)
-                    return
-                }
+    //             if (!remittanceModule) {
+    //                 toast.push(
+    //                     <Notification
+    //                         title="Permission"
+    //                         type="danger"
+    //                     >
+    //                         You don't have access to this module
+    //                     </Notification>
+    //                 )
+    //                 navigate('/home')
+    //                 setPermissionCheckComplete(true)
+    //                 setIsInitialized(true)
+    //                 return
+    //             }
 
-                // Find PF Tracker menu item
-                const recommendedMenu = remittanceModule.menus?.find(
-                    (menu: any) => menu.id === 9
-                )
+    //             // Find PF Tracker menu item
+    //             const recommendedMenu = remittanceModule.menus?.find(
+    //                 (menu: any) => menu.id === 9
+    //             )
 
-                if (!recommendedMenu) {
-                    toast.push(
-                        <Notification
-                            title="Permission"
-                            type="danger"
-                        >
-                            You don't have access to this menu
-                        </Notification>
-                    )
-                    navigate('/home')
-                    setPermissionCheckComplete(true)
-                    setIsInitialized(true)
-                    return
-                }
+    //             if (!recommendedMenu) {
+    //                 toast.push(
+    //                     <Notification
+    //                         title="Permission"
+    //                         type="danger"
+    //                     >
+    //                         You don't have access to this menu
+    //                     </Notification>
+    //                 )
+    //                 navigate('/home')
+    //                 setPermissionCheckComplete(true)
+    //                 setIsInitialized(true)
+    //                 return
+    //             }
 
-                // Get and set permissions only once
-                const newPermissions = getPermissions(recommendedMenu)
-                setPermissions(newPermissions)
-                setIsInitialized(true)
+    //             // Get and set permissions only once
+    //             const newPermissions = getPermissions(recommendedMenu)
+    //             setPermissions(newPermissions)
+    //             setIsInitialized(true)
                 
-                // If no list permission, show notification and redirect
-                if (!newPermissions.canList) {
-                    toast.push(
-                        <Notification
-                            title="Permission"
-                            type="danger"
-                        >
-                            You don't have permission of Recommended List
-                        </Notification>
-                    )
-                    navigate('/home')
-                }
-                setPermissionCheckComplete(true)
+    //             // If no list permission, show notification and redirect
+    //             if (!newPermissions.canList) {
+    //                 toast.push(
+    //                     <Notification
+    //                         title="Permission"
+    //                         type="danger"
+    //                     >
+    //                         You don't have permission of Recommended List
+    //                     </Notification>
+    //                 )
+    //                 navigate('/home')
+    //             }
+    //             setPermissionCheckComplete(true)
 
-            } catch (error) {
-                console.error('Error fetching auth user:', error)
-                setIsInitialized(true)
-                setPermissionCheckComplete(true)
-            }
-        }
+    //         } catch (error) {
+    //             console.error('Error fetching auth user:', error)
+    //             setIsInitialized(true)
+    //             setPermissionCheckComplete(true)
+    //         }
+    //     }
 
-        if (!isInitialized) {
-            initializeAuth()
-        }
-    }, [dispatch, isInitialized, navigate])
+    //     if (!isInitialized) {
+    //         initializeAuth()
+    //     }
+    // }, [dispatch, isInitialized, navigate])
 
 
 
@@ -242,18 +242,18 @@ const RecommendedList = () => {
     }, [selectedState, selectedCompanyGroup, selectedCompany]);
 
     
-    if (!isInitialized || !permissionCheckComplete) {
-        return (
-            <Loading loading={true} type="default">
-                <div className="h-full" />
-            </Loading>
-        )
-    }
+    // if (!isInitialized || !permissionCheckComplete) {
+    //     return (
+    //         <Loading loading={true} type="default">
+    //             <div className="h-full" />
+    //         </Loading>
+    //     )
+    // }
 
-    // Only render if we have list permission
-    if (!permissions.canList) {
-        return null
-    }
+    // // Only render if we have list permission
+    // if (!permissions.canList) {
+    //     return null
+    // }
 
 
     return (

@@ -108,9 +108,237 @@ interface ComplianceDetailTableProps {
     onPageSizeChange: (pageSize: number) => void
     canCreate: boolean
 }
-
+const dummyDueComplianceData: DueComplianceDetailData[] = [
+    {
+      id: 1,
+      uuid: 'comp-001',
+      ac_compliance_id: 101,
+      proof_document: 'https://example.com/proof1.pdf',
+      status: 'pending',
+      compliance_detail: {
+        id: 101,
+        uuid: 'detail-001',
+        legislation: 'Environmental Protection Act 2020',
+        category: 'Environmental',
+        penalty_type: 'Monetary Fine',
+        default_due_date: {
+          first_date: '2023-12-31',
+          last_date: '2023-12-31'
+        },
+        scheduled_frequency: 'yearly',
+        proof_mandatory: true,
+        header: 'Annual Environmental Compliance Report',
+        description: 'Submission of annual environmental impact assessment report',
+        penalty_description: 'Fine up to $50,000 for non-compliance',
+        applicability: 'All manufacturing units',
+        bare_act_text: 'Section 12(3) of the Environmental Protection Act',
+        type: 'Annual Filing',
+        clause: '12.3',
+        frequency: 'Annual',
+        statutory_auth: 'Ministry of Environment',
+        approval_required: true,
+        criticality: 'high',
+        created_type: 'system',
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+      },
+      upload_date: '2023-12-15',
+      first_due_date: '2023-12-31',
+      due_date: '2023-12-31',
+      data_status: 'pending',
+      uploaded_by: 201,
+      approved_by: 301,
+      created_by: 1,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-12-15T00:00:00Z',
+      UploadBy: {
+        id: 201,
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john.doe@example.com',
+        mobile: 9876543210
+      },
+      ApprovedBy: {
+        id: 301,
+        name: 'Jane Smith'
+      },
+      AssignedComplianceRemark: [
+        {
+          id: 1,
+          remark: 'Initial submission pending review',
+          created_by: 1,
+          created_at: '2023-12-01T00:00:00Z',
+          updated_at: '2023-12-01T00:00:00Z'
+        }
+      ]
+    },
+    {
+      id: 2,
+      uuid: 'comp-002',
+      ac_compliance_id: 102,
+      proof_document: null,
+      status: 'due',
+      compliance_detail: {
+        id: 102,
+        uuid: 'detail-002',
+        legislation: 'Labor Standards Act',
+        category: 'Employment',
+        penalty_type: 'Administrative Penalty',
+        default_due_date: {
+          first_date: '2023-06-30',
+          last_date: '2023-06-30'
+        },
+        scheduled_frequency: 'quarterly',
+        proof_mandatory: false,
+        header: 'Quarterly Employee Benefits Report',
+        description: 'Submission of quarterly report on employee benefits',
+        penalty_description: 'Warning for first offense, fine thereafter',
+        applicability: 'All full-time employees',
+        bare_act_text: 'Section 8(2) of the Labor Standards Act',
+        type: 'Quarterly Filing',
+        clause: '8.2',
+        frequency: 'Quarterly',
+        statutory_auth: 'Ministry of Labor',
+        approval_required: false,
+        criticality: 'medium',
+        created_type: 'system',
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+      },
+      upload_date: null,
+      first_due_date: '2023-06-30',
+      due_date: '2023-06-30',
+      data_status: 'due',
+      uploaded_by: null,
+      approved_by: null,
+      created_by: 1,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z',
+      UploadBy: null,
+      ApprovedBy: null,
+      AssignedComplianceRemark: []
+    },
+    {
+      id: 3,
+      uuid: 'comp-003',
+      ac_compliance_id: 103,
+      proof_document: 'https://example.com/proof3.pdf',
+      status: 'completed',
+      compliance_detail: {
+        id: 103,
+        uuid: 'detail-003',
+        legislation: 'Financial Regulations Act',
+        category: 'Financial',
+        penalty_type: 'Monetary Fine',
+        default_due_date: {
+          first_date: '2023-03-31',
+          last_date: '2023-03-31'
+        },
+        scheduled_frequency: 'monthly',
+        proof_mandatory: true,
+        header: 'Monthly Financial Disclosure',
+        description: 'Submission of monthly financial statements',
+        penalty_description: 'Fine up to $10,000 per day of delay',
+        applicability: 'All financial transactions',
+        bare_act_text: 'Section 5(1) of the Financial Regulations Act',
+        type: 'Monthly Filing',
+        clause: '5.1',
+        frequency: 'Monthly',
+        statutory_auth: 'Financial Regulatory Authority',
+        approval_required: true,
+        criticality: 'high',
+        created_type: 'system',
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+      },
+      upload_date: '2023-03-25',
+      first_due_date: '2023-03-31',
+      due_date: '2023-03-31',
+      data_status: 'completed',
+      uploaded_by: 202,
+      approved_by: 302,
+      created_by: 1,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-03-25T00:00:00Z',
+      UploadBy: {
+        id: 202,
+        first_name: 'Robert',
+        last_name: 'Johnson',
+        email: 'robert.j@example.com',
+        mobile: 9876543211
+      },
+      ApprovedBy: {
+        id: 302,
+        name: 'Emily Davis'
+      },
+      AssignedComplianceRemark: [
+        {
+          id: 2,
+          remark: 'Submitted on time',
+          created_by: 1,
+          created_at: '2023-03-25T00:00:00Z',
+          updated_at: '2023-03-25T00:00:00Z'
+        }
+      ]
+    },
+    {
+      id: 4,
+      uuid: 'comp-004',
+      ac_compliance_id: 104,
+      proof_document: null,
+      status: 'overdue',
+      compliance_detail: {
+        id: 104,
+        uuid: 'detail-004',
+        legislation: 'Health and Safety Regulations',
+        category: 'Safety',
+        penalty_type: 'Both Fine and Penalty',
+        default_due_date: {
+          first_date: '2023-01-15',
+          last_date: '2023-01-15'
+        },
+        scheduled_frequency: 'half_yearly',
+        proof_mandatory: false,
+        header: 'Bi-annual Safety Audit',
+        description: 'Submission of workplace safety audit report',
+        penalty_description: 'Fine up to $25,000 and possible shutdown',
+        applicability: 'All work locations',
+        bare_act_text: 'Section 7(4) of the Health and Safety Regulations',
+        type: 'Bi-annual Filing',
+        clause: '7.4',
+        frequency: 'Half-yearly',
+        statutory_auth: 'Department of Workplace Safety',
+        approval_required: false,
+        criticality: 'medium',
+        created_type: 'system',
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+      },
+      upload_date: null,
+      first_due_date: '2023-01-15',
+      due_date: '2023-01-15',
+      data_status: 'overdue',
+      uploaded_by: null,
+      approved_by: null,
+      created_by: 1,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z',
+      UploadBy: null,
+      ApprovedBy: null,
+      AssignedComplianceRemark: [
+        {
+          id: 3,
+          remark: 'Overdue - reminder sent',
+          created_by: 1,
+          created_at: '2023-01-20T00:00:00Z',
+          updated_at: '2023-01-20T00:00:00Z'
+        }
+      ]
+    }
+  ];
+  
 const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
-    data,
+    data = dummyDueComplianceData,
     loading,
     onViewDetail,
     onUpdateStatus,
@@ -348,7 +576,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 className="hover:bg-transparent"
               />
             </Tooltip> */}
-                        {canCreate && (
+                        {/* {canCreate && ( */}
                             <Tooltip title="Update Status" placement="top">
                                 <Button
                                     size="sm"
@@ -359,8 +587,8 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                                     className="hover:bg-transparent"
                                 />
                             </Tooltip>
-                        )}
-                        {row.original.proof_document && (
+                        {/* )} */}
+                        {/* {row.original.proof_document && (
                             <Tooltip title="Download Proof" placement="top">
                                 <Button
                                     size="sm"
@@ -374,7 +602,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                                     className="hover:bg-transparent"
                                 />
                             </Tooltip>
-                        )}
+                        )} */}
                     </div>
                 ),
             },

@@ -5,7 +5,7 @@ import { toast } from '@/components/ui';
 import { Notification } from '@/components/ui';
 import AdaptableCard from '@/components/shared/AdaptableCard';
 import DueComplianceTableTool from './components/DueComplianceTableTool';
-import DueComplianceTable from './components/DueComplianceTable';
+import DueComplianceTable, { DueComplianceDetailData } from './components/DueComplianceTable';
 import { endpoints } from '@/api/endpoint';
 import httpClient from '@/api/http-client';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +30,238 @@ interface Permissions {
     }
   }
 
+
+  const dummyDueComplianceData: DueComplianceDetailData[] = [
+      {
+        id: 1,
+        uuid: 'comp-001',
+        ac_compliance_id: 101,
+        proof_document: 'https://example.com/proof1.pdf',
+        status: 'pending',
+        compliance_detail: {
+          id: 101,
+          uuid: 'detail-001',
+          legislation: 'Environmental Protection Act 2020',
+          category: 'Environmental',
+          penalty_type: 'Monetary Fine',
+          default_due_date: {
+            first_date: '2023-12-31',
+            last_date: '2023-12-31'
+          },
+          scheduled_frequency: 'yearly',
+          proof_mandatory: true,
+          header: 'Annual Environmental Compliance Report',
+          description: 'Submission of annual environmental impact assessment report',
+          penalty_description: 'Fine up to $50,000 for non-compliance',
+          applicability: 'All manufacturing units',
+          bare_act_text: 'Section 12(3) of the Environmental Protection Act',
+          type: 'Annual Filing',
+          clause: '12.3',
+          frequency: 'Annual',
+          statutory_auth: 'Ministry of Environment',
+          approval_required: true,
+          criticality: 'high',
+          created_type: 'system',
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-01-01T00:00:00Z',
+        },
+        upload_date: '2023-12-15',
+        first_due_date: '2023-12-31',
+        due_date: '2023-12-31',
+        data_status: 'pending',
+        uploaded_by: 201,
+        approved_by: 301,
+        created_by: 1,
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-12-15T00:00:00Z',
+        UploadBy: {
+          id: 201,
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'john.doe@example.com',
+          mobile: 9876543210
+        },
+        ApprovedBy: {
+          id: 301,
+          name: 'Jane Smith'
+        },
+        AssignedComplianceRemark: [
+          {
+            id: 1,
+            remark: 'Initial submission pending review',
+            created_by: 1,
+            created_at: '2023-12-01T00:00:00Z',
+            updated_at: '2023-12-01T00:00:00Z'
+          }
+        ]
+      },
+      {
+        id: 2,
+        uuid: 'comp-002',
+        ac_compliance_id: 102,
+        proof_document: null,
+        status: 'due',
+        compliance_detail: {
+          id: 102,
+          uuid: 'detail-002',
+          legislation: 'Labor Standards Act',
+          category: 'Employment',
+          penalty_type: 'Administrative Penalty',
+          default_due_date: {
+            first_date: '2023-06-30',
+            last_date: '2023-06-30'
+          },
+          scheduled_frequency: 'quarterly',
+          proof_mandatory: false,
+          header: 'Quarterly Employee Benefits Report',
+          description: 'Submission of quarterly report on employee benefits',
+          penalty_description: 'Warning for first offense, fine thereafter',
+          applicability: 'All full-time employees',
+          bare_act_text: 'Section 8(2) of the Labor Standards Act',
+          type: 'Quarterly Filing',
+          clause: '8.2',
+          frequency: 'Quarterly',
+          statutory_auth: 'Ministry of Labor',
+          approval_required: false,
+          criticality: 'medium',
+          created_type: 'system',
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-01-01T00:00:00Z',
+        },
+        upload_date: null,
+        first_due_date: '2023-06-30',
+        due_date: '2023-06-30',
+        data_status: 'due',
+        uploaded_by: null,
+        approved_by: null,
+        created_by: 1,
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+        UploadBy: null,
+        ApprovedBy: null,
+        AssignedComplianceRemark: []
+      },
+      {
+        id: 3,
+        uuid: 'comp-003',
+        ac_compliance_id: 103,
+        proof_document: 'https://example.com/proof3.pdf',
+        status: 'completed',
+        compliance_detail: {
+          id: 103,
+          uuid: 'detail-003',
+          legislation: 'Financial Regulations Act',
+          category: 'Financial',
+          penalty_type: 'Monetary Fine',
+          default_due_date: {
+            first_date: '2023-03-31',
+            last_date: '2023-03-31'
+          },
+          scheduled_frequency: 'monthly',
+          proof_mandatory: true,
+          header: 'Monthly Financial Disclosure',
+          description: 'Submission of monthly financial statements',
+          penalty_description: 'Fine up to $10,000 per day of delay',
+          applicability: 'All financial transactions',
+          bare_act_text: 'Section 5(1) of the Financial Regulations Act',
+          type: 'Monthly Filing',
+          clause: '5.1',
+          frequency: 'Monthly',
+          statutory_auth: 'Financial Regulatory Authority',
+          approval_required: true,
+          criticality: 'high',
+          created_type: 'system',
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-01-01T00:00:00Z',
+        },
+        upload_date: '2023-03-25',
+        first_due_date: '2023-03-31',
+        due_date: '2023-03-31',
+        data_status: 'completed',
+        uploaded_by: 202,
+        approved_by: 302,
+        created_by: 1,
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-03-25T00:00:00Z',
+        UploadBy: {
+          id: 202,
+          first_name: 'Robert',
+          last_name: 'Johnson',
+          email: 'robert.j@example.com',
+          mobile: 9876543211
+        },
+        ApprovedBy: {
+          id: 302,
+          name: 'Emily Davis'
+        },
+        AssignedComplianceRemark: [
+          {
+            id: 2,
+            remark: 'Submitted on time',
+            created_by: 1,
+            created_at: '2023-03-25T00:00:00Z',
+            updated_at: '2023-03-25T00:00:00Z'
+          }
+        ]
+      },
+      {
+        id: 4,
+        uuid: 'comp-004',
+        ac_compliance_id: 104,
+        proof_document: null,
+        status: 'overdue',
+        compliance_detail: {
+          id: 104,
+          uuid: 'detail-004',
+          legislation: 'Health and Safety Regulations',
+          category: 'Safety',
+          penalty_type: 'Both Fine and Penalty',
+          default_due_date: {
+            first_date: '2023-01-15',
+            last_date: '2023-01-15'
+          },
+          scheduled_frequency: 'half_yearly',
+          proof_mandatory: false,
+          header: 'Bi-annual Safety Audit',
+          description: 'Submission of workplace safety audit report',
+          penalty_description: 'Fine up to $25,000 and possible shutdown',
+          applicability: 'All work locations',
+          bare_act_text: 'Section 7(4) of the Health and Safety Regulations',
+          type: 'Bi-annual Filing',
+          clause: '7.4',
+          frequency: 'Half-yearly',
+          statutory_auth: 'Department of Workplace Safety',
+          approval_required: false,
+          criticality: 'medium',
+          created_type: 'system',
+          created_at: '2023-01-01T00:00:00Z',
+          updated_at: '2023-01-01T00:00:00Z',
+        },
+        upload_date: null,
+        first_due_date: '2023-01-15',
+        due_date: '2023-01-15',
+        data_status: 'overdue',
+        uploaded_by: null,
+        approved_by: null,
+        created_by: 1,
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+        UploadBy: null,
+        ApprovedBy: null,
+        AssignedComplianceRemark: [
+          {
+            id: 3,
+            remark: 'Overdue - reminder sent',
+            created_by: 1,
+            created_at: '2023-01-20T00:00:00Z',
+            updated_at: '2023-01-20T00:00:00Z'
+          }
+        ]
+      }
+    ];
+
+
+    
 const DueCompliance = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch();
@@ -49,141 +281,141 @@ const DueCompliance = () => {
 const [isInitialized, setIsInitialized] = useState(false)
 const [permissionCheckComplete, setPermissionCheckComplete] = useState(false)
 
-useEffect(() => {
-    const initializeAuth = async () => {
-        try {
-            const response = await dispatch(fetchAuthUser())
+// useEffect(() => {
+//     const initializeAuth = async () => {
+//         try {
+//             const response = await dispatch(fetchAuthUser())
 
-            if (!response.payload?.moduleAccess) {
-                toast.push(
-                    <Notification
-                        title="Permission"
-                        type="danger"
-                    >
-                        You don't have access to any modules
-                    </Notification>
-                )
-                navigate('/home')
-                setPermissionCheckComplete(true)
-                setIsInitialized(true)
-                return
-            }
+//             if (!response.payload?.moduleAccess) {
+//                 toast.push(
+//                     <Notification
+//                         title="Permission"
+//                         type="danger"
+//                     >
+//                         You don't have access to any modules
+//                     </Notification>
+//                 )
+//                 navigate('/home')
+//                 setPermissionCheckComplete(true)
+//                 setIsInitialized(true)
+//                 return
+//             }
             
-            // Find Remittance Tracker module
-            const remittanceModule = response.payload.moduleAccess?.find(
-                (module: any) => module.id === 2
-            )
+//             // Find Remittance Tracker module
+//             const remittanceModule = response.payload.moduleAccess?.find(
+//                 (module: any) => module.id === 2
+//             )
             
-            if (!remittanceModule) {
-                toast.push(
-                    <Notification
-                        title="Permission"
-                        type="danger"
-                    >
-                        You don't have access to this module
-                    </Notification>
-                )
-                navigate('/home')
-                setPermissionCheckComplete(true)
-                setIsInitialized(true)
-                return
-            }
+//             if (!remittanceModule) {
+//                 toast.push(
+//                     <Notification
+//                         title="Permission"
+//                         type="danger"
+//                     >
+//                         You don't have access to this module
+//                     </Notification>
+//                 )
+//                 navigate('/home')
+//                 setPermissionCheckComplete(true)
+//                 setIsInitialized(true)
+//                 return
+//             }
 
-            // Find PF Tracker menu item
-            const recommendedMenu = remittanceModule.menus?.find(
-                (menu: any) => menu.id === 12
-            )
+//             // Find PF Tracker menu item
+//             const recommendedMenu = remittanceModule.menus?.find(
+//                 (menu: any) => menu.id === 12
+//             )
 
-            if (!recommendedMenu) {
-                toast.push(
-                    <Notification
-                        title="Permission"
-                        type="danger"
-                    >
-                        You don't have access to this menu
-                    </Notification>
-                )
-                navigate('/home')
-                setPermissionCheckComplete(true)
-                setIsInitialized(true)
-                return
-            }
+//             if (!recommendedMenu) {
+//                 toast.push(
+//                     <Notification
+//                         title="Permission"
+//                         type="danger"
+//                     >
+//                         You don't have access to this menu
+//                     </Notification>
+//                 )
+//                 navigate('/home')
+//                 setPermissionCheckComplete(true)
+//                 setIsInitialized(true)
+//                 return
+//             }
 
-            // Get and set permissions only once
-            const newPermissions = getPermissions(recommendedMenu)
-            setPermissions(newPermissions)
-            setIsInitialized(true)
+//             // Get and set permissions only once
+//             const newPermissions = getPermissions(recommendedMenu)
+//             setPermissions(newPermissions)
+//             setIsInitialized(true)
             
-            // If no list permission, show notification and redirect
-            if (!newPermissions.canList) {
-                toast.push(
-                    <Notification
-                        title="Permission"
-                        type="danger"
-                    >
-                        You don't have permission of Due List
-                    </Notification>
-                )
-                navigate('/home')
-            }
-            setPermissionCheckComplete(true)
+//             // If no list permission, show notification and redirect
+//             if (!newPermissions.canList) {
+//                 toast.push(
+//                     <Notification
+//                         title="Permission"
+//                         type="danger"
+//                     >
+//                         You don't have permission of Due List
+//                     </Notification>
+//                 )
+//                 navigate('/home')
+//             }
+//             setPermissionCheckComplete(true)
 
-        } catch (error) {
-            console.error('Error fetching auth user:', error)
-            setIsInitialized(true)
-            setPermissionCheckComplete(true)
-        }
-    }
+//         } catch (error) {
+//             console.error('Error fetching auth user:', error)
+//             setIsInitialized(true)
+//             setPermissionCheckComplete(true)
+//         }
+//     }
 
-    if (!isInitialized) {
-        initializeAuth()
-    }
-}, [dispatch, isInitialized, navigate])
-
-
+//     if (!isInitialized) {
+//         initializeAuth()
+//     }
+// }, [dispatch, isInitialized, navigate])
 
 
-    const fetchDueComplianceData = useCallback(async (page: number = 1, pageSize: number = 10) => {
-        console.log('Fetching due compliance data...');
+
+
+    // const fetchDueComplianceData = useCallback(async (page: number = 1, pageSize: number = 10) => {
+    //     console.log('Fetching due compliance data...');
         
-        setIsLoading(true);
-        try {
-            const response = await httpClient.get(endpoints.due.getAll(), {
-                params: {
-                    page,
-                    pageSize:pageSize,
-                    'data_status[]': ['due']
-                }
-            });
+    //     setIsLoading(true);
+    //     try {
+    //         const response = await httpClient.get(endpoints.due.getAll(), {
+    //             params: {
+    //                 page,
+    //                 pageSize:pageSize,
+    //                 'data_status[]': ['due']
+    //             }
+    //         });
 
-            if (response?.data?.data) {
-                console.log('API Response:', response.data);
-                console.log('Due compliance data received:', response.data.data);
-                setData(response.data.data);
-                 setPagination((prev) => ({...prev, total: response.data.paginate_data.totalResults }));
-            } else {
-                console.log('No data in API response or unexpected response structure');
-            }
-        } catch (error: any) {
-            console.error('Error fetching due compliance data:', error);
-            console.error('Error details:', {
-                message: error.message,
-                stack: error.stack
-            });
-            toast.push(
-                <Notification type="danger" title="Error">
-                    Failed to fetch due compliance data
-                </Notification>
-            );
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+    //         if (response?.data?.data) {
+    //             console.log('API Response:', response.data);
+    //             console.log('Due compliance data received:', response.data.data);
+    //             setData(response.data.data);
+    //              setPagination((prev) => ({...prev, total: response.data.paginate_data.totalResults }));
+    //         } else {
+    //             console.log('No data in API response or unexpected response structure');
+    //         }
+    //     } catch (error: any) {
+    //         console.error('Error fetching due compliance data:', error);
+    //         console.error('Error details:', {
+    //             message: error.message,
+    //             stack: error.stack
+    //         });
+    //         toast.push(
+    //             <Notification type="danger" title="Error">
+    //                 Failed to fetch due compliance data
+    //             </Notification>
+    //         );
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // }, []);
 
     useEffect(() => {
         console.log('Initial component mount - Fetching data...');
-        fetchDueComplianceData(pagination.pageIndex, pagination.pageSize);
-    }, [fetchDueComplianceData, pagination.pageIndex, pagination.pageSize]);
+        // fetchDueComplianceData(pagination.pageIndex, pagination.pageSize);
+    }, [, pagination.pageIndex, pagination.pageSize]);
 
     const handleUploadAll = (selectedComplianceIds, remark) => {
         console.log(`Uploading ${selectedComplianceIds.length} compliances with remark: ${remark}`);
@@ -207,18 +439,18 @@ useEffect(() => {
     setPagination((prev) => ({...prev, pageSize: newPageSize, pageIndex: 1 }));
   };
 
-  if (!isInitialized || !permissionCheckComplete) {
-    return (
-        <Loading loading={true} type="default">
-            <div className="h-full" />
-        </Loading>
-    )
-}
+//   if (!isInitialized || !permissionCheckComplete) {
+//     return (
+//         <Loading loading={true} type="default">
+//             <div className="h-full" />
+//         </Loading>
+//     )
+// }
 
-// Only render if we have list permission
-if (!permissions.canList) {
-    return null
-}
+// // Only render if we have list permission
+// if (!permissions.canList) {
+//     return null
+// }
 
     return (
         <AdaptableCard className="h-full" bodyClass="h-full">
@@ -232,11 +464,11 @@ if (!permissions.canList) {
                 </div>
             </div>
             <DueComplianceTable 
-                data={data} 
+                data={dummyDueComplianceData} 
                 loading={isLoading}
                 onUploadSingle={handleUploadSingle} 
                 onUpdateStatus={handleUpdateStatus} 
-                onDataUpdate={fetchDueComplianceData}
+                // onDataUpdate={fetchDueComplianceData}
                  pagination={pagination}
         onPaginationChange={handlePaginationChange}
         onPageSizeChange={handlePageSizeChange}

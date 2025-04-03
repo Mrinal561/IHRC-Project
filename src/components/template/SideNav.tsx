@@ -1261,11 +1261,11 @@ const adminnav: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
-    {
-        key: 'collapseMenu',
+     {
+        key: 'collapseMenu.collapse',
         path: '',
         title: 'Audit Checklist',
-        translateKey: 'nav.collapseMenu.collapseMenu',
+        translateKey: 'nav.collapseMenu.collapseMenu.collapse',
         icon: 'auditCollapse',
         type: NAV_ITEM_TYPE_COLLAPSE,
         authority: [],
@@ -1274,7 +1274,7 @@ const adminnav: NavigationTree[] = [
                 key: 'recommendedList.item1',
                 path: '/recommended-checklist',
                 title: 'Recommended Checklist',
-                translateKey: 'nav.collapseMenu.item1',
+                translateKey: 'nav.collapseMenu.collapse.item1',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
@@ -1284,7 +1284,7 @@ const adminnav: NavigationTree[] = [
                 key: 'assignChecklist.item3',
                 path: '/assigned-checklist',
                 title: 'Assigned Checklist',
-                translateKey: 'nav.collapseMenu.item3',
+                translateKey: 'nav.collapseMenu.collapse.item3',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
@@ -1294,7 +1294,7 @@ const adminnav: NavigationTree[] = [
                 key: 'customChecklist.item4',
                 path: '/custom-checklist',
                 title: 'Custom Checklist',
-                translateKey: 'nav.collapseMenu.item4',
+                translateKey: 'nav.collapseMenu.collapse.item4',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
@@ -1304,7 +1304,7 @@ const adminnav: NavigationTree[] = [
                 key: 'dueCompliance.item5',
                 path: '/due-compliance',
                 title: 'Due Compliances',
-                translateKey: 'nav.collapseMenu.item5',
+                translateKey: 'nav.collapseMenu.collapse.item5',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
@@ -1314,7 +1314,7 @@ const adminnav: NavigationTree[] = [
                 key: 'status.item6',
                 path: '/status',
                 title: 'Status',
-                translateKey: 'nav.collapseMenu.item6',
+                translateKey: 'nav.collapseMenu.collapse.item6',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
@@ -1324,7 +1324,7 @@ const adminnav: NavigationTree[] = [
                 key: 'complianceCertificate.item7',
                 path: '/compliance-certificate',
                 title: 'Compliance Certificate',
-                translateKey: 'nav.collapseMenu.item7',
+                translateKey: 'nav.collapseMenu.collapse.item7',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
@@ -1360,7 +1360,7 @@ const usernav: NavigationTree[] = [
         path: '/agreements',
         title: 'Agreement',
         translateKey: 'nav.agreement',
-        icon: 'agreement',
+        icon: 'remittanceCollapse',
         type: NAV_ITEM_TYPE_ITEM,
         authority: [],
         subMenu: [],
@@ -1441,7 +1441,17 @@ const usernav: NavigationTree[] = [
         path: '/notice-tracker',
         title: 'Notice Tracker',
         translateKey: 'nav.notice',
-        icon: 'notice',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
+    },
+    {
+        key: 'return',
+        path: '/return-tracker',
+        title: 'Return Tracker',
+        translateKey: 'nav.return',
+        icon: 'remittanceCollapse',
         type: NAV_ITEM_TYPE_ITEM,
         authority: [],
         subMenu: [],
@@ -1454,7 +1464,7 @@ const filterNavigation = (
     isAdmin: boolean = false
 ) => {
     // List of items that should always be visible regardless of moduleList
-    const alwaysVisibleItems = ['Dashboard', 'Audit Checklist'];
+    const alwaysVisibleItems = ['Dashboard'];
 
     const findMenuInModuleList = (
         title: string,
@@ -1515,7 +1525,58 @@ const filterNavigation = (
         return null;
     };
 
-    return navigation.filter((navItem) => {
+    // return navigation.filter((navItem) => {
+    //     // Allow always visible items
+    //     if (alwaysVisibleItems.includes(navItem.title)) {
+    //         return true;
+    //     }
+
+    //     // Special case for Global Settings (admin only)
+    //     if (navItem.key === 'groupMenu.collapse') {
+    //         return isAdmin;
+    //     }
+
+    //     // Find menu item in module list
+    //     const menuInfo = findMenuInModuleList(navItem.title, moduleList);
+        
+    //     // Handle items with submenus
+    //     if (navItem.subMenu && navItem.subMenu.length > 0) {
+    //         // For admin, recursively filter without permission check
+    //         if (isAdmin) {
+    //             const filteredSubMenu = filterNavigation(navItem.subMenu, moduleList, true);
+    //             navItem.subMenu = filteredSubMenu;
+    //             return filteredSubMenu.length > 0;
+    //         }
+
+    //         // For users, check permissions at each level
+    //         let filteredSubMenu;
+    //         if (menuInfo?.parentModule) {
+    //             // For menus like Remittance Tracker with direct submenus
+    //             filteredSubMenu = navItem.subMenu.filter(subItem => {
+    //                 const subMenuInfo = findNestedMenu(subItem.title, moduleList);
+    //                 return subMenuInfo?.access?.can_list === true;
+    //             });
+    //         } else {
+    //             // For deeply nested menus
+    //             filteredSubMenu = filterNavigation(navItem.subMenu, moduleList, false);
+    //         }
+
+    //         navItem.subMenu = filteredSubMenu;
+    //         return filteredSubMenu.length > 0;
+    //     }
+
+    //     // For regular menu items
+    //     if (!menuInfo) return false;
+
+    //     // For admin, only check if menu exists
+    //     if (isAdmin) {
+    //         return true;
+    //     }
+
+    //     // For users, check can_list permission
+    //     return menuInfo.access?.can_list === true;
+    // });
+    const filteredNav = navigation.filter((navItem) => {
         // Allow always visible items
         if (alwaysVisibleItems.includes(navItem.title)) {
             return true;
@@ -1566,6 +1627,100 @@ const filterNavigation = (
         // For users, check can_list permission
         return menuInfo.access?.can_list === true;
     });
+
+    // Ensure "Return Tracker" is always shown after "Notice Tracker"
+    const noticeTrackerIndex = filteredNav.findIndex(item => item.key === 'notice');
+    if (noticeTrackerIndex !== -1) {
+        const returnTrackerItem = {
+                key: 'collapseMenu.collapse',
+                path: '',
+                title: 'Audit Checklist',
+                translateKey: 'nav.collapseMenu.collapseMenu.collapse',
+                icon: 'auditCollapse',
+                type: NAV_ITEM_TYPE_COLLAPSE,
+                authority: [],
+                subMenu: [
+                    {
+                        key: 'recommendedList.item1',
+                        path: '/recommended-checklist',
+                        title: 'Recommended Checklist',
+                        translateKey: 'nav.collapseMenu.collapse.item1',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'assignChecklist.item3',
+                        path: '/assigned-checklist',
+                        title: 'Assigned Checklist',
+                        translateKey: 'nav.collapseMenu.collapse.item3',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'customChecklist.item4',
+                        path: '/custom-checklist',
+                        title: 'Custom Checklist',
+                        translateKey: 'nav.collapseMenu.collapse.item4',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'dueCompliance.item5',
+                        path: '/due-compliance',
+                        title: 'Due Compliances',
+                        translateKey: 'nav.collapseMenu.collapse.item5',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'status.item6',
+                        path: '/status',
+                        title: 'Status',
+                        translateKey: 'nav.collapseMenu.collapse.item6',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'complianceCertificate.item7',
+                        path: '/compliance-certificate',
+                        title: 'Compliance Certificate',
+                        translateKey: 'nav.collapseMenu.collapse.item7',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'history.item8',
+                        path: '/history',
+                        title: 'History',
+                        translateKey: 'nav.collapseMenu.item8',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                ],
+        };
+
+        // Insert "Return Tracker" after "Notice Tracker"
+        filteredNav.splice(noticeTrackerIndex + 1, 0, returnTrackerItem);
+    }
+
+    return filteredNav;
+
+
+
 };
 
 const SideNav = () => {
