@@ -34,6 +34,28 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+    {
+        key: 'nav.committee',
+        path: '/committee',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/POSH/components/Committee'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'addCommittee',
+        path: '/add-committee',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/POSH/components/AddComittee'
+                ),
+        ),
+        authority: [],
+    },
     // {
     //     key: 'Reset Password',
     //     path: '/reset-password',

@@ -1261,87 +1261,7 @@ const adminnav: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
-     {
-        key: 'collapseMenu.collapse',
-        path: '',
-        title: 'Audit Checklist',
-        translateKey: 'nav.collapseMenu.collapseMenu.collapse',
-        icon: 'auditCollapse',
-        type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: [],
-        subMenu: [
-            {
-                key: 'recommendedList.item1',
-                path: '/recommended-checklist',
-                title: 'Recommended Checklist',
-                translateKey: 'nav.collapseMenu.collapse.item1',
-                icon: '',
-                type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
-                subMenu: [],
-            },
-            {
-                key: 'assignChecklist.item3',
-                path: '/assigned-checklist',
-                title: 'Assigned Checklist',
-                translateKey: 'nav.collapseMenu.collapse.item3',
-                icon: '',
-                type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
-                subMenu: [],
-            },
-            {
-                key: 'customChecklist.item4',
-                path: '/custom-checklist',
-                title: 'Custom Checklist',
-                translateKey: 'nav.collapseMenu.collapse.item4',
-                icon: '',
-                type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
-                subMenu: [],
-            },
-            {
-                key: 'dueCompliance.item5',
-                path: '/due-compliance',
-                title: 'Due Compliances',
-                translateKey: 'nav.collapseMenu.collapse.item5',
-                icon: '',
-                type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
-                subMenu: [],
-            },
-            {
-                key: 'status.item6',
-                path: '/status',
-                title: 'Status',
-                translateKey: 'nav.collapseMenu.collapse.item6',
-                icon: '',
-                type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
-                subMenu: [],
-            },
-            {
-                key: 'complianceCertificate.item7',
-                path: '/compliance-certificate',
-                title: 'Compliance Certificate',
-                translateKey: 'nav.collapseMenu.collapse.item7',
-                icon: '',
-                type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
-                subMenu: [],
-            },
-            {
-                key: 'history.item8',
-                path: '/history',
-                title: 'History',
-                translateKey: 'nav.collapseMenu.item8',
-                icon: '',
-                type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
-                subMenu: [],
-            },
-        ],
-    },
+   
 ];
 
 const usernav: NavigationTree[] = [
@@ -1446,16 +1366,7 @@ const usernav: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
-    {
-        key: 'posh',
-                path: '/posh',
-                title: 'POSH',
-                translateKey: 'nav.posh',
-                icon: 'auditCollapse',
-                type: NAV_ITEM_TYPE_COLLAPSE,
-                authority: [],
-                subMenu: [],
-    },
+  
 ];
 
 const filterNavigation = (
@@ -1632,14 +1543,35 @@ const filterNavigation = (
     const noticeTrackerIndex = filteredNav.findIndex(item => item.key === 'notice');
     if (noticeTrackerIndex !== -1) {
         const returnTrackerItem = {
-                key: 'psoh',
-                path: '/posh',
+                key: 'posh.collapse',
+                path: '/poshTracker',
                 title: 'POSH',
-                translateKey: 'nav.posh',
-                icon: 'auditCollapse',
+                translateKey: 'nav.poshTracker.collapse.collapse',
+                icon: 'remittanceCollapse',
                 type: NAV_ITEM_TYPE_COLLAPSE,
                 authority: [],
-                subMenu: [],
+                subMenu: [
+                    {
+                        key: 'poshTracker.collapse.item1',
+                        path: '/posh',
+                        title: 'POSH Return',
+                        translateKey: 'nav.poshTracker.collapse.item1',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'poshTracker.collapse.item2',
+                        path: '/committee',
+                        title: 'Committee',
+                        translateKey: 'nav.poshTracker.collapse.item2',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                ]
         };
 
         // Insert "Return Tracker" after "Notice Tracker"
