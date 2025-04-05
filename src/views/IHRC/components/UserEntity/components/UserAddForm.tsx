@@ -146,7 +146,7 @@ const UserAddForm = () => {
     const loadBranches = async (companyId: string) => {
         try {
             console.log('Loading branches for company:', companyId)
-            const { data } = await httpClient.get(endpoints.branch.getAll(), {
+            const { data } = await httpClient.get(endpoints.branch.getAllBranch(), {
                 params: {
                     'company_id[]': companyId
                 }

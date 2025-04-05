@@ -126,7 +126,7 @@ const NoticeFormPage = ({ onSuccess }) => {
 
     const loadBranches = async (companyId: string) => {
         try {
-            const { data } = await httpClient.get(endpoints.branch.getAll(), {
+            const { data } = await httpClient.get(endpoints.branch.getAllBranch(), {
                 params: { 'company_id[]': companyId }
             })
             const formattedBranches = data?.data?.map((branch: any) => ({
