@@ -342,14 +342,8 @@ const PFEditPage: React.FC = () => {
         setIsSubmitted(true)
         const isValid = await validateForm()
 
-        if (!isValid) {
-            toast.push(
-                <Notification title="Validation Error" type="danger">
-                    Please fix the highlighted errors to continue
-                </Notification>,
-            )
-            return
-        }
+            if (!isValid) return
+        
 
         // Format the signatory data
         const formattedSignatoryData = pfSetupData.signatory_data.map(

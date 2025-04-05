@@ -328,14 +328,7 @@ const PFSetupPage: React.FC = () => {
         setIsSubmitted(true)
         const isValid = await validateForm()
 
-        if (!isValid) {
-            toast.push(
-                <Notification title="Validation Error" type="danger">
-                    Please fix the highlighted errors to continue
-                </Notification>,
-            )
-            return
-        }
+        if (!isValid) return
         const formData = {
             ...pfSetupData,
             register_date: pfSetupData.register_date?.toISOString() || '',
