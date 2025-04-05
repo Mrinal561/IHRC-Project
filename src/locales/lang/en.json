@@ -3,9 +3,8 @@
         "home": "Dashboard",
         "collapseMenu": {
             "collapseMenu": "Audit Checklist",
-            "item1": "Recommended Checklist",
+            "item1": "Compliance",
             "item2": "Compliance Details",
-            "item3": "Assigned Checklist",
             "item4": "Custom Checklist",
             "item5": "Due Compliance",
             "item6": "Status",

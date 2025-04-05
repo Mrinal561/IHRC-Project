@@ -245,14 +245,16 @@ const CustomChecklistTable = () => {
     const columns: ColumnDef<ComplianceData>[] = useMemo(
         () => [
             {
-                header: 'Compliance ID',
+                header: 'Compliance ID',                enableSorting: false,
+
                 accessorKey: 'Compliance_ID',
                 cell: (props) => (
                   <div className="w-10 text-start">{props.getValue()}</div>
                 ),
               },
               {
-                header: 'Legislation',
+                header: 'Legislation',                enableSorting: false,
+
                 accessorKey: 'Legislation',
                 cell: (props) => {
                   const value = props.getValue() as string;
@@ -264,7 +266,8 @@ const CustomChecklistTable = () => {
                 },
               },
               {
-                header: 'Criticality',
+                header: 'Criticality',                enableSorting: false,
+
                 accessorKey: 'Criticality',
                 cell: (props) => {
                     const criticality = props.getValue(); // Get the value once
@@ -284,7 +287,8 @@ const CustomChecklistTable = () => {
             },
             
               {
-                header: 'Location',
+                header: 'Location',                enableSorting: false,
+
                 accessorKey: 'Location',
                 cell: (props) => {
                   const value = props.getValue() as string;
@@ -296,7 +300,8 @@ const CustomChecklistTable = () => {
                 },
               },
               {
-                header: 'Header',
+                header: 'Header',                enableSorting: false,
+
                 accessorKey: 'Compliance_Header',
                 cell: (props) => {
                   const value = props.getValue() as string;
@@ -308,7 +313,8 @@ const CustomChecklistTable = () => {
                 },
               },
             {
-                header: 'Description',
+                header: 'Description',                enableSorting: false,
+
                 accessorKey: 'Compliance_Description',
                 cell: (props) => {
                     const value = props.getValue() as string;
@@ -320,7 +326,8 @@ const CustomChecklistTable = () => {
                 },
             },
             {
-                header: 'Status',
+                header: 'Status',                enableSorting: false,
+
                 accessorKey: 'Status',
                 cell: (props) => {
                     const criticality = props.getValue(); // Get the value once

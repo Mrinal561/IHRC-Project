@@ -471,14 +471,16 @@ const HistoryPageTable: React.FC = () => {
 
     const columns: ColumnDef<ComplianceData>[] = [
         {
-            header: 'Instance ID',
+            header: 'Instance ID',                enableSorting: false,
+
             accessorKey: 'record_id',
             cell: (props) => (
                 <div className="w-40 text-start">{props.getValue()}</div>
             ),
         },
         {
-            header: 'Legislation',
+            header: 'Legislation',                enableSorting: false,
+
             accessorKey: 'compliance_detail.legislation',
             cell: (props) => {
                 const value = props.getValue() as string
@@ -490,7 +492,8 @@ const HistoryPageTable: React.FC = () => {
             },
         },
         {
-            header: 'Header',
+            header: 'Header',                enableSorting: false,
+
             accessorKey: 'compliance_detail.header',
             cell: (props) => {
                 const value = props.getValue() as string
@@ -502,7 +505,8 @@ const HistoryPageTable: React.FC = () => {
             },
         },
         {
-            header: 'Compliance Status',
+            header: 'Compliance Status',                enableSorting: false,
+
             accessorKey: 'data_status',
             cell: (props) => {
                 const criticality = props.getValue()

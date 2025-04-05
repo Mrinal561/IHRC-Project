@@ -12,8 +12,9 @@ const CustomChecklistTool = () => {
         <div className="flex flex-col lg:flex-row lg:items-center gap-3">
             <CustomTableSearch />
             {/* <Company /> */}
+            <Button size='sm' icon={<HiDownload />} variant='solid'>Download </Button>
             <BulkUpload />
-            <div className="block lg:inline-block md:mb-0 mb-4 ml-2">
+            <div className="block lg:inline-block md:mb-0 mb-4">
                 <CustomChecklistButton />
             </div>
         </div>

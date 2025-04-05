@@ -11,7 +11,7 @@ import {
 } from '@/components/ui'
 import { RiEyeLine } from 'react-icons/ri'
 import { MdEdit } from 'react-icons/md'
-import { HiDocumentDownload } from 'react-icons/hi'
+import { HiDocumentDownload, HiUpload } from 'react-icons/hi'
 import OutlinedSelect from '@/components/ui/Outlined'
 import { updateStatus } from '@/store/slices/dueCompliance/statusUpdateSlice'
 import { useDispatch } from 'react-redux'
@@ -478,27 +478,27 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     const columns: ColumnDef<DueComplianceDetailData>[] = useMemo(
         () => [
             {
-                header: 'Compliance ID',
-                accessorKey: 'compliance_detail.record_id',
+                header: 'Compliance ID', enableSorting: false,
+                accessorKey: 'uuid',
                 cell: (props) => (
-                    <div className="w-24 text-start">{props.getValue()}</div>
+                    <div className="w-40 text-start">{props.getValue()}</div>
                 ),
             },
             {
-                header: 'Legislation',
+                header: 'Legislation', enableSorting: false,
                 accessorFn: (row) => row.compliance_detail.legislation,
                 cell: (props) => (
                     <Tooltip title={props.getValue() as string} placement="top">
-                        <div className="w-32 truncate">
-                            {((props.getValue() as string) || '').length > 20
-                                ? `${(props.getValue() as string).substring(0, 20)}...`
+                        <div className="w-64 truncate">
+                            {((props.getValue() as string) || '').length > 40
+                                ? `${(props.getValue() as string).substring(0, 40)}...`
                                 : props.getValue()}
                         </div>
                     </Tooltip>
                 ),
             },
             {
-                header: 'Criticality',
+                header: 'Criticality', enableSorting: false,
                 accessorFn: (row) => row.compliance_detail.criticality,
                 cell: (props) => {
                     const criticality = props.getValue() as string
@@ -516,16 +516,16 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 },
             },
             {
-                header: 'Category',
+                header: 'Category', enableSorting: false,
                 accessorFn: (row) => row.compliance_detail.category,
                 cell: (props) => (
                     <Tooltip title={props.getValue() as string} placement="top">
-                        <div className="w-32 truncate">{props.getValue()}</div>
+                        <div className="w-40 truncate">{props.getValue()}</div>
                     </Tooltip>
                 ),
             },
             {
-                header: 'Due Date',
+                header: 'Due Date', enableSorting: false,
                 accessorKey: 'due_date',
                 cell: (props) => (
                     <div className="w-28">
@@ -536,7 +536,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 ),
             },
             {
-                header: 'Status',
+                header: 'Status', enableSorting: false,
                 accessorKey: 'data_status',
                 cell: (props) => (
                     <div
@@ -548,7 +548,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 ),
             },
             {
-                header: 'Uploaded By',
+                header: 'Uploaded By', enableSorting: false,
                 accessorFn: (row) =>
                     `${row.UploadBy?.first_name || ''} ${row.UploadBy?.last_name || ''}`.trim(),
                 cell: (props) => (
@@ -557,7 +557,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
             },
 
             {
-                header: 'Approved By',
+                header: 'Approved By', enableSorting: false,
                 accessorFn: (row) => row.ApprovedBy?.name,
                 cell: (props) => (
                     <div className="w-32">{props.getValue() || '--'}</div>
@@ -583,7 +583,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                                     onClick={() =>
                                         handleStatusUpdate(row.original)
                                     }
-                                    icon={<MdEdit />}
+                                    icon={<HiUpload />}
                                     className="hover:bg-transparent"
                                 />
                             </Tooltip>

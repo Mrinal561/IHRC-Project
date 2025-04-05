@@ -32,6 +32,17 @@ export const protectedRoutes = [
 
     {
         key: 'recommendedList.item1',
+        path: '/compliance-checklist',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/AuditChecklist/AuditChecklistPage/AuditChecklistPage'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'recommendedList.item1',
         path: '/recommended-checklist',
         component: lazy(
             () =>

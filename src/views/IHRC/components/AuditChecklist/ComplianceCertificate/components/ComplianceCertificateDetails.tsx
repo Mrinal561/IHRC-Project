@@ -243,11 +243,13 @@ const ComplianceCertificateDetails = () => {
 
     const columns: ColumnDef<CertificateData>[] = [
         {
-            header: 'Year',
+            header: 'Year',                enableSorting: false,
+
             accessorKey: 'year',
         },
         {
-            header: 'Month',
+            header: 'Month',                enableSorting: false,
+
             accessorKey: 'month',
             cell: (props) => {
                 const monthNumber = props.getValue() as number
@@ -255,7 +257,8 @@ const ComplianceCertificateDetails = () => {
             },
         },
         {
-            header: 'Company',
+            header: 'Company',                enableSorting: false,
+
             accessorKey: 'company',
         },
         {
