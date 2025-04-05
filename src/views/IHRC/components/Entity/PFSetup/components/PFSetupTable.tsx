@@ -69,6 +69,8 @@ const PFSetupTable = ({ data, onRefresh, companyName, groupName, pagination, onP
       },
       {
         header: 'PF Code Location',
+        enableSorting: false,
+
         accessorKey: 'location_name',
         cell: (props) => (
           <div className="w-36 truncate">{props.getValue()}</div>
@@ -76,6 +78,8 @@ const PFSetupTable = ({ data, onRefresh, companyName, groupName, pagination, onP
       },
       {
         header: 'PF Registration Date',
+        enableSorting: false,
+
         enableSorting: false,
         accessorKey: 'register_date',
         cell: (props) => (
@@ -92,6 +96,7 @@ const PFSetupTable = ({ data, onRefresh, companyName, groupName, pagination, onP
       baseColumns.push(
         {
           header: `Authorized Signatory ${signatoryNum}`,
+          enableSorting: false,
           accessorKey: `signatory_name_${signatoryNum}`,
           cell: (props) => (
             <div className="w-48 truncate">{props.getValue()}</div>
@@ -106,6 +111,8 @@ const PFSetupTable = ({ data, onRefresh, companyName, groupName, pagination, onP
         },
         {
           header: `Email ${signatoryNum}`,
+          enableSorting: false,
+
           accessorKey: `signatory_email_${signatoryNum}`,
           cell: (props) => (
             <div className="w-48 truncate">{props.getValue()}</div>
@@ -113,6 +120,8 @@ const PFSetupTable = ({ data, onRefresh, companyName, groupName, pagination, onP
         },
         {
           header: `DSC Validity ${signatoryNum}`,
+          enableSorting: false,
+
           accessorKey: `dsc_validity_${signatoryNum}`,
           cell: (props) => (
             <div className="w-44 flex items-center justify-center">
@@ -122,6 +131,8 @@ const PFSetupTable = ({ data, onRefresh, companyName, groupName, pagination, onP
         },
         {
           header: `E Sign Status ${signatoryNum}`,
+          enableSorting: false,
+
           accessorKey: `e_sign_status_${signatoryNum}`,
           cell: (props) => (
             <div className="w-48 truncate">{props.getValue()}</div>

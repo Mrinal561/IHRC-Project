@@ -32,7 +32,6 @@ const LWFBulkUpload: React.FC<LWFBulkUploadProps> = ({
                         title="Error"
                         closable={true}
                         type="danger"
-                        closable={true}
                     >
                         Please select a file to upload
                     </Notification>,
