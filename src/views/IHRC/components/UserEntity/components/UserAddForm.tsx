@@ -22,6 +22,7 @@ import { Formik, Field, Form, ErrorMessage } from 'formik'
 import OutlinedPasswordInput from '@/components/ui/OutlinedInput/OutlinedPasswordInput'
 import { MultiValue } from 'react-select'
 interface LocationState {
+    companyGroupName?: string
     companyName?: string
     companyId?: string
     groupId?: string
@@ -123,6 +124,8 @@ const UserAddForm = () => {
     const location = useLocation()
     const [isSubmitting, setIsSubmitting] = useState(false);
     const locationState = location.state as LocationState
+    const companyGroupName = locationState?.companyGroupName
+
     const companyName = locationState?.companyName
     const companyId = locationState?.companyId
     const groupId = locationState?.groupId
@@ -173,6 +176,12 @@ const UserAddForm = () => {
                     label: v.name,
                     value: String(v.id),
                 })),
+            )
+            setSelectedCompanyGroup(
+                data.data.map((v: any) => ({
+                    label: v.name,
+                    value: String(v.id),
+                }))[0],
             )
         } catch (error) {
             console.error('Failed to load company groups:', error)
@@ -236,31 +245,72 @@ const UserAddForm = () => {
         }
     }, [groupId])
 
+    // const handleAddUser = async (values: UserFormData) => {
+    //     const data = {
+    //         ...values,
+    //         group_id: companyId,
+    //         // Company_Group_Name: companyName,
+    //         company_id: Number(values.company_id),
+    //         branch_id: values.branch_id,
+    //         role_id: Number(values.role_id),
+    //     }
+    //     try {
+    //         setIsSubmitting(true)
+    //         const resultAction = await dispatch(createUser(data)).unwrap()
+    //         .catch((error: any) => {
+    //             throw error;
+    //         })
+    //         if (resultAction) {
+    //             navigate('/user-entity')
+    //             showNotification('success', 'User added successfully')
+    //         }
+    //     } catch (error: any) {
+    //         const errorMessage = error || 'Failed to add user'
+    //         // showNotification('error', errorMessage) // Show the API error message
+    //     } finally {
+    //         setIsSubmitting(false)
+    //     }
+    // }
+
     const handleAddUser = async (values: UserFormData) => {
+        // Format the date to YYYY-MM-DD (without time/timezone)
+        const formatDate = (dateString: string) => {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        };
+    
         const data = {
-            ...values,
-            group_id: companyId,
-            Company_Group_Name: companyName,
+            group_id: Number(groupId),
             company_id: Number(values.company_id),
+            name: values.name,
+            email: values.email,
+            password: values.password,
+            mobile: values.mobile,
+            joining_date: formatDate(values.joining_date), // Formatted date
             role_id: Number(values.role_id),
-        }
+            auth_signatory: values.auth_signatory,
+            suspend: values.suspend,
+            disable: values.disable,
+            branch_id: values.branch_id,
+            aadhar_no: values.aadhar_no || undefined, // Convert empty string to undefined
+            pan_card: values.pan_card || undefined    // Convert empty string to undefined
+        };
+    
         try {
-            setIsSubmitting(true)
-            const resultAction = await dispatch(createUser(data)).unwrap()
-            .catch((error: any) => {
-                throw error;
-            })
+            setIsSubmitting(true);
+            const resultAction = await dispatch(createUser(data)).unwrap();
             if (resultAction) {
-                navigate('/user-entity')
-                showNotification('success', 'User added successfully')
+                navigate('/user-entity');
+                showNotification('success', 'User added successfully');
             }
         } catch (error: any) {
-            const errorMessage = error || 'Failed to add user'
-            // showNotification('error', errorMessage) // Show the API error message
+            const errorMessage = error?.message || 'Failed to add user';
+            showNotification('error', errorMessage);
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
-    }
+    };
 
     return (
         <div className="p-2 bg-white rounded-lg">
@@ -308,7 +358,7 @@ const UserAddForm = () => {
                     </p>
                     <input
                         type="text"
-                        value={companyName}
+                        value={selectedCompanyGroup?.label}
                         disabled
                         className="p-2 border rounded"
                     />
