@@ -1261,6 +1261,36 @@ const adminnav: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
+    { key: 'register.collapse',
+        path: '/register',
+        title: 'Register',
+        translateKey: 'nav.register.collapse.collapse',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_COLLAPSE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'register.collapse.item1',
+                path: '/register-client',
+                title: 'Register For Client',
+                translateKey: 'nav.register.collapse.item1',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'register.collapse.item2',
+                path: '/register-contractor',
+                title: 'Register For Contractor',
+                translateKey: 'nav.register.collapse.item2',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ]
+}
    
 ];
 

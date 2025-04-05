@@ -843,4 +843,37 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+    {
+        key: 'registerForClient',
+        path: '/register-client',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Register/Register'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'registerForContractor',
+        path: '/register-contractor',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Register/components/RegisterContractor'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'registerHistory',
+        path: `/register/history/:id`,
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Register/components/RegisterHistory'
+                ),
+        ),
+        authority: [],
+    },
 ]
