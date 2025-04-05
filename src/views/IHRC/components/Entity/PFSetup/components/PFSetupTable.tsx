@@ -80,7 +80,6 @@ const PFSetupTable = ({ data, onRefresh, companyName, groupName, pagination, onP
         header: 'PF Registration Date',
         enableSorting: false,
 
-        enableSorting: false,
         accessorKey: 'register_date',
         cell: (props) => (
           <div className="w-44 flex items-center justify-center">
@@ -103,7 +102,9 @@ const PFSetupTable = ({ data, onRefresh, companyName, groupName, pagination, onP
           ),
         },
         {
-          header: `Designation ${signatoryNum}`,
+          header: `Designation ${signatoryNum}`,                
+          enableSorting: false,
+
           accessorKey: `signatory_role_${signatoryNum}`,
           cell: (props) => (
             <div className="w-48 truncate">{props.getValue()}</div>
