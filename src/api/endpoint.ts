@@ -83,6 +83,9 @@ export const endpoints = {
         update:(id:any)=> api(`companyadmin/role/${id}`),
         getById:(id:any)=> api(`companyadmin/role/${id}`),
         delete:(id:any)=> api(`companyadmin/role/${id}`),
+        bulkCreate:()=> api(`/companyadmin/role/bulk-upload`),
+        download: () => api(`/companyadmin/role/export`),
+        downloadFormat: () => api(`/companyadmin/role/designation-template`),
         rolePermission:(id:any) => api(`/companyadmin/role/role-permission/${id}`)
     },
     compliance: {
@@ -99,7 +102,10 @@ export const endpoints = {
         // download: () => api(`companyadmin/esisetup/esi-tracker/export`)
          update: (id: any) => api(`/companyadmin/esisetup/${id}`),
          delete: (id:any) => api(`companyadmin/esisetup/${id}`),
-         getAllCodes:()=> api('esi-code')
+         getAllCodes:()=> api('esi-code'),
+         downloadFormat: (id:any) => api(`/companyadmin/esisetup/template/download?company_id=${id}`),
+         downloadData: () => api('/companyadmin/esisetup/esisetup-data/export'),
+         bulkCreate: () => api('/companyadmin/esisetup/bulk-upload'),
     },
     pfSetup: {
         getAll: () => api('companyadmin/pfsetup'),
@@ -206,7 +212,8 @@ export const endpoints = {
           delete: (id:any) => api(`companyadmin/lwfsetup/${id}`),
           getAllCodes:()=> api('lwf-code'),
           downloadFormat:(id:any)=> api(`companyadmin/lwfsetup/template/download?company_id=${id}`),
-          bulkCreate:()=> api('companyadmin/lwfsetup/bulk-create')
+          bulkCreate:()=> api('companyadmin/lwfsetup/bulk-create'),
+          download: () => api('/companyadmin/lwfsetup/lwfsetup-data/export')
     },
     request: {
         request: (id: any) => api(`companyadmin/company/edit-request/${id}`),

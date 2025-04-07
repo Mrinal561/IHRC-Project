@@ -124,7 +124,7 @@ const LWFBulkUpload: React.FC<LWFBulkUploadProps> = ({
                 size="sm"
                 icon={<HiUpload />}
                 onClick={handleUploadClick}
-                className="mr-2"
+                className=""
             >
                 Bulk Upload
             </Button>

@@ -210,7 +210,7 @@ const handlePageSizeChange = (newPageSize: number) => {
             icon={<HiDownload />}
             onClick={handleDownload}
             >
-            Download Data
+            Download
           </Button>
         <PTBulkUpload
                         companyId={actualCompanyId}

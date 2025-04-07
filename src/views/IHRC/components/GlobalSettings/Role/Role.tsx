@@ -2,13 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import AdaptableCard from '@/components/shared/AdaptableCard';
 import { Button, Dialog, toast, Notification } from '@/components/ui';
-import { HiPlusCircle } from 'react-icons/hi';
+import { HiDownload, HiPlusCircle } from 'react-icons/hi';
 import OutlinedInput from '@/components/ui/OutlinedInput';
 import { useDispatch } from 'react-redux';
 import { showErrorNotification } from '@/components/ui/ErrorMessage';
 import { createRole, fetchRoles } from '@/store/slices/role/roleSlice';
 import RoleTable from './components/RoleTable';
 import * as yup from 'yup';
+import BulkUpload from './components/BulkUpload';
+import httpClient from '@/api/http-client';
+import { endpoints } from '@/api/endpoint';
 // import RoleTable from './components/RoleTable';
 
 
@@ -21,7 +24,13 @@ const roleSchema = yup.object().shape({
     .matches(/^\S.*\S$|^\S$/,'The input must not have leading or trailing spaces')
   });
 
+  interface CompanyDetails {
+    id: number
+    name: string
+    group_id: number
+  }
 
+  
 const Role = () => {
   const dispatch = useDispatch();
   
@@ -36,6 +45,7 @@ const Role = () => {
   const [errors, setErrors] = useState({
     name: ''
   });
+   const [companyDetails, setCompanyDetails] = useState<CompanyDetails | null>(null)
 
   const refreshData = () => {
     setKey(prev => prev + 1);
@@ -140,22 +150,76 @@ const Role = () => {
     }
   };
 
+  const handleDownload = async () => {
+    if (!companyDetails) {
+        toast.push(
+            <Notification title="Error" type="error">
+                Company details not loaded
+            </Notification>
+        )
+        return
+    }
+
+    try {
+        const params = new URLSearchParams()
+        // params.append('company_id[]', companyDetails.id.toString())
+        params.append('group_id[]', companyDetails.group_id.toString())
+
+        const response = await httpClient.get(
+            endpoints.role.download(), 
+            {
+                params,
+                responseType: 'blob'
+            }
+        )
+
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'designation_data.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        toast.push(
+            <Notification title="Success" type="success">
+                Designation data downloaded successfully
+            </Notification>
+        )
+    } catch (error) {
+        console.error('Download failed:', error)
+        toast.push(
+            <Notification title="Error" type="error">
+                Failed to download Designation data
+            </Notification>
+        )
+    }
+}
+
+
   return (
     <AdaptableCard className="h-full" bodyClass="h-full">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
         <div className="mb-4 lg:mb-0">
           <h3 className="text-2xl font-bold">Designation</h3>
         </div>
+        <div className='flex gap-2'>
+          <Button variant='solid' size='sm' icon={<HiDownload />} onClick={handleDownload}>Download</Button>
+<div>
+  <BulkUpload />
+</div>
         <div className="flex gap-2">
           <Button
             variant="solid"
             size="sm"
             icon={<HiPlusCircle />}
             onClick={() => setIsDialogOpen(true)}
-          >
+            >
             Add Designation
           </Button>
         </div>
+            </div>
       </div>
 
       <RoleTable 

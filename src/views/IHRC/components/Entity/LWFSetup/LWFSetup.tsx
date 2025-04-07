@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Button, Dialog, toast, Notification } from '@/components/ui'
-import { HiArrowLeft, HiPlusCircle } from 'react-icons/hi'
+import { HiArrowLeft, HiDownload, HiPlusCircle } from 'react-icons/hi'
 import LWFSetupPanel from './components/LWFSetupPanel'
 import LWFSetupTable from './components/LWFSetupTable'
 import httpClient from '@/api/http-client'
@@ -135,6 +135,55 @@ const LWFSetupPage: React.FC = () => {
         )
     }
 
+
+    const handleDownload = async () => {
+        if (!actualCompanyId || !actualGroupId) {
+          toast.push(
+            <Notification title="Error" type="error">
+              Company information is incomplete
+            </Notification>
+          );
+          return;
+        }
+    
+        try {
+          const params = new URLSearchParams();
+          params.append('company_id[]', actualCompanyId);
+          params.append('group_id[]', actualGroupId);
+    
+          const response = await httpClient.get(endpoints.lwfSetup.download(), {
+            params,
+            responseType: 'blob'
+          });
+    
+          // Create download link
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'lwf_setup_data.xlsx');
+          document.body.appendChild(link);
+          link.click();
+          
+          // Clean up
+          link.parentNode?.removeChild(link);
+          window.URL.revokeObjectURL(url);
+    
+          toast.push(
+            <Notification title="Success" type="success">
+              LWF Setup data downloaded successfully
+            </Notification>
+          );
+        } catch (error) {
+          console.error('Download failed:', error);
+          toast.push(
+            <Notification title="Error" type="error">
+              Failed to download LWF Setup data
+            </Notification>
+          );
+        }
+      };
+
+
     return (
         <div className="">
             <div className="flex justify-between items-center mb-6">
@@ -159,7 +208,15 @@ const LWFSetupPage: React.FC = () => {
                 value={stateSearch}
                 onChange={handleStateSearch}
                 />
-            </div>
+                                            </div>
+                 <Button 
+                                            variant='solid' 
+                                            size='sm' 
+                                            icon={<HiDownload />}
+                                            onClick={handleDownload}
+                                            >
+                                            Download
+                                          </Button>
                     <LWFBulkUpload
                         companyId={actualCompanyId}
                         onUploadSuccess={refreshLWFSetupData}

@@ -250,16 +250,16 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
           );
         }
       },
-      {
-        header: 'PT Amount As Per Salary Register',
-        enableSorting: false,
-        accessorKey: 'total_challan_amt',
-        cell: (props) => (
-          <div className="w-40 truncate">
-            ₹{(props.getValue() as number).toLocaleString()}
-          </div>
-        ),
-      },
+      // {
+      //   header: 'PT Amount As Per Salary Register',
+      //   enableSorting: false,
+      //   accessorKey: 'total_challan_amt',
+      //   cell: (props) => (
+      //     <div className="w-40 truncate">
+      //       ₹{(props.getValue() as number).toLocaleString()}
+      //     </div>
+      //   ),
+      // },
       {
         header: 'Total Amount Paid',
         enableSorting: false,
@@ -270,22 +270,22 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
           </div>
         ),
       },
-      {
-        header: 'Difference in Amount',
-        enableSorting: false,
-        accessorKey: 'difference_amt',
-        cell: (props) => (
-          <div className="w-44 truncate">
-            ₹{(props.getValue() as number).toLocaleString()}
-          </div>
-        ),
-      },
-      {
-        header: 'Difference Reason',
-        enableSorting: false,
-        accessorKey: 'difference_reason',
-        cell: (props) => <div className="w-40 truncate">{props.getValue() as string || '--'}</div>,
-      },
+      // {
+      //   header: 'Difference in Amount',
+      //   enableSorting: false,
+      //   accessorKey: 'difference_amt',
+      //   cell: (props) => (
+      //     <div className="w-44 truncate">
+      //       ₹{(props.getValue() as number).toLocaleString()}
+      //     </div>
+      //   ),
+      // },
+      // {
+      //   header: 'Difference Reason',
+      //   enableSorting: false,
+      //   accessorKey: 'difference_reason',
+      //   cell: (props) => <div className="w-40 truncate">{props.getValue() as string || '--'}</div>,
+      // },
       {
         header: 'Due Date',
         enableSorting: false,

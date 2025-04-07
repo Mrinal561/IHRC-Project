@@ -262,7 +262,7 @@ const isEditPermissionExpired = (tracker: PfiwChallanData) => {
         ),
       },
       {
-        header: 'Date Of Payment',
+        header: 'Date Of Submission',
         enableSorting: false,
         accessorKey: 'submit_date',
         cell: (props) => (

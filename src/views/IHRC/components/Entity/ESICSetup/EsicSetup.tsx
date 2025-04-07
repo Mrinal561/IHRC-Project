@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Button, Dialog, toast, Notification } from '@/components/ui'
-import { HiArrowLeft, HiPlusCircle } from 'react-icons/hi'
+import { HiArrowLeft, HiDownload, HiPlusCircle } from 'react-icons/hi'
 import { setPanelExpand, useAppDispatch } from '@/store'
 import ESISetupPanel from './components/ESISetupPanel'
 import ESISetupTable from './components/EsicSetupTable'
 import httpClient from '@/api/http-client'
 import { endpoints } from '@/api/endpoint'
+import ESIBulkUpload from './components/ESIBulkUpload'
 
 export interface ESISetupData {
     Company_Group_Name: string
@@ -202,6 +203,58 @@ const CompanyESISetupPage: React.FC = () => {
     //   refreshData();
     // }, [handleAddESISetup]);
 
+    const handleDownload = async () => {
+        if (!actualCompanyId || !actualGroupId) {
+          toast.push(
+            <Notification title="Error" type="error">
+              Company information is incomplete
+            </Notification>
+          );
+          return;
+        }
+    
+        try {
+          const params = new URLSearchParams();
+          params.append('company_id[]', actualCompanyId);
+          params.append('group_id[]', actualGroupId);
+    
+          const response = await httpClient.get(endpoints.esiSetup.downloadData(), {
+            params,
+            responseType: 'blob'
+          });
+    
+          // Create download link
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'esi_setup_data.xlsx');
+          document.body.appendChild(link);
+          link.click();
+          
+          // Clean up
+          link.parentNode?.removeChild(link);
+          window.URL.revokeObjectURL(url);
+    
+          toast.push(
+            <Notification title="Success" type="success">
+              ESI Setup data downloaded successfully
+            </Notification>
+          );
+        } catch (error) {
+          console.error('Download failed:', error);
+          toast.push(
+            <Notification title="Error" type="error">
+              Failed to download ESI Setup data
+            </Notification>
+          );
+        }
+      };
+
+      const refreshPTSetupData = () => {
+        fetchESISetupData();
+        // showNotification('PF Setup data refreshed successfully');
+      };
+
     return (
         <div className="">
             <div className="flex justify-between items-center mb-6">
@@ -217,15 +270,28 @@ const CompanyESISetupPage: React.FC = () => {
                         {actualCompanyName}- ESI Setup
                     </h1>
                 </div>
+                <div className='flex gap-2'>
+
+                <Button 
+                            variant='solid' 
+                            size='sm' 
+                            icon={<HiDownload />}
+                            onClick={handleDownload}
+                            >
+                            Download
+                          </Button>
+                          <ESIBulkUpload  companyId={actualCompanyId}
+                        onUploadSuccess={refreshPTSetupData}/>
                 <Button
                     variant="solid"
                     size="sm"
                     icon={<HiPlusCircle />}
                     onClick={() => setIsOpen(true)}
                     disabled={isLoading}
-                >
+                    >
                     Add ESI Setup
                 </Button>
+                    </div>
             </div>
 
             <ESISetupTable
