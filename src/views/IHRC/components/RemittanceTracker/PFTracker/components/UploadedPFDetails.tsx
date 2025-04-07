@@ -97,12 +97,12 @@ const params: any = {
         accessorKey: 'PfSetup.pf_code',
         cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
       },
-      {
-        header: 'Company Group',
-        enableSorting: false,
-        accessorKey: 'PfSetup.CompanyGroup.name',
-        cell: (props) => <div className="w-28 truncate">{props.getValue() as string}</div>,
-      },
+      // {
+      //   header: 'Company Group',
+      //   enableSorting: false,
+      //   accessorKey: 'PfSetup.CompanyGroup.name',
+      //   cell: (props) => <div className="w-28 truncate">{props.getValue() as string}</div>,
+      // },
       {
         header: 'Company',
         enableSorting: false,
