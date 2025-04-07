@@ -84,7 +84,7 @@ const BranchAgreementTable: React.FC<BranchAgreementTableProps> = ({ canEdit, ca
             // Extract just the ID value if it's an object and put it in an array
             const id = typeof companyId === 'object' ? companyId.value : companyId;
             
-            const response = await httpClient.get(endpoints.branch.getAll(), {
+            const response = await httpClient.get(endpoints.branch.getAllBranch(), {
                 params: { 
                     company_id: [id] // Pass as array since API expects company_id[]
                 }
