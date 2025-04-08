@@ -274,7 +274,8 @@ export const endpoints = {
         },
         forgotpassword:{
             forgot:()=> api('forgot-password'),
-            reset:() => api(`reset-password`)
+            reset:() => api(`reset-password`),
+            verifyToken: () => api(`/verify-reset-token`)
         },
         graph:{
             // dueDate:(type:any,code:any,financialYear:any)=> api(`companyadmin/graph/graph-data?type=${type}&code=${code}&financial_year=${financialYear}`),
