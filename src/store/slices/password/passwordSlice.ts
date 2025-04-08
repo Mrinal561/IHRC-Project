@@ -10,7 +10,7 @@ export type ForgotPasswordRequest = {
 export type ResetPasswordRequest = {
     token: string;
     password: string;
-    confirmPassword: string;
+    // confirmPassword: string;
 };
 
 export interface PasswordRecoveryState {

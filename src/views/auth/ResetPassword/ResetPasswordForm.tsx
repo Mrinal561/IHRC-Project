@@ -297,7 +297,7 @@ const ResetPasswordForm = (props: ResetPasswordFormProps) => {
             await dispatch(resetPassword({
                 token,
                 newPassword: values.password,
-                confirmPassword: values.confirmPassword
+                // confirmPassword: values.confirmPassword
             })).unwrap()
             
             setSuccess(true)
