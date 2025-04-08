@@ -15,6 +15,12 @@ import { endpoints } from '@/api/endpoint';
 // import RoleTable from './components/RoleTable';
 
 
+interface CompanyDetails {
+  id: number
+  name: string
+  group_id: number
+}
+
 const roleSchema = yup.object().shape({
   name: yup
     .string()
@@ -126,6 +132,8 @@ const Role = () => {
     );
 };
 
+
+
   const handleConfirm = async () => {
     const isValid = await validateForm();
     if(!isValid) return;
@@ -196,6 +204,35 @@ const Role = () => {
         )
     }
 }
+
+const fetchCompanyData = async () => {
+  try {
+      // Use your existing company endpoint to get the first company
+      const response = await httpClient.get(endpoints.company.getAll())
+      console.log('Company data:', response.data.data)
+      const companies = response.data.data
+      
+      if (companies && companies.length > 0) {
+          const firstCompany = companies[0]
+          setCompanyDetails({
+              id: firstCompany.id,
+              name: firstCompany.name,
+              group_id: firstCompany.group_id // Ensure this field exists in your API response
+          })
+      }
+  } catch (error) {
+      console.error('Failed to fetch company details:', error)
+      toast.push(
+          <Notification title="Error" type="error">
+              Failed to load company information
+          </Notification>
+      )
+  }
+}
+
+useEffect(() => {
+  fetchCompanyData()
+}, [])
 
 
   return (
