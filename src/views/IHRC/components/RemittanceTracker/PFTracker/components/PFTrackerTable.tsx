@@ -240,13 +240,13 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
         header: 'Difference',
         enableSorting: false,
         accessorKey: 'difference_amt',
-        cell: (props) => <div className="w-52 truncate">{(props.getValue() as number).toLocaleString()}</div>,
+        cell: (props) => <div className="w-28 truncate">{(props.getValue() as number).toLocaleString()}</div>,
       },
       {
         header: 'Difference Reason',
         enableSorting: false,
         accessorKey: 'difference_reason',
-        cell: (props) => <div className="w-40 truncate">{props.getValue() as string}</div>,
+        cell: (props) => <div className="w-40 truncate">{(props.getValue() as string) || '--'}</div>,
       },
       {
         header: 'Due Date',
@@ -316,7 +316,7 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
           };
 
           return (
-            <div className="w-40 flex items-center">
+            <div className="w-28 flex items-center">
               {challanDocument ? (
                 <a 
                   href="#" 
@@ -348,7 +348,7 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
           };
 
           return (
-            <div className="w-40 flex items-center">
+            <div className="w-28 flex items-center">
               {ecrDocument ? (
                 <a 
                   href="#" 
@@ -380,7 +380,7 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
           };
 
           return (
-            <div className="w-40 flex items-center">
+            <div className="w-28 flex items-center">
               {paymentReceiptDocument ? (
                 <a 
                   href="#" 
