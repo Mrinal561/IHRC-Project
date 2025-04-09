@@ -357,7 +357,10 @@ const RentalDepositsDashboard: React.FC<AgreementStatusProps> = ({
                 cell: (props) => {
                     const value = props.getValue() as string;
                     // Apply text-red-600 class only if status is "Expired"
-                    const textColorClass = value === 'Expired' ? 'text-red-600' : '';
+                    const textColorClass = 
+                        value === 'Expired' ? 'text-red-600' : 
+                        value === 'Valid' ? 'text-green-600' : 
+                        '';
 
                     return (
                         <Tooltip title={value} placement="top">

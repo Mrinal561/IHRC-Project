@@ -60,12 +60,18 @@ interface NoticeStatusProps {
               enableSorting: false,
               cell: (props) => {
                   const value = props.getValue() as string;
+                  const textColorClass = 
+                  value === 'Closed' ? 'text-red-600' : 
+                  value === 'Open' ? 'text-green-600' : 
+                  '';
                   return (
                       <Tooltip title={value} placement="top">
-                         <div className="font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-200 text-xs">
-                              {value.length > 30 ? value.substring(0, 30) + '...' : value}
-                          </div>
-                      </Tooltip>
+                                                 <div className={`w-10.5 font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-200 text-xs ${textColorClass}`}>
+                                                     {value.length > 30
+                                                         ? value.substring(0, 30) + '...'
+                                                         : value}
+                                                 </div>
+                                             </Tooltip>
                   );
               },
           },

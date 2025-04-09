@@ -242,7 +242,10 @@ const SEDashboardCount: React.FC<SEProps> = ({
                     const row = props.row.original;
 
                     const value = props.getValue() as string;
-                    const textColorClass = value === 'Expired' ? 'text-red-600' : '';
+                    const textColorClass = 
+                        value === 'Expired' ? 'text-red-600' : 
+                        value === 'Valid' ? 'text-green-600' : 
+                        '';
                     return (
                         <Tooltip title={value} placement="top">
                             <div className= {`font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-200 text-xs w-10.5 ${textColorClass}`}>
