@@ -81,11 +81,19 @@ interface NoticeStatusProps {
               enableSorting: false,
               cell: (props) => {
                    const row = props.row.original;
-                                      const value = props.getValue() as string;
+                   const value = props.getValue() as string;
+                
+                   // Determine text color based on the name
+                   let textColor = 'text-gray-700';
+                   if (row.name.toLowerCase() === 'open') {
+                       textColor = 'text-green-600'; // Yellow for Rented
+                   } else if (row.name.toLowerCase() === 'closed') {
+                       textColor = 'text-red-600'; // Blue for Owned
+                   }
                                       return (
                                           <Tooltip title={value} placement="top">
                                               <div
-                                                  className={`inline-flex items-center py-2 rounded-full text-xs font-semibold ${row.badgeColor}`}>
+                                                  className={`inline-flex items-center py-2 rounded-full text-xs font-semibold  ${textColor}`}>
                               {value.length > 18 ? value.substring(0, 18) + '...' : value}
                           </div>
                       </Tooltip>

@@ -304,7 +304,13 @@ const SEDashboardCount: React.FC<SEProps> = ({
                 cell: (props) => {
                     const row = props.row.original;
                     const value = props.getValue() as string;   
-                    const textColorClass = row.name === 'Expired' ? 'text-red-600' : '';                 return (
+                    let textColorClass = 'text-gray-700';
+                    if (row.name.toLowerCase() === 'expired') {
+                        textColorClass = 'text-red-600'; // Yellow for Rented
+                    } else if (row.name.toLowerCase() === 'valid') {
+                        textColorClass = 'text-green-600'; // Blue for Owned
+                    } 
+                     return (
                         <Tooltip title={value} placement="top">
                             <div  className={`inline-flex items-center py-2 rounded-full text-xs font-semibold ${textColorClass}`}>
                                 {value.length > 18

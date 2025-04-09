@@ -423,7 +423,13 @@ const RentalDepositsDashboard: React.FC<AgreementStatusProps> = ({
                     const row = props.row.original;
                     const value = props.getValue() as string;
                     // Apply text-red-600 class only if row's name is "Expired"
-                    const textColorClass = row.name === 'Expired' ? 'text-red-600' : '';
+                    // const textColorClass = row.name === 'Expired' ? 'text-red-600' : '';
+                    let textColorClass = 'text-gray-700';
+                    if (row.name.toLowerCase() === 'expired') {
+                        textColorClass = 'text-red-600'; // Yellow for Rented
+                    } else if (row.name.toLowerCase() === 'valid') {
+                        textColorClass = 'text-green-600'; // Blue for Owned
+                    } 
                     
                     return (
                         <Tooltip title={value} placement="top">
