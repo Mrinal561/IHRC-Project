@@ -65,10 +65,27 @@ interface BranchStatusProps {
                 accessorKey: 'name',
                 enableSorting: false,
                 cell: (props) => {
+                    // const value = props.getValue() as string;
+                    // return (
+                    //     <Tooltip title={value} placement="top">
+                    //         <div className="font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-200 text-xs w-18">
+                    //             {value.length > 30 ? value.substring(0, 30) + '...' : value}
+                    //         </div>
+                    //     </Tooltip>
                     const value = props.getValue() as string;
+                    // Determine text color based on type
+                    let textColor = 'text-gray-700';
+                    if (value.toLowerCase() === 'rented') {
+                        textColor = 'text-[#ffc107]'; // Yellow for Rented
+                    } else if (value.toLowerCase() === 'owned') {
+                        textColor = 'text-[#0ea5e9]'; // Blue for Owned
+                    } else if (value.toLowerCase() === 'total') {
+                        textColor = 'text-gray-900 font-bold'; // Dark gray and bold for Total
+                    }
+                    
                     return (
                         <Tooltip title={value} placement="top">
-                            <div className="font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-200 text-xs w-18">
+                            <div className={`font-semibold hover:text-blue-600 transition-colors duration-200 text-xs w-18 ${textColor}`}>
                                 {value.length > 30 ? value.substring(0, 30) + '...' : value}
                             </div>
                         </Tooltip>
@@ -110,15 +127,34 @@ interface BranchStatusProps {
                 accessorKey: 'value',
                 enableSorting: false,
                 cell: (props) => {
-                   const row = props.row.original;
-                                       const value = props.getValue() as string;
-                                       return (
-                                           <Tooltip title={value} placement="top">
-                                               <div
-                                                   className={`inline-flex items-center py-2 rounded-full text-xs text-center font-semibold ${row.badgeColor}`}>
-                                {value.length > 18 ? value.substring(0, 18) + '...' : value}
-                            </div>
-                        </Tooltip>
+                //    const row = props.row.original;
+                //                        const value = props.getValue() as string;
+                //                        return (
+                //                            <Tooltip title={value} placement="top">
+                //                                <div
+                //                                    className={`inline-flex items-center py-2 rounded-full text-xs text-center font-semibold ${row.badgeColor}`}>
+                //                 {value.length > 18 ? value.substring(0, 18) + '...' : value}
+                //             </div>
+                //         </Tooltip>
+                const row = props.row.original;
+                const value = props.getValue() as string;
+                
+                // Determine text color based on the name
+                let textColor = 'text-gray-700';
+                if (row.name.toLowerCase() === 'rented') {
+                    textColor = 'text-[#ffc107]'; // Yellow for Rented
+                } else if (row.name.toLowerCase() === 'owned') {
+                    textColor = 'text-[#0ea5e9]'; // Blue for Owned
+                } else if (row.name.toLowerCase() === 'total') {
+                    textColor = 'text-gray-900 font-bold'; // Dark gray and bold for Total
+                }
+                
+                return (
+                    <Tooltip title={value} placement="top">
+                        <div className={`inline-flex items-center py-2 rounded-full text-xs text-center font-semibold ${textColor}`}>
+                            {value.length > 18 ? value.substring(0, 18) + '...' : value}
+                        </div>
+                    </Tooltip>
                     );
                 },
             },

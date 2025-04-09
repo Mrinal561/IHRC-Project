@@ -297,6 +297,8 @@ export const endpoints = {
             esiremittanceBreakup: () => api(`companyadmin/graph/esi-remittance-breakdown`),
             lwfremittanceBreakup: () => api(`companyadmin/graph/lwf-remittance-breakdown`),
             ptremittanceBreakup: () => api(`companyadmin/graph/pt-remittance-breakdown`),
+            branchStatusGraph: () => api(`companyadmin/graph/branch-status-graph`),
+            calendar: () => api(`companyadmin/graph/compliance-calendar-dates`)
         },
         
 }

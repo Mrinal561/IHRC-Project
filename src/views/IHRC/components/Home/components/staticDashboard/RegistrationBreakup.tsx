@@ -203,6 +203,20 @@ const RegistrationsBreakup: React.FC<RegistrationBreakupProps> = ({
         chart: {
             type: 'bar',
             height: 350,
+            events: {
+                mouseMove: function(event, chartContext, config) {
+                    // This helps with tooltip positioning
+                }
+            },
+            animations: {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 800,
+                animateGradually: {
+                    enabled: true,
+                    delay: 150
+                }
+            }
         },
         plotOptions: {
             bar: {
@@ -232,6 +246,9 @@ const RegistrationsBreakup: React.FC<RegistrationBreakupProps> = ({
             },
         },
         tooltip: {
+            enabled: true,
+        shared: false,
+        intersect: false,
             y: {
                 title: {
                     formatter: function (seriesName, opts) {
@@ -241,6 +258,9 @@ const RegistrationsBreakup: React.FC<RegistrationBreakupProps> = ({
                 },
                 formatter: (val) => `${val}`, // Tooltip formatting
             },
+        },
+        marker: {
+            show: true
         },
         legend: {
             show: true,

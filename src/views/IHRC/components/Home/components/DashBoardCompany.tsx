@@ -406,13 +406,13 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
         </div>
       </div>
     )}
-      <div className="flex-1 min-w-[140px]">
+      {/* <div className="flex-1 min-w-[140px]">
         <OutlinedInput
           label="Company Group"
           value={companyGroupName} 
           onChange={() => {}}
         />
-      </div>
+      </div> */}
 
       <div className="flex-1 min-w-[140px]">
         <OutlinedSelect

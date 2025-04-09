@@ -370,48 +370,48 @@ const RentalDepositsDashboard: React.FC<AgreementStatusProps> = ({
                     );
                 },
             },
-            {
-                header: 'PH',
-                accessorKey: 'ph',
-                enableSorting: false,
-                cell: (props) => {
-                    const row = props.row.original;
-                    const value = props.getValue() as string || '';
-                    // Apply text-red-600 class only if row's name is "Expired"
-                    const textColorClass = row.name === 'Expired' ? 'text-red-600' : '';
+            // {
+            //     header: 'PH',
+            //     accessorKey: 'ph',
+            //     enableSorting: false,
+            //     cell: (props) => {
+            //         const row = props.row.original;
+            //         const value = props.getValue() as string || '';
+            //         // Apply text-red-600 class only if row's name is "Expired"
+            //         const textColorClass = row.name === 'Expired' ? 'text-red-600' : '';
                     
-                    return (
-                        <Tooltip title={value} placement="top">
-                            <div className={`font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-200 text-xs ${textColorClass}`}>
-                                {value && value.length > 18
-                                    ? value.substring(0, 18) + '...'
-                                    : value}
-                            </div>
-                        </Tooltip>
-                    );
-                },
-            },
-            {
-                header: 'VR',
-                accessorKey: 'vr',
-                enableSorting: false,
-                cell: (props) => {
-                    const row = props.row.original;
-                    const value = props.getValue() as string || '';
-                    // Apply text-red-600 class only if row's name is "Expired"
-                    const textColorClass = row.name === 'Expired' ? 'text-red-600' : '';
+            //         return (
+            //             <Tooltip title={value} placement="top">
+            //                 <div className={`font-semibold text-gray-700 hover:text-blue-600 transition-colors duration-200 text-xs ${textColorClass}`}>
+            //                     {value && value.length > 18
+            //                         ? value.substring(0, 18) + '...'
+            //                         : value}
+            //                 </div>
+            //             </Tooltip>
+            //         );
+            //     },
+            // },
+            // {
+            //     header: 'VR',
+            //     accessorKey: 'vr',
+            //     enableSorting: false,
+            //     cell: (props) => {
+            //         const row = props.row.original;
+            //         const value = props.getValue() as string || '';
+            //         // Apply text-red-600 class only if row's name is "Expired"
+            //         const textColorClass = row.name === 'Expired' ? 'text-red-600' : '';
                     
-                    return (
-                        <Tooltip title={value} placement="top">
-                            <div className={`inline-flex items-center rounded-full text-xs font-semibold ${textColorClass}`}>
-                                {value && value.length > 18
-                                    ? value.substring(0, 18) + '...'
-                                    : value}
-                            </div>
-                        </Tooltip>
-                    );
-                },
-            },
+            //         return (
+            //             <Tooltip title={value} placement="top">
+            //                 <div className={`inline-flex items-center rounded-full text-xs font-semibold ${textColorClass}`}>
+            //                     {value && value.length > 18
+            //                         ? value.substring(0, 18) + '...'
+            //                         : value}
+            //                 </div>
+            //             </Tooltip>
+            //         );
+            //     },
+            // },
             {
                 header: 'Total',
                 accessorKey: 'total',

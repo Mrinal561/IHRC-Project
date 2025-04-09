@@ -140,7 +140,7 @@ const [chartData, setChartData] = useState<SEStatusData>({
     <div className="w-full">
       <div className="flex justify-center items-center px-4">
         <h4 className="text-base font-semibold text-center">
-          S&E Status
+         Branch S&E Status
         </h4>
       </div>
     </div>

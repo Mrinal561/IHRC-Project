@@ -164,13 +164,19 @@
 // export default ComplinceStatus;
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Chart from 'react-apexcharts';
 import { Card } from '@/components/ui';
 import { ApexOptions } from 'apexcharts';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
+import { addMonths, format, parse, setMonth, setYear } from 'date-fns'
+import { HiOutlineViewGrid } from 'react-icons/hi';
+
+
+const FINANCIAL_YEAR_KEY = 'selectedFinancialYear'
+const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged'
 
 interface ComplianceStatusProps {
   year?: string; // Financial year (e.g., '2024-25')
@@ -180,6 +186,34 @@ interface ComplianceStatusProps {
   locationId?: string | number;
   branchId?: string | number;
 }
+
+
+
+const generateMonthOptions = (financialYear: string | null) => {
+    if (!financialYear) return []
+
+    // Parse the financial year (format: "2023-24")
+    const [startYear] = financialYear.split('-')
+    const fullStartYear = parseInt(`${startYear}`)
+
+    const months = []
+    // Start from April of start year
+    let startDate = new Date(fullStartYear, 3, 1) // Month is 0-based, so 3 is April
+
+    // Generate 12 months starting from April
+    for (let i = 0; i < 12; i++) {
+        const date = addMonths(startDate, i)
+        const twoDigitYear = format(date, 'yy') // Get last two digits of the year
+        months.push({
+            value: format(date, 'yyyy-MM'),
+            label: `${format(date, 'MMM')} ${twoDigitYear}`, // Always shows format like "Jan 25"
+            apiValue: format(date, 'MMM').toLowerCase()
+        })
+    }
+
+    return months
+}
+
 
 const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
   year = '2024-25',
@@ -195,103 +229,88 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
   const [penaltyTotal, setPenaltyTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Generate month options based on the financial year
-  const getFinancialYearMonths = (financialYear: string) => {
-    const [startYear, endYear] = financialYear.split('-').map((y) =>
-      parseInt(y.length === 2 ? `20${y}` : y)
-    );
-    const months = [
-      { value: 'apr', label: `April ${startYear}` },
-      { value: 'may', label: `May ${startYear}` },
-      { value: 'jun', label: `June ${startYear}` },
-      { value: 'jul', label: `July ${startYear}` },
-      { value: 'aug', label: `August ${startYear}` },
-      { value: 'sep', label: `September ${startYear}` },
-      { value: 'oct', label: `October ${startYear}` },
-      { value: 'nov', label: `November ${startYear}` },
-      { value: 'dec', label: `December ${startYear}` },
-      { value: 'jan', label: `January ${endYear}` },
-      { value: 'feb', label: `February ${endYear}` },
-      { value: 'mar', label: `March ${endYear}` },
-    ];
-    return months;
-  };
+   const [financialYear, setFinancialYear] = useState<string | null>(
+            sessionStorage.getItem(FINANCIAL_YEAR_KEY),
+        )
+  
+   const groupOptions = useMemo(
+          () => generateMonthOptions(financialYear),
+          [financialYear],
+      )
+  
+      useEffect(() => {
+        if (groupOptions.length > 0 && !currentGroup) {
+          setCurrentGroup(groupOptions[0].value);
+        }
+      }, [groupOptions, currentGroup]);
+  
+       useEffect(() => {
+              const handleFinancialYearChange = (event: CustomEvent) => {
+                  const newFinancialYear = event.detail
+                  setFinancialYear(newFinancialYear)
+                  // Reset current selection when financial year changes
+                  setCurrentGroup('')
+              }
+      
+              window.addEventListener(
+                  FINANCIAL_YEAR_CHANGE_EVENT,
+                  handleFinancialYearChange as EventListener,
+              )
+      
+              return () => {
+                  window.removeEventListener(
+                      FINANCIAL_YEAR_CHANGE_EVENT,
+                      handleFinancialYearChange as EventListener,
+                  )
+              }
+          }, [])
+  
+    // Handler for dropdown changes
+    useEffect(() => {
+      const fetchRemittanceData = async () => {
+        if (!currentGroup || !financialYear) return;
+  
+        setLoading(true);
+        try {
+          const selectedOption = groupOptions.find(opt => opt.value === currentGroup);
+          const response = await httpClient.get(endpoints.graph.pfremittanceBreakup(), {
+            params: {
+              companyId,
+              stateId,
+              districtId,
+              locationId,
+              branchId,
+              month: selectedOption?.apiValue, // Using MM/yyyy format
+              financialYear // Already in correct format (YYYY-YY)
+            }
+          });
+  
+          setMainTotal(response.data.main || 0);
+          setInterestTotal(response.data.interest || 0);
+          setPenaltyTotal(response.data.penalty || 0);
+        } catch (error) {
+          console.error('Error fetching remittance breakup data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchRemittanceData();
+    }, [companyId, stateId, districtId, locationId, branchId, currentGroup, financialYear, groupOptions]);
 
-  const groupOptions = getFinancialYearMonths(year);
 
-  // Get the current month based on the financial year
-  const getCurrentMonth = () => {
-    const currentDate = new Date();
-    const currentMonthIndex = currentDate.getMonth(); // 0 (Jan) to 11 (Dec)
-    const currentYear = currentDate.getFullYear();
-
-    // Financial year starts in April (index 3)
-    const financialYearStart = year.split('-')[0];
-    const financialYearEnd = year.split('-')[1];
-
-    if (currentMonthIndex >= 3) {
-      // April (3) to December (11) belong to the start year
-      return groupOptions[currentMonthIndex - 3].value;
-    } else {
-      // January (0) to March (2) belong to the end year
-      return groupOptions[currentMonthIndex + 9].value;
-    }
-  };
-
-  // Set the default month to the current month
-  useEffect(() => {
-    const currentMonth = getCurrentMonth();
-    setCurrentGroup(currentMonth);
-  }, [year]);
-
-  // Handler for dropdown changes
-  const handleChange = (setter: (value: string) => void) => (option: any) => {
-    setter(option.value);
-  };
-
-  // Fetch data when filters, month, or financial year change
-  useEffect(() => {
-    const fetchRemittanceData = async () => {
-      setLoading(true);
-      try {
-        const response = await httpClient.get(endpoints.graph.ptremittanceBreakup(), {
-          params: {
-            companyId,
-            stateId,
-            districtId,
-            locationId,
-            branchId,
-            month: currentGroup, // Pass the selected month
-            financialYear: year, // Pass the financial year
-          },
-        });
-
-        // Update state with fetched data
-        setMainTotal(response.data.main || 0);
-        setInterestTotal(response.data.interest || 0);
-        setPenaltyTotal(response.data.penalty || 0);
-      } catch (error) {
-        console.error('Error fetching PT remittance data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRemittanceData();
-  }, [companyId, stateId, districtId, locationId, branchId, currentGroup, year]);
+ 
 
   // Data series and labels
   const series = [mainTotal, interestTotal, penaltyTotal];
-  const labels = ['Main', 'Interest', 'Penalty'];
+  const labels = ['Main Challan', 'Interest', 'Penalty'];
   const totalAmount = mainTotal + interestTotal + penaltyTotal;
 
   const isNoDataAvailable = series.every((value) => value === 0);
-
-  // Format percentage values, replacing NaN with 0%
-  const formatPercentage = (value: number, total: number) => {
-    if (total === 0) return '0%';
-    const percent = (value / total) * 100;
-    return isNaN(percent) ? '0%' : `${percent.toFixed(1)}%`;
+  const handleMonthChange = (option: { value: string; label: string } | null) => {
+    if (option) {
+      setCurrentGroup(option.value);
+    }
   };
 
   return (
@@ -299,24 +318,29 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
       <div className="w-full">
         <div className="flex justify-between items-center">
           <h4 className="text-base font-bold flex-1 text-center">
-            PT Remittance Breakdown for {year}
+            PT Remittance Breakdown for  {financialYear ? `for ${financialYear}` : ''}
           </h4>
           <div className="w-40">
             <OutlinedSelect
               label="Month"
               options={groupOptions}
               value={groupOptions.find((option) => option.value === currentGroup)}
-              onChange={handleChange(setCurrentGroup)}
+              onChange={handleMonthChange}
             />
           </div>
         </div>
       </div>
 
-      {loading ? (
-        <div className="py-10 text-gray-400">Loading...</div>
-      ) : isNoDataAvailable ? (
-        <div className="py-10 text-gray-400">No Data Available</div>
-      ) : (
+       {loading ? (
+       <div className="py-10 text-gray-400">Loading...</div>
+     ) : isNoDataAvailable ? (
+       <div className="flex items-center justify-center min-h-[300px] w-full"> {/* Fixed minimum height */}
+         <div className="flex flex-col items-center justify-center text-gray-500">
+           <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+           <p className="text-center">No Data Available</p>
+         </div>
+       </div>
+     ) : (
         <>
           <Chart
             options={{
@@ -340,9 +364,9 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
               },
               dataLabels: {
                 enabled: false,
-                formatter: function (val) {
-                  return isNaN(val) ? '0%' : val.toFixed(1) + '%';
-                },
+                // formatter: function (val) {
+                //   return isNaN(val) ? '0%' : val.toFixed(1) + '%';
+                // },
               },
               tooltip: {
                 y: {

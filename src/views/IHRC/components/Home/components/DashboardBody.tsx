@@ -34,6 +34,7 @@ import RegistrationBreakup from './staticDashboard/RegistrationBreakup';
 import LWF from './staticDashboard/LWF';
 import SandEStatusPie from './staticDashboard/SandEStatusPie';
 import AgreementStatus from './staticDashboard/AgreementStatus';
+import BranchStatus from './staticDashboard/BranchStatus';
 
 interface DashboardBodyProps {
     companyId: string | number;
@@ -217,7 +218,8 @@ const DashboardBody: React.FC<DashboardBodyProps> = ({ companyId, stateId, distr
                 {/* First Row */}
                 <div className="grid grid-cols-1 md:grid-cols-8 gap-2">
                     <div className="bg-white rounded-lg col-span-2 font-bold">
-                        <BranchTypes {...props} />
+                        {/* <BranchTypes {...props} /> */}
+                        <SEDashboardCount {...props} />
                     </div>
                     <div className="bg-white rounded-lg col-span-2">
                         <BranchOwnership {...props} />
@@ -225,21 +227,22 @@ const DashboardBody: React.FC<DashboardBodyProps> = ({ companyId, stateId, distr
                     <div className="bg-white rounded-lg col-span-2">
                         <RentalDepositsDashboard {...props} />
                     </div>
-                    <div className="col-span-2 bg-white rounded-lg p-1 shadow-lg border col-span-2">
-                        <AgreementStatus {...props} />
+                    <div className="col-span-2 bg-white rounded-lg col-span-2">
+                        <NoticesDashboard {...props} />
                     </div>
                 </div>
 
                 {/* Second Row */}
                 <div className="grid grid-cols-1 md:grid-cols-8 gap-2">
-                    <div className="bg-white rounded-lg col-span-2">
-                        <SEDashboardCount {...props} />
-                    </div>
-                    <div className="bg-white p-1 rounded-lg shadow-lg border col-span-2">
+                <div className="bg-white p-1 rounded-lg shadow-lg border col-span-2">
                         <SandEStatusPie {...props} />
                     </div>
-                    <div className="bg-white rounded-lg col-span-2">
-                        <NoticesDashboard {...props} />
+                    <div className="bg-white p-1 rounded-lg shadow-lg border col-span-2">
+                        <BranchStatus {...props} />
+                    </div>
+                    <div className="bg-white rounded-lg p-1 shadow-lg border  col-span-2">
+                        {/* <NoticesDashboard {...props} /> */}
+                        <AgreementStatus {...props} />
                     </div>
                     <div className="bg-white p-1 rounded-lg shadow-lg border col-span-2">
                         <NoticeStatusPie {...props} />
@@ -269,17 +272,17 @@ const DashboardBody: React.FC<DashboardBodyProps> = ({ companyId, stateId, distr
                  {/* Sixth Row */}
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="bg-white p-4 rounded-lg border shadow-sm">
-                        <LWF />
+                        <LWF  {...props}/>
                     </div>
                     <div className="bg-white p-4 rounded-lg border shadow-sm">
-                        <ComplinceStatus />
+                        <ComplinceStatus  {...props} />
                     </div>
                 </div>
 
                 {/* Seventh Row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="bg-white p-4 rounded-lg border shadow-sm">
-                        <ComplianceCalendar />
+                        <ComplianceCalendar {...props} />
                     </div>
                     <div className="bg-white p-4 rounded-lg border shadow-sm">
                         <Updateds />

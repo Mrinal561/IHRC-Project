@@ -103,11 +103,12 @@ const RemittanceBreakup: React.FC<RemittanceBreakupProps> = ({
           <Chart
             options={{
               title: {
-                text: 'Remittance Breakup',
+                text: 'YTD Remittance Breakup',
                 align: 'center',
                 style: {
                   fontSize: '16px',
                   fontWeight: 'bold',
+                  fontFamily: 'Arial'
                 },
               },
               plotOptions: {
@@ -137,11 +138,17 @@ const RemittanceBreakup: React.FC<RemittanceBreakupProps> = ({
                 max: xAxisMax
               },
               tooltip: {
+                enabled: true,
+                intersect: false,
+                shared: false,
                 y: {
                   formatter: function (value) {
                     return value.toLocaleString('en-IN');
                   }
-                }
+                },
+                // onDatasetHover: {
+                //   highlightDataSeries: true
+                // }
               },
               legend: {
                 show: true,
