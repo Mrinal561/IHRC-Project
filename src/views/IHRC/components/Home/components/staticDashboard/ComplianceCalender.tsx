@@ -198,8 +198,20 @@ const ComplianceCalendar: React.FC<ComplianceCalendarProps> = ({
   useEffect(() => {
     const handleFinancialYearChange = (event: CustomEvent) => {
       const newFinancialYear = event.detail;
+     
       setFinancialYear(newFinancialYear);
       sessionStorage.setItem(FINANCIAL_YEAR_KEY, newFinancialYear);
+      const startYear = parseInt(newFinancialYear.split('-')[0], 10);
+    
+    // Explicitly create a new date for April of the starting year
+    const newDisplayDate = new Date(startYear, 3, 1); // April 1st (month is 0-indexed)
+    
+    // Force update both states
+    setCurrentMonth(newDisplayDate);
+    setValue(newDisplayDate);
+    
+  
+
     };
 
     window.addEventListener(
@@ -313,7 +325,13 @@ const ComplianceCalendar: React.FC<ComplianceCalendarProps> = ({
   };
 
   const handleMonthChange = (date: Date) => {
-    setCurrentMonth(date);
+    // Only allow navigation within the current financial year
+    const financialYearStart = getFinancialYearStartDate(financialYear);
+    const financialYearEnd = new Date(financialYearStart.getFullYear() + 1, 2, 31); // March 31 of next year
+    
+    if (date >= financialYearStart && date <= financialYearEnd) {
+      setCurrentMonth(date);
+    }
   };
 
   // Get filtered dates for dialog (current month only)
@@ -328,17 +346,25 @@ const ComplianceCalendar: React.FC<ComplianceCalendarProps> = ({
     });
   };
 
-  const getFinancialYearStart = (financialYear: string | null): Date => {
+
+  const getFinancialYearStartDate = (financialYear: string | null): Date => {
     if (!financialYear) return new Date();
     
-    const [startYear] = financialYear.split('-').map(Number);
+    // Very explicit parsing to ensure we get the correct year
+    const yearParts = financialYear.split('-');
+    const startYear = parseInt(yearParts[0], 10);
+    
+    // Ensure we have a valid year
+    if (isNaN(startYear)) return new Date();
+    
+    console.log("Financial year start parsed as:", startYear);
     return new Date(startYear, 3, 1); // April 1st of start year
   };
 
 
   return (
     <Card className="p-0 border-none custom-card-body">
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-3">
         {/* Calendar Section */}
         <div className="flex-1 md:w-[60%]">
           <div className="flex items-center justify-between mb-4">
@@ -346,7 +372,7 @@ const ComplianceCalendar: React.FC<ComplianceCalendarProps> = ({
               Compliance Calendar {financialYear ? `(${financialYear})` : ''}
             </h2>
           </div>
-          <div className="bg-white dark:bg-gray-800 h-[180px]">
+          <div className="bg-white dark:bg-gray-800">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -357,8 +383,9 @@ const ComplianceCalendar: React.FC<ComplianceCalendarProps> = ({
               </div>
             ) : (
               <Calendar
-                className="border-none h-full"
-               value={getFinancialYearStart(financialYear)}
+                className="border-none"
+                value={currentMonth}
+                month={currentMonth}
                 onMonthChange={handleMonthChange}
                 dayClassName={(date, { selected }) => {
                   const isDueDate = highlightDates(date);
@@ -415,7 +442,7 @@ const ComplianceCalendar: React.FC<ComplianceCalendarProps> = ({
             </h3>
           </div>
           {loading ? (
-            <div className="space-y-4 h-[380px] overflow-y-auto">
+            <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="animate-pulse flex items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <div className="flex-1">
@@ -438,7 +465,7 @@ const ComplianceCalendar: React.FC<ComplianceCalendarProps> = ({
               </div>
             </div>
           ) : (
-            <div className="space-y-4 h-[380px] overflow-y-auto pr-2">
+            <div className="space-y-3">
               {groupedUpcomingDates.map((item, index) => (
                 <div
                   key={index}
