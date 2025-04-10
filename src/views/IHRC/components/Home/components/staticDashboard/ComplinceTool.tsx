@@ -185,6 +185,19 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
                   donut: {
                     labels: {
                       show: true,
+                      name: {
+                        fontSize: '12px',
+                        offsetY: -10, // Move the label up slightly
+
+                      },
+                      value: {
+                        show: true,
+                        fontSize: '10px', // Reduced font size for the value
+                        formatter: function(val) {               
+                          return parseFloat(val).toLocaleString('en-US');
+                        },
+                        offsetY: 5
+                      },
                     }
                   }
                 }
@@ -198,7 +211,7 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
               tooltip: {
                 y: {
                   formatter: function (val) {
-                    return val.toLocaleString();
+                    return val.toLocaleString('en-US');
                   }
                 }
               },

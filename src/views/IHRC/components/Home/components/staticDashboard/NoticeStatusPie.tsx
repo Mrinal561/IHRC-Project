@@ -413,7 +413,7 @@ const NoticeStatusPie: React.FC<NoticeStatusProps> = ({
       background: 'transparent'
     },
     // colors: ['#ed3237', '#059669'],
-    colors: [ '#d20000', '#00a249',],    
+    colors: [ '#00a249', '#d20000'],    
     labels: chartData.labels,
     legend: {
       show: false

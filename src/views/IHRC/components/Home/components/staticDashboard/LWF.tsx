@@ -363,9 +363,22 @@ const Lwf: React.FC<ComplianceStatusProps> = ({
                   donut: {
                     labels: {
                       show: true,
-                    },
-                  },
-                },
+                      name: {
+                        fontSize: '12px',
+                        offsetY: -10, // Move the label up slightly
+
+                      },
+                      value: {
+                        show: true,
+                        fontSize: '10px', // Reduced font size for the value
+                        formatter: function(val) {               
+                          return parseFloat(val).toLocaleString('en-US');
+                        },
+                        offsetY: 5
+                      },
+                    }
+                  }
+                }
               },
               dataLabels: {
                 enabled: false,
