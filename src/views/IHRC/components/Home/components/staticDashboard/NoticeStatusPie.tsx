@@ -347,6 +347,7 @@ import { ApexOptions } from 'apexcharts';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
+import { HiOutlineViewGrid } from 'react-icons/hi';
 
 interface NoticeStatusProps {
   companyId?: string | number;
@@ -502,10 +503,15 @@ const NoticeStatusPie: React.FC<NoticeStatusProps> = ({
        >
          <div className="p-0 flex justify-center items-center">
            {loading ? (
-             <div className="py-10 text-gray-400">Loading...</div>
-           ) : isNoDataAvailable ? (
-             <div className="py-10 text-gray-400">No Data Available</div>
-           ) : (
+                             <div className="py-10 text-gray-400 text-center">Loading remittance data...</div>
+                           ) : isNoDataAvailable ? (
+                             <div className="flex items-center justify-center pt-4 w-full">
+                               <div className="flex flex-col items-center justify-center text-gray-500">
+                              <HiOutlineViewGrid className="w-8 h-8 mb-4 text-gray-300" />
+                                 <p className="text-center">No Data Available</p>
+                               </div>
+                             </div>
+                           ) : (
              <Chart
                options={options}
                series={chartData.series}
