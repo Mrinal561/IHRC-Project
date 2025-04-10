@@ -1,111 +1,7 @@
-// import React from 'react'
-// import Timeline from '@/components/ui/Timeline'
-// import Avatar from '@/components/ui/Avatar'
-// import Badge from '@/components/ui/Badge'
-// import Card from '@/components/ui/Card'
-// import Tag from '@/components/ui/Tag'
-// import { AlertCircle, FileText, Clock, Upload } from 'lucide-react'
-
-// const TimelineAvatar = ({ children, ...rest }) => {
-//     return (
-//         <Avatar {...rest} size={25} shape="circle">
-//             {children}
-//         </Avatar>
-//     )
-// }
-
-// const Updateds = () => {
-//     return (
-//         <div className="max-w-[700px]">
-//             <div className="flex justify-between items-center mb-6">
-//                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-//                     Latest Updates
-//                 </h2>
-//                 <button className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
-//                     View All
-//                 </button>
-//             </div>
-//             <Timeline>
-//                 <Timeline.Item
-//                 // media={
-//                 //     <TimelineAvatar className="bg-blue-500 text-white">
-//                 //         <Upload size={14} />
-//                 //     </TimelineAvatar>
-//                 // }
-//                 >
-//                     <p className="my-1 flex items-center">
-//                     <span className="font-semibold text-gray-900 dark:text-gray-100">
-//                             23.02/2025
-//                         </span>
-//                         <span className="mx-2">-</span>
-//                         <span>
-//                            Process Flow for Delinking of Erroneously Linked Member ID's from UAN.{' '}
-//                         </span>
-//                     </p>
-//                 </Timeline.Item>
-//                 <Timeline.Item
-//                 // media={
-//                 //     <TimelineAvatar className="bg-blue-500 text-white">
-//                 //         <Upload size={14} />
-//                 //     </TimelineAvatar>
-//                 // }
-//                 >
-//                     <p className="my-1 flex items-center">
-//                         <span className="font-semibold text-gray-900 dark:text-gray-100">
-//                             11.12/2024
-//                         </span>
-//                         <span className="mx-2">-</span>
-//                         <span>
-//                            Kerla LWF! Online Payment Mode Enabled.{' '}
-//                         </span>
-//                     </p>
-//                 </Timeline.Item>
-//                 <Timeline.Item
-//                 // media={
-//                 //     <TimelineAvatar className="bg-blue-500 text-white">
-//                 //         <Upload size={14} />
-//                 //     </TimelineAvatar>
-//                 // }
-//                 >
-//                     <p className="my-1 flex items-center">
-//                         <span className="font-semibold text-gray-900 dark:text-gray-100">
-//                             05.12/2024
-//                         </span>
-//                         <span className="mx-2">-</span>
-//                         <span>
-//                         EPFO EXTENSION OF TIME - UAN Activation and Seeding Bank Account with Aadhar for availing the benefits under ELI Scheme.{' '}
-//                         </span>
-//                     </p>
-//                 </Timeline.Item>
-//                 <Timeline.Item
-//                 // media={
-//                 //     <TimelineAvatar className="bg-blue-500 text-white">
-//                 //         <Upload size={14} />
-//                 //     </TimelineAvatar>
-//                 // }
-//                 >
-//                     <p className="my-1 flex items-center">
-//                         <span className="font-semibold text-gray-900 dark:text-gray-100">
-//                             18.07/2025
-//                         </span>
-//                         <span className="mx-2">-</span>
-//                         <span>
-//                         Haryana LWF! Option of monthly payment available on the online portal. {' '}
-//                         </span>
-//                     </p>
-//                 </Timeline.Item>
-//             </Timeline>
-//         </div>
-//     )
-// }
-
-// export default Updateds
-
-
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Timeline from '@/components/ui/Timeline';
-import latestUpdates from './latestUpdates.json';
+import { Tooltip } from '@/components/ui';
+import { useNavigate } from 'react-router-dom';
 
 interface LatestUpdate {
   title: string;
@@ -113,9 +9,56 @@ interface LatestUpdate {
   date: string;
 }
 
-const Updateds = () => {
-  // Type assertion if needed
-  const updates: LatestUpdate[] = latestUpdates as LatestUpdate[];
+const Updates = () => {
+  const [updates, setUpdates] = useState<LatestUpdate[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUpdates = async () => {
+      try {
+        const response = await fetch('https://ihrcgroup.com/api/latest-updates');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setUpdates(data.slice(0, 6));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUpdates();
+  }, []);
+
+  // Function to truncate text and add ellipsis
+  const truncateText = (text: string, maxLength: number = 60) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
+  // Function to handle title click
+  const handleTitleClick = (slug: string) => {
+    window.open(`https://www.ihrcgroup.com/blog/${slug}`, '_blank');
+  };
+
+  // Function to handle View All click
+  const handleViewAllClick = () => {
+    window.open('https://www.ihrcgroup.com/blog', '_blank');
+  };
+
+  if (loading) {
+    return <div className="max-w-[700px]">Loading latest updates...</div>;
+  }
+
+  if (error) {
+    return <div className="max-w-[700px] text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="max-w-[700px]">
@@ -123,7 +66,10 @@ const Updateds = () => {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Latest Updates
         </h2>
-        <button className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+        <button 
+          className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          onClick={handleViewAllClick}
+        >
           View All
         </button>
       </div>
@@ -135,7 +81,14 @@ const Updateds = () => {
                 {update.date}
               </span>
               <span className="mx-2">-</span>
-              <span>{update.title}</span>
+              <Tooltip title={update.title}>
+                <span 
+                  className="cursor-pointer hover:text-blue-500 transition-colors"
+                  onClick={() => handleTitleClick(update.slug)}
+                >
+                  {truncateText(update.title)}
+                </span>
+              </Tooltip>
             </p>
           </Timeline.Item>
         ))}
@@ -144,4 +97,4 @@ const Updateds = () => {
   );
 };
 
-export default Updateds;
+export default Updates;
