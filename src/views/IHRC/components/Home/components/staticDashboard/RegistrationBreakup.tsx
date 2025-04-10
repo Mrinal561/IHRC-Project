@@ -142,6 +142,7 @@ import httpClient from '@/api/http-client';
 import React, { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import { Card } from '@/components/ui';
+import { HiOutlineViewGrid } from 'react-icons/hi';
 
 interface RegistrationBreakupProps {
     companyId?: string | number;
@@ -237,14 +238,14 @@ const RegistrationsBreakup: React.FC<RegistrationBreakupProps> = ({
         xaxis: {
             categories: chartData.categories, // Labels from API
         },
-        title: {
-            text: 'Registrations Breakup',
-            align: 'center',
-            style: {
-                fontSize: '16px',
-                fontWeight: 'bold',
-            },
-        },
+        // title: {
+        //     text: 'Registrations Breakup',
+        //     align: 'center',
+        //     style: {
+        //         fontSize: '16px',
+        //         fontWeight: 'bold',
+        //     },
+        // },
         tooltip: {
             enabled: true,
         shared: false,
@@ -275,11 +276,19 @@ const RegistrationsBreakup: React.FC<RegistrationBreakupProps> = ({
     return (
         <div >
             <div>
+            <h4 className="text-base font-bold text-center mb-4">
+            Registrations Breakup
+      </h4>
                 {loading ? (
-                    <div className="py-10 text-gray-400 text-center">Loading registration data...</div>
-                ) : isNoDataAvailable ? (
-                    <div className="py-10 text-gray-400 text-center">No Data Available</div>
-                ) : (
+                       <div className="py-10 text-gray-400 text-center">Loading remittance data...</div>
+                     ) : isNoDataAvailable ? (
+                       <div className="flex items-center justify-center min-h-[300px] w-full">
+                         <div className="flex flex-col items-center justify-center text-gray-500">
+                           <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+                           <p className="text-center">No Data Available</p>
+                         </div>
+                       </div>
+                     ) : (
                     <Chart
                         options={options}
                         series={chartData.data}
