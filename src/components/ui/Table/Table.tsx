@@ -61,7 +61,7 @@ const Table = forwardRef<HTMLElement, TableProps>((props, ref) => {
 
     const wrapperClass = classNames(
         'relative',
-        overflow && 'overflow-x-auto overflow-y-auto max-h-[500px] ref={tableRef}'
+        overflow && 'overflow-x-auto overflow-y-auto max-h-[300px] ref={tableRef}'
     )
 
     const stickyColumnStyles = `

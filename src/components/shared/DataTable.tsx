@@ -540,7 +540,7 @@ function _DataTable<T>(
                         z-index: 9999 !important;
                     }
                 `}</style>
-                <div className="overflow-x-auto overflow-y-auto max-h-[500px]">
+                <div className="overflow-x-auto overflow-y-auto max-h-[300px]">
                     <Table>
                         <Table.THead>
                             {table.getHeaderGroups().map((headerGroup) => (
