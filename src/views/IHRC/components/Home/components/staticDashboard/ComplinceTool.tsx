@@ -46,6 +46,11 @@ const generateMonthOptions = (financialYear: string | null) => {
     return months
 }
 
+const formatIndianNumber = (num: number): string => {
+  const result = new Intl.NumberFormat('en-IN').format(num);
+  return result;
+};
+
 const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
   companyId,
   stateId,
@@ -194,7 +199,7 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
                         show: true,
                         fontSize: '10px', // Reduced font size for the value
                         formatter: function(val) {               
-                          return parseFloat(val).toLocaleString('en-US');
+                          return formatIndianNumber(parseFloat(val));
                         },
                         offsetY: 5
                       },
@@ -211,7 +216,7 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
               tooltip: {
                 y: {
                   formatter: function (val) {
-                    return val.toLocaleString('en-US');
+                    return formatIndianNumber(val);
                   }
                 }
               },
@@ -238,7 +243,7 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
               <div key={index} className="flex flex-col">
                 <span className="text-sm text-gray-600">{label}</span>
                 <span className="font-semibold text-lg">
-                  {series[index].toLocaleString()}
+                {formatIndianNumber(series[index])}
                 </span>
               </div>
             ))}
