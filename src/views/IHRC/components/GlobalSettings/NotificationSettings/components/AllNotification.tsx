@@ -497,9 +497,9 @@ const AllNotifications = () => {
                 <div className="mb-6 flex justify-between items-center">
                     <h4 className="text-lg font-semibold">All Notifications</h4>
                     <div className="flex gap-3">
-                        <CustomDateRangePicker 
+                        {/* <CustomDateRangePicker 
                             onApply={handleDateRangeApply}
-                        />
+                        /> */}
                         <div className="w-[170px]">
                             <OutlinedSelect
                                 label="Filter Notifications"
