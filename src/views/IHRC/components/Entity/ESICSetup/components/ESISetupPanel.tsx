@@ -859,6 +859,25 @@ interface LocationOption {
     district_id: number
 }
 
+// interface FormData {
+//     group_id: number;
+//     company_id: number;
+//     code_Type: string;
+//     code: string;
+//     district_id: number;
+//     location: string;
+//     esi_user: string;
+//     password: string;
+//     certificate?: {
+//       data: string;
+//       filename: string;
+//       mimetype: string;
+//     };
+//     email: string;
+//     mobile_number: string;
+//   }
+
+  
 const ESISetupPanel = ({
     onClose,
     addESISetup,
@@ -922,6 +941,21 @@ const ESISetupPanel = ({
         email: '',
         mobile_number: '',
     })
+
+
+    // const [formData, setFormData] = useState<FormData>({
+    //     group_id: 0,
+    //     company_id: 0,
+    //     code_Type: '',
+    //     code: '',
+    //     district_id: 0,
+    //     location: '',
+    //     esi_user: '',
+    //     password: '',
+    //     email: '',
+    //     mobile_number: ''
+    //     // certificate is optional now
+    //   });
 
     const codeTypeOptions = [
         { value: 'main', label: 'Main' },
@@ -1113,6 +1147,26 @@ const ESISetupPanel = ({
             reader.readAsDataURL(file)
         }
     }
+
+
+    // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const file = e.target.files?.[0];
+    //     if (file) {
+    //         const reader = new FileReader();
+    //         reader.onload = () => {
+    //             const base64String = (reader.result as string).split(',')[1];
+    //             setFormData(prev => ({
+    //                 ...prev,
+    //                 certificate: {
+    //                     data: base64String,  // Pure file content
+    //                     filename: file.name, // Original filename
+    //                     mimetype: file.type  // MIME type
+    //                 }
+    //             }));
+    //         };
+    //         reader.readAsDataURL(file);
+    //     }
+    // };
 
     const validateForm = async () => {
         try {
