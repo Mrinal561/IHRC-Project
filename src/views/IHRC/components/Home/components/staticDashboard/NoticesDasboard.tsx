@@ -61,8 +61,8 @@ interface NoticeStatusProps {
               cell: (props) => {
                   const value = props.getValue() as string;
                   const textColorClass = 
-                  value === 'Closed' ? 'text-red-600' : 
-                  value === 'Open' ? 'text-green-600' : 
+                  value === 'Closed' ? 'text-green-600' : 
+                  value === 'Open' ? 'text-red-600' : 
                   '';
                   return (
                       <Tooltip title={value} placement="top">
@@ -86,9 +86,9 @@ interface NoticeStatusProps {
                    // Determine text color based on the name
                    let textColor = 'text-gray-700';
                    if (row.name.toLowerCase() === 'open') {
-                       textColor = 'text-green-600'; // Yellow for Rented
+                       textColor = 'text-red-600'; // Yellow for Rented
                    } else if (row.name.toLowerCase() === 'closed') {
-                       textColor = 'text-red-600'; // Blue for Owned
+                       textColor = 'text-green-600'; // Blue for Owned
                    }
                                       return (
                                           <Tooltip title={value} placement="top">
