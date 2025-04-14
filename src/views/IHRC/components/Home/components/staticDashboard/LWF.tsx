@@ -112,7 +112,7 @@ const Lwf: React.FC<ComplianceStatusProps> = ({
             setLoading(true);
             try {
               const selectedOption = groupOptions.find(opt => opt.value === currentGroup);
-              const response = await httpClient.get(endpoints.graph.pfremittanceBreakup(), {
+              const response = await httpClient.get(endpoints.graph.lwfremittanceBreakup(), {
                 params: {
                   companyId,
                   stateId,
