@@ -14,7 +14,7 @@ const Cover = ({ children, content, ...rest }: CoverProps) => {
             <div
                 className="col-span-2 bg-no-repeat bg-cover py-6 px-16 flex-col justify-between bg-white dark:bg-gray-800 hidden lg:flex"
                 style={{
-                    backgroundImage: `url('/img/others/auth-cover-bg.jpg')`,
+                    backgroundImage: `url('/ihrc/img/others/auth-cover-bg.jpg')`,
                 }}
             >
                 <Logo mode="dark" />

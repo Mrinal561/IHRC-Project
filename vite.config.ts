@@ -19,7 +19,7 @@ export default defineConfig({
             '@': path.join(__dirname, 'src'),
         },
     },
-    base: '/',
+    base: '/ihrc/',
     build: {
         outDir: 'dist',
     },
