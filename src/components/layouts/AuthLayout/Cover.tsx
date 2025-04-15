@@ -8,13 +8,18 @@ interface CoverProps extends CommonProps {
     content?: ReactNode
 }
 
+
+const base = import.meta.env.VITE_BASE_NAME || ''
+
+
+
 const Cover = ({ children, content, ...rest }: CoverProps) => {
     return (
         <div className="grid lg:grid-cols-3 h-full">
             <div
                 className="col-span-2 bg-no-repeat bg-cover py-6 px-16 flex-col justify-between bg-white dark:bg-gray-800 hidden lg:flex"
                 style={{
-                    backgroundImage: `url('/ihrc/img/others/auth-cover-bg.jpg')`,
+                    backgroundImage: `url('${base ? `/${base}` : ''}/img/others/auth-side-bg.jpg')`,
                 }}
             >
                 <Logo mode="dark" />

@@ -73,7 +73,7 @@ import appConfig from '@/configs/app.config'
 import './locales'
 import { useEffect, useState } from 'react'
 
-const environment = process.env.NODE_ENV
+const base = import.meta.env.VITE_BASE_NAME || ''
 
 /**
  * Set enableMock(Default false) to true at configs/app.config.js
@@ -100,10 +100,12 @@ function App() {
         })
     }
 
+
+
     return (
         <PersistGate loading={null} persistor={persistor}>
             {!loading && (
-                <BrowserRouter basename="ihrc">
+                <BrowserRouter basename={base}>
                     <Theme>
                         <Layout />
                     </Theme>
