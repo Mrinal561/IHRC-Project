@@ -20,11 +20,17 @@ interface UploadedESIDetailsProps {
   companyId:string;
 }
 
+
+
+const FINANCIAL_YEAR_KEY = 'selectedFinancialYear'
+const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged';
+
 const UploadedESIDetails: React.FC<UploadedESIDetailsProps> = ({ onBack, loading, groupId, companyId }) => {
   const navigate = useNavigate();
   const [data, setData] = useState<esiChallanData[]>([]);
 const [isLoading, setIsLoading] = useState(false);
 const {login} = store.getState();
+  const [financialYear, setFinancialYear] = useState(sessionStorage.getItem(FINANCIAL_YEAR_KEY));
 const [pagination, setPagination] = useState({
   total: 0,
   pageIndex: 1,
@@ -38,13 +44,17 @@ const params: any = {
     console.log(login)
     try {
         setIsLoading(true)
-      const res = await httpClient.get(endpoints.esiTracker.getAll(), {
-        params: {
+        const params: any = {
           page,
           page_size: pageSize,
           'group_id[]': login.user.user?.group_id,
           'company_id[]': login.user.user?.company_id,
-        },
+        };
+        if (financialYear) {
+          params['financial_year'] = financialYear
+      }
+      const res = await httpClient.get(endpoints.esiTracker.getAll(), {
+        params,
       });
       console.log(res.data.data)
       setData(res.data.data);
