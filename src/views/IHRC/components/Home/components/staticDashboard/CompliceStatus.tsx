@@ -103,6 +103,7 @@ const ComplianceStatus: React.FC<ComplianceStatusProps> = ({
     }
   }, [])
   
+  
   // Handler for dropdown changes
   useEffect(() => {
     const fetchRemittanceData = async () => {
