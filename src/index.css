@@ -181,5 +181,10 @@
  display: none;
 }
 .table-custom-responsive .overflow-x-auto{
-  max-height: 385px !important;
+  max-height: 380px !important;
+}
+@media only screen and (min-width: 1599px) and (max-width: 1900px) {
+  .table-custom-responsive .overflow-x-auto{
+    max-height: 392px !important;
+  }
 }

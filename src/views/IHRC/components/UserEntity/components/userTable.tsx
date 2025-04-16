@@ -444,7 +444,7 @@ const UserTable: React.FC<{
     }
 
     return (
-        <div className="relative">
+        <div className="relative table-custom-responsive">
             {userTableData.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
                     <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
