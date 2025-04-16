@@ -937,13 +937,15 @@ const ESISetupPanel = ({
     ]
 
     const showNotification = (
-        type: 'success' | 'info' | 'danger' | 'warning',
+        type: 'success' | 'info' | 'error' | 'warning',
         message: string,
     ) => {
         toast.push(
             <Notification
                 title={type.charAt(0).toUpperCase() + type.slice(1)}
                 type={type}
+                closable= {true}
+
             >
                 {message}
             </Notification>,
@@ -956,7 +958,7 @@ const ESISetupPanel = ({
 
         // Validate file size (20MB max)
         if (file.size > 20 * 1024 * 1024) {
-            showNotification('danger', 'File size exceeds 20MB limit')
+            showNotification('error', 'File size exceeds 20MB limit')
             return
         }
 
@@ -971,7 +973,7 @@ const ESISetupPanel = ({
         ]
 
         if (!allowedTypes.includes(file.type)) {
-            showNotification('danger', 'Only PDF, ZIP, JPEG, PNG, and GIF files are allowed')
+            showNotification('error', 'Only PDF, ZIP, JPEG, PNG, and GIF files are allowed')
             return
         }
 
@@ -996,7 +998,7 @@ const ESISetupPanel = ({
             }))
         } catch (error) {
             console.error('File upload error:', error)
-            showNotification('danger', 'Failed to process file')
+            showNotification('error', 'Failed to process file')
         }
     }
 
@@ -1014,7 +1016,7 @@ const ESISetupPanel = ({
             }
         } catch (error) {
             console.error('Failed to load states:', error)
-            showNotification('danger', 'Failed to load states')
+            showNotification('error', 'Failed to load states')
         } finally {
             setIsLoading(false)
         }
@@ -1048,7 +1050,7 @@ const ESISetupPanel = ({
             setLoading(true)
             const isValid = await validateForm()
             if (!isValid) {
-                showNotification('danger', 'Please fix the validation errors')
+                showNotification('error', 'Please fix the validation errors')
                 return
             }
 

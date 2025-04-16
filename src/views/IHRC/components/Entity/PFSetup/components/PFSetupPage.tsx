@@ -58,9 +58,11 @@ const pfSetupSchema = yup.object().shape({
         .required('Registration date is required')
         .max(new Date(), 'Registration date cannot be in the future'),
 
-    // register_certificate: yup
-    //     .string()
-    //     .required('Registration certificate is required'),
+    register_certificate: yup.object().shape({
+            data: yup.string().required('Registration certificate file is required'),
+            filename: yup.string().required(),
+            mimetype: yup.string().required()
+        }).required('Registration certificate is required'),
 
     signatory_data: yup
         .array()
@@ -79,6 +81,12 @@ const pfSetupSchema = yup.object().shape({
         .min(1, 'At least one signatory is required'),
 })
 
+interface CertificateData {
+    data: string
+    filename: string
+    mimetype: string
+}
+
 interface PFSetupData {
     group_id: number
     company_id: number
@@ -87,7 +95,7 @@ interface PFSetupData {
     location: string
     pf_code: string
     register_date: Date | null
-    register_certificate: string
+    register_certificate?: CertificateData
     signatory_data: SignatoryData[]
     pf_user: string
     password: string
@@ -187,7 +195,6 @@ const PFSetupPage: React.FC = () => {
         location: '',
         pf_code: '',
         register_date: null,
-        register_certificate: '',
         signatory_data: [],
         pf_user: '',
         password: '',
@@ -206,29 +213,71 @@ const PFSetupPage: React.FC = () => {
         })
     }
 
+     const showNotification = (
+            type: 'success' | 'info' | 'error' | 'warning',
+            message: string,
+        ) => {
+            toast.push(
+                <Notification
+                    title={type.charAt(0).toUpperCase() + type.slice(1)}
+                    type={type}
+                    closable= {true}
+                >
+                    {message}
+                </Notification>,
+            )
+        }
+
     // Handle registration certificate upload
     const handleRegistrationCertificateUpload = async (
         e: React.ChangeEvent<HTMLInputElement>,
     ) => {
         const file = e.target.files?.[0]
-        if (file) {
-            try {
-                const base64String = await convertToBase64(file)
-                setPfSetupData((prev) => ({
-                    ...prev,
-                    register_certificate: base64String,
-                }))
-            } catch (error) {
-                console.error(
-                    'Error converting registration certificate to base64:',
-                    error,
-                )
-                toast.push(
-                    <Notification title="Error" closable={true} type="danger">
-                        Failed to process registration certificate
-                    </Notification>,
-                )
-            }
+        if (!file) return
+
+        // Validate file size (20MB max)
+        if (file.size > 20 * 1024 * 1024) {
+            showNotification('error', 'File size exceeds 20MB limit')
+            return
+        }
+
+        // Validate file type
+        const allowedTypes = [
+            'application/pdf',
+            'application/zip',
+            'application/x-zip-compressed',
+            'image/jpeg',
+            'image/png',
+            'image/gif'
+        ]
+
+        if (!allowedTypes.includes(file.type)) {
+            showNotification('error', 'Only PDF, ZIP, JPEG, PNG, and GIF files are allowed')
+            return
+        }
+
+        try {
+            const base64String = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = () => {
+                    const result = reader.result as string
+                    resolve(result.split(',')[1])
+                }
+                reader.onerror = reject
+                reader.readAsDataURL(file)
+            })
+
+            setPfSetupData(prev => ({
+                ...prev,
+                registration_certificate: {
+                    data: base64String,
+                    filename: file.name,
+                    mimetype: file.type
+                }
+            }))
+        } catch (error) {
+            console.error('File upload error:', error)
+            showNotification('error', 'Failed to process file')
         }
     }
 
@@ -796,12 +845,19 @@ const PFSetupPage: React.FC = () => {
                             <span className="text-red-500">*</span>
                         </label>
                         <Input
-                            accept=".pdf,.zip,.jpg"
+                            accept=".pdf,.zip,.jpg,.jpeg,.png,.gif,application/pdf,application/zip,image/jpeg,image/png,image/gif"                            
                             type="file"
                             onChange={handleRegistrationCertificateUpload}
                         />
-                        {getErrorMessage('register_certificate')}
-                    </div>
+<div style={{ height: '10px' }}>
+                        {errors.certificate && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {typeof errors.certificate === 'string' 
+                                    ? errors.certificate 
+                                    : 'Certificate is required'}
+                            </p>
+                        )}
+                    </div>                    </div>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
