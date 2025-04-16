@@ -164,15 +164,15 @@
   width: 30px;
   height: 30px;
 }
-/* .sticky-right::before, .sticky-left::before{
+.sticky-right::before, .sticky-left::before{
   position: absolute;
-  top: 0px;
+  top: -0.5px;
   width: 105%;
   height: 1px;
   content: '';
  left: -5%;
   border-bottom: 1px solid #ddd;
-} */
+}
 .sticky-right, .sticky-left{
   padding: 5px 10px !important;
  
