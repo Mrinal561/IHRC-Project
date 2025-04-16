@@ -62,7 +62,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [isLoadingBranches, setIsLoadingBranches] = useState(false);
 
-  const showNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const showNotification = (type: 'success' | 'info' | 'error' | 'warning', message: string) => {
     toast.push(
       <Notification
         title={type.charAt(0).toUpperCase() + type.slice(1)}
@@ -94,7 +94,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
       }
     } catch (error) {
       console.error('Failed to load company group:', error);
-      showNotification('danger', 'Failed to load company group');
+      showNotification('error', 'Failed to load company group');
     } finally {
       setIsLoading(false);
     }
@@ -104,16 +104,16 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
   const loadCompanies = async (groupId: string) => {
     try {
       const groupIdParam = [groupId];
-      const { data } = await httpClient.get(endpoints.company.getAll(), {
+      const { data } = await httpClient.get(endpoints.company.companyList(), {
         params: {
           'group_id[]': [groupId]
         }
       });
-      console.log(data.data);
-      console.log('company id ' + data.data.id);
+      console.log(data);
+      console.log('company id ' + data.id);
 
-      if (data?.data) {
-        const formattedCompanies = data.data.map((company: any) => ({
+      if (Array.isArray(data)) {
+        const formattedCompanies = data.map((company: any) => ({
           label: company.name,
           value: String(company.id),
         }));
@@ -135,7 +135,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
         }
     } catch (error: any) {
       console.error('Failed to load companies:', error);
-      showNotification('danger', error.response?.data?.message || 'Failed to load companies');
+      showNotification('error', error.response?.data?.message);
       setCompanies([]);
     }
   };
@@ -155,7 +155,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
       console.log('state  id ' + response.data.id);
     } catch (error) {
       console.error('Failed to load states:', error);
-      showNotification('danger', 'Failed to load states');
+      showNotification('error', 'Failed to load states');
     }
   };
 
@@ -177,7 +177,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
       console.log('district  id ' + response.data.id);
     } catch (error) {
       console.error('Failed to load districts:', error);
-      showNotification('danger', 'Failed to load districts');
+      showNotification('error', 'Failed to load districts');
       setDistricts([]);
     }
   };
@@ -260,7 +260,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
       console.log(data.data);
     } catch (error) {
       console.error('Failed to load branches:', error);
-      showNotification('danger', 'Failed to load branches');
+      showNotification('error', 'Failed to load branches');
       setBranches([]);
       setSelectedBranch(null);
       onBranchChange?.(null);
