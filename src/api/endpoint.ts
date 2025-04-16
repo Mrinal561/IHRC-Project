@@ -24,6 +24,7 @@ export const endpoints = {
         delete: (id: string) => api(`companyadmin/company/${id}`),
         downloadFormat: () => api(`/companyadmin/company/export-template`),
         bulkCreate: () => api(`/companyadmin/company/bulk-upload`),
+        companyList: () => api('company')
     },
     common: {
         getAll: () => api('/company-group'),

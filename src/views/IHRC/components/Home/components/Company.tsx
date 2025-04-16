@@ -101,17 +101,13 @@ const Company: React.FC<CompanyProps> = ({
   const loadCompanies = async (groupId: string) => {
     try {
       const groupIdParam = [groupId];
-      const { data } = await httpClient.get(endpoints.company.getAll(), {
+      const { data } = await httpClient.get(endpoints.company.companyList(), {
         params: {
           'group_id[]': [groupId]
         }
       });
-      console.log(data.data);
-      console.log('company id ' + data.data.id);
-
-
-      if (data?.data) {
-        const formattedCompanies = data.data.map((company: any) => ({
+      if (Array.isArray(data)) {
+        const formattedCompanies = data.map((company: any) => ({
           label: company.name,
           value: String(company.id),
         }));

@@ -153,14 +153,14 @@ const PFIWTrackerFilter: React.FC<PFIWTrackerFilterProps> = ({ onFilterChange })
   // Load Companies based on selected Company Group
   const loadCompanies = async (groupId: string) => {
     try {
-      const { data } = await httpClient.get(endpoints.company.getAll(), {
+      const { data } = await httpClient.get(endpoints.company.companyList(), {
         params: {
           'group_id[]': [groupId]
         }
       });
 
-      if (data?.data) {
-        const formattedCompanies = data.data.map((company: any) => ({
+      if (Array.isArray(data)) {
+        const formattedCompanies = data.map((company: any) => ({
           label: company.name,
           value: String(company.id),
         }));
