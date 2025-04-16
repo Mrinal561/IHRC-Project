@@ -180,3 +180,6 @@
 .table-default thead > tr > th:last-child::before, .table-default thead > tr > th:first-child::before{
  display: none;
 }
+.table-custom-responsive .overflow-x-auto{
+  max-height: 385px !important;
+}
