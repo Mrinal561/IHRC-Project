@@ -58,11 +58,11 @@ const pfSetupSchema = yup.object().shape({
         .required('Registration date is required')
         .max(new Date(), 'Registration date cannot be in the future'),
 
-    register_certificate: yup.object().shape({
-            data: yup.string().required('Registration certificate file is required'),
-            filename: yup.string().required(),
-            mimetype: yup.string().required()
-        }).required('Registration certificate is required'),
+    // register_certificate: yup.object().shape({
+    //         data: yup.string().required('Registration certificate file is required'),
+    //         filename: yup.string().required(),
+    //         mimetype: yup.string().required()
+    //     }).required('Registration certificate is required'),
 
     signatory_data: yup
         .array()
