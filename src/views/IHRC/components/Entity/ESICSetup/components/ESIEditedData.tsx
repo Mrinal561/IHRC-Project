@@ -249,12 +249,13 @@ const ESIEditedData: React.FC<ESIEditedDataProps> = ({
             'application/zip',
             'application/x-zip-compressed',
             'image/jpeg',
+            'image/jpg',
             'image/png',
             'image/gif'
         ]
 
         if (!allowedTypes.includes(file.type)) {
-            showNotification('danger', 'Only PDF, ZIP, JPEG, PNG, and GIF files are allowed')
+            showNotification('danger', 'Only PDF, ZIP, JPEG, JPG PNG, and GIF files are allowed')
             return
         }
 
@@ -497,7 +498,7 @@ const ESIEditedData: React.FC<ESIEditedDataProps> = ({
                             <>
                             <Tooltip title = "View Document">
                                 <Button
-                               
+                                className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
                                     onClick={handleDocumentView}
                                     >
                                     <Eye size={20} />

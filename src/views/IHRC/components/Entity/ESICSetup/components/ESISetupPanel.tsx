@@ -187,12 +187,13 @@ const ESISetupPanel = ({
             'application/zip',
             'application/x-zip-compressed',
             'image/jpeg',
+            'image/jpg',
             'image/png',
             'image/gif'
         ]
 
         if (!allowedTypes.includes(file.type)) {
-            showNotification('error', 'Only PDF, ZIP, JPEG, PNG, and GIF files are allowed')
+            showNotification('error', 'Only PDF, ZIP, JPEG, PNG, JPG and GIF files are allowed')
             return
         }
 

@@ -73,59 +73,103 @@ const EditFollowUpDialog = ({ followUpId, onClose, isOpen }) => {
 
    
        // Handle file upload
-       const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-           const file = e.target.files?.[0];
-           if (file) {
-               try {
-                   const base64String = await convertToBase64(file);
-                   setFileBase64(base64String); // Store base64 string for new file
-               } catch (error) {
-                   console.error('Error converting file:', error);
-               }
-           }
-       };
+     // Update the handleFileChange function
+const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      // Convert file to base64
-      const convertToBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
+    // Check file size (20MB limit)
+    if (file.size > 20 * 1024 * 1024) {
+        toast.push(
+            <Notification title="Error" type="error" closable={true}>
+                File size should not exceed 20MB
+            </Notification>
+        );
+        return;
+    }
+
+    // Check allowed file types
+    const allowedTypes = [
+        'application/pdf',
+        'application/zip',
+        'application/x-zip-compressed',
+        'image/jpeg',
+        'image/png',
+        'image/gif'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+        toast.push(
+            <Notification title="Error" type="error" closable={true}>
+                Only PDF, ZIP, JPG, PNG, GIF files are allowed
+            </Notification>
+        );
+        return;
+    }
+
+    try {
+        const base64String = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => {
-                const base64String = (reader.result as string).split(',')[1];
-                resolve(base64String);
+                const result = reader.result as string;
+                resolve(result.split(',')[1]); // Extract just the base64 part
             };
             reader.onerror = reject;
             reader.readAsDataURL(file);
         });
-    };
 
+        const documentData = {
+            data: base64String,
+            filename: file.name,
+            mimetype: file.type
+        };
 
-    const handleSubmit = async () => {
-        try {
-            setIsLoading(true);
-            const payload = {
-                notice_type: form.notice_type,
-                notice_date: form.notice_date,
-                reference_number: form.reference_number,
-                notice_detail: form.notice_detail,
-                notice_document: fileBase64 ? fileBase64 : form.notice_document,
-            };
+        setForm(prev => ({
+            ...prev,
+            notice_document: documentData
+        }));
+        
+    } catch (error) {
+        console.error('Error processing file:', error);
+        toast.push(
+            <Notification title="Error" type="error" closable={true}>
+                Failed to process file
+            </Notification>
+        );
+    }
+};
 
-            await httpClient.put(endpoints.noticeTracker.updateFollowupNotice(followUpId), payload);
+// Update the handleSubmit function
+const handleSubmit = async () => {
+    try {
+        setIsLoading(true);
+        
+        // Prepare the payload with proper document format
+        const payload = {
+            notice_type: form.notice_type,
+            notice_date: form.notice_date,
+            reference_number: form.reference_number,
+            notice_detail: form.notice_detail,
+            // Include document only if it exists and is in the correct format
+            notice_document: form.notice_document && typeof form.notice_document === 'object' 
+                ? form.notice_document 
+                : undefined
+        };
 
-            toast.push(
-                <Notification title="Success" type="success" closable={true}>
-                    Follow-up notice updated successfully.
-                </Notification>
-            );
+        await httpClient.put(endpoints.noticeTracker.updateFollowupNotice(followUpId), payload);
 
-            onClose(); // Close the dialog after successful submission
-        } catch (error) {
-            throw error;
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
+        toast.push(
+            <Notification title="Success" type="success" closable={true}>
+                Follow-up notice updated successfully
+            </Notification>
+        );
+        onClose();
+    } catch (error) {
+       throw error
+    } finally {
+        setIsLoading(false);
+    }
+};
      // Handle document view
         const handleDocumentView = (e: React.MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
@@ -204,13 +248,12 @@ const EditFollowUpDialog = ({ followUpId, onClose, isOpen }) => {
                                 accept=".pdf,.jpg,.jpeg,.png,.zip"
                             />
                             <Tooltip title="View Document">
-                                <button
+                                <Button
                                     onClick={handleDocumentView}
                                     className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
-                                    title="View Document"
                                 >
                                     <Eye size={20} />
-                                </button>
+                                </Button>
                             </Tooltip>
                         </div>
                     </div>

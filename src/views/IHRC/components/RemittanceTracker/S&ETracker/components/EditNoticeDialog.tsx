@@ -16,6 +16,12 @@ interface EditNoticeDialogProps {
   onSuccess?: () => void;
 }
 
+interface FileData {
+  data: string;
+  filename: string;
+  mimetype: string;
+}
+
 const EditNoticeDialog: React.FC<EditNoticeDialogProps> = ({
   isOpen,
   onClose,
@@ -24,7 +30,8 @@ const EditNoticeDialog: React.FC<EditNoticeDialogProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [fileBase64, setFileBase64] = useState<string>('');
+  const [fileData, setFileData] = useState<FileData | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const initialFormData = {
     notice_type: '',
@@ -86,18 +93,42 @@ const EditNoticeDialog: React.FC<EditNoticeDialogProps> = ({
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      try {
-        const base64String = await convertToBase64(file);
-        setFileBase64(base64String);
-        setFormData(prev => ({
-          ...prev,
-          notice_document: base64String
-        }));
-      } catch (error) {
-        console.error('Error converting file:', error);
-        showErrorNotification('Error processing file');
-      }
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/zip',
+      'application/x-zip-compressed',
+      'image/jpeg',
+      'image/png',
+      'image/gif'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      showErrorNotification('Only PDF, ZIP, and image files (JPEG, PNG, GIF) are allowed');
+      return;
+    }
+
+    // Validate file size (20MB max)
+    if (file.size > 20 * 1024 * 1024) {
+      showErrorNotification('File size must be less than 20MB');
+      return;
+    }
+
+    setSelectedFile(file);
+
+    try {
+      const base64String = await convertToBase64(file);
+      const fileData = {
+        data: base64String,
+        filename: file.name,
+        mimetype: file.type
+      };
+      setFileData(fileData);
+    } catch (error) {
+      console.error('Error converting file:', error);
+      showErrorNotification('Error processing file');
     }
   };
 
@@ -105,6 +136,7 @@ const EditNoticeDialog: React.FC<EditNoticeDialogProps> = ({
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
+        // Extract base64 data (remove the data URL prefix)
         const base64String = (reader.result as string).split(',')[1];
         resolve(base64String);
       };
@@ -119,7 +151,7 @@ const EditNoticeDialog: React.FC<EditNoticeDialogProps> = ({
     try {
       setIsLoading(true);
       
-      const noticeData = {
+      const noticeData: any = {
         notice_type: formData.notice_type,
         notice_type_id: formData.notice_type_id,
         notice_date: formData.notice_date ? formData.notice_date.toISOString() : null,
@@ -127,8 +159,12 @@ const EditNoticeDialog: React.FC<EditNoticeDialogProps> = ({
         notice_detail: formData.notice_detail,
         related_act: formData.related_act,
         related_act_id: formData.related_act_id,
-        notice_document: formData.notice_document
       };
+
+      // Only include document if a new one was selected
+      if (fileData) {
+        noticeData.notice_document = fileData;
+      }
   
       await dispatch(updateNotice({
         id: noticeId.toString(),
@@ -143,7 +179,7 @@ const EditNoticeDialog: React.FC<EditNoticeDialogProps> = ({
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error('Failed to update notice:', error);
+     throw error
     } finally {
       setIsLoading(false);
     }
@@ -211,39 +247,41 @@ const EditNoticeDialog: React.FC<EditNoticeDialogProps> = ({
           </div>
 
           <div className="space-y-2 flex gap-2 flex-col">
-            <label className="text-sm font-medium">Update Notice Copy (PDF/Zip/Image, Max 20MB){' '}</label>
+            <label className="text-sm font-medium">Update Notice Copy (PDF/Zip/Image, Max 20MB)</label>
             <div className='flex gap-2'>
               <Input 
                 type="file"
                 onChange={handleFileChange}
                 className="w-full"
-                accept=".pdf,.jpg,.jpeg,.png,.zip,"
+                accept=".pdf,.jpg,.jpeg,.png,.zip"
               />
-              <Tooltip title="View Document">
-                <button
-                  onClick={handleDocumentView}
-                  className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
-                  title="View Document"
-                >
-                  <Eye size={20} />
-                </button>
-              </Tooltip>
+              {formData.notice_document && (
+                 <Tooltip title = "View Document">
+                                                                           <Button
+                                                                           className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
+                                                                               onClick={handleDocumentView}
+                                                                               >
+                                                                               <Eye size={20} />
+                                                                           </Button>
+                                                                               </Tooltip>
+              )}
             </div>
+           
           </div>
 
           <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                        Details of Notice
-                    </label>
-                    <textarea
-                        className="w-full p-2 border rounded-md h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={formData.notice_detail}
-                        onChange={(e) =>
-                            handleChange('notice_detail', e.target.value)
-                        }
-                        placeholder="Enter notice details..."
-                    />
-                </div>
+            <label className="text-sm font-medium">
+              Details of Notice
+            </label>
+            <textarea
+              className="w-full p-2 border rounded-md h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.notice_detail}
+              onChange={(e) =>
+                handleChange('notice_detail', e.target.value)
+              }
+              placeholder="Enter notice details..."
+            />
+          </div>
         </div>
 
         <div className="flex justify-end mt-6 space-x-2">

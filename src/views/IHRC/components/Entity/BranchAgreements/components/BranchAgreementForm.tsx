@@ -127,6 +127,82 @@ const [loading, setLoading] = useState(false)
     );
   };
 
+  const convertFileToCertificateData = async (file: File): Promise<{
+    data: string;
+    filename: string;
+    mimetype: string;
+  }> => {
+    const base64String = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Split to get only the base64 data without the mime prefix
+        const result = reader.result as string;
+        resolve(result.split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  
+    return {
+      data: base64String,
+      filename: file.name,
+      mimetype: file.type
+    };
+  };
+  
+  // Update your handleFormSubmit function
+  const handleFormSubmit = async (
+    values: FormValues, 
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
+    try {
+      setLoading(true);
+  
+      // Validate required fields
+      if (!values.agreementDocument) {
+        showNotification('error', 'Agreement document is required');
+        return;
+      }
+  
+      // Convert file to the format backend expects
+      const agreementDocument = await convertFileToCertificateData(values.agreementDocument);
+  
+      // Prepare dates in ISO format
+      const startDate = new Date(values.startDate);
+      const endDate = new Date(values.endDate);
+  
+      // Construct the request body exactly as backend expects
+      const requestBody = {
+        branch_id: parseInt(values.branch, 10),
+        agreement_type: values.agreementType,
+        sub_category: values.subCategory,
+        owner_id: parseInt(values.owner_id, 10),
+        partner_name: values.partnerName,
+        partner_number: values.partnerContact,
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
+        applicable_for_all: values.applicableForAllCompany,
+        agreement_document: agreementDocument, // This matches the CertificateData interface
+        created_by: 1 // Replace with actual user ID from your auth system
+      };
+  
+      // Make the API call
+      const response = await httpClient.post(
+        endpoints.branchAgreement.create(),
+        requestBody
+      );
+  
+      showNotification('success', 'Branch agreement created successfully');
+      navigate('/agreements');
+  
+    } catch (error: any) {
+     throw error
+    } finally {
+      setSubmitting(false);
+      setLoading(false);
+    }
+  };
+
   const loadCompanyGroups = async () => {
     try {
       const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
@@ -256,75 +332,75 @@ const [loading, setLoading] = useState(false)
   
 
 
-  const handleFormSubmit = async (
-    values: FormValues, 
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
-  ) => {
-    console.log("form submisiion")
-    try {
-      setLoading(true)
-      if (!values.agreementDocument) {
-        showNotification('error', 'Agreement document is required');
-        return;
-      }
+  // const handleFormSubmit = async (
+  //   values: FormValues, 
+  //   { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  // ) => {
+  //   console.log("form submisiion")
+  //   try {
+  //     setLoading(true)
+  //     if (!values.agreementDocument) {
+  //       showNotification('error', 'Agreement document is required');
+  //       return;
+  //     }
   
-      // Convert file to base64
-      let base64Document = '';
-      if (values.agreementDocument instanceof File) {
-        base64Document = await convertFileToBase64(values.agreementDocument);
-      }
+  //     // Convert file to base64
+  //     let base64Document = '';
+  //     if (values.agreementDocument instanceof File) {
+  //       base64Document = await convertFileToBase64(values.agreementDocument);
+  //     }
   
-      const startDate = new Date(values.startDate);
-      const endDate = new Date(values.endDate);
+  //     const startDate = new Date(values.startDate);
+  //     const endDate = new Date(values.endDate);
   
-      const requestBody = {
-        branch_id: parseInt(values.branch, 10),
-        agreement_type: values.agreementType,
-        sub_category: values.subCategory,
-        owner_id: parseInt(values.owner_id, 10),
-        partner_name: values.partnerName,
-        partner_number: values.partnerContact,
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
-        applicable_for_all: values.applicableForAllCompany,
-        agreement_document: base64Document,
-      };
+  //     const requestBody = {
+  //       branch_id: parseInt(values.branch, 10),
+  //       agreement_type: values.agreementType,
+  //       sub_category: values.subCategory,
+  //       owner_id: parseInt(values.owner_id, 10),
+  //       partner_name: values.partnerName,
+  //       partner_number: values.partnerContact,
+  //       start_date: startDate.toISOString(),
+  //       end_date: endDate.toISOString(),
+  //       applicable_for_all: values.applicableForAllCompany,
+  //       agreement_document: base64Document,
+  //     };
   
-      const response = await httpClient.post(
-        endpoints.branchAgreement.create(),
-        requestBody
-      );
+  //     const response = await httpClient.post(
+  //       endpoints.branchAgreement.create(),
+  //       requestBody
+  //     );
   
-      // Log response for debugging
-      console.log('API Response:', response);
+  //     // Log response for debugging
+  //     console.log('API Response:', response);
   
-      // Only show success and navigate if we get here (no error thrown)
-      showNotification('success', 'Branch agreement created successfully');
-      navigate('/agreements');
+  //     // Only show success and navigate if we get here (no error thrown)
+  //     showNotification('success', 'Branch agreement created successfully');
+  //     navigate('/agreements');
   
-    } catch (error: any) {
-      console.error('Failed to submit form:', error);
+  //   } catch (error: any) {
+  //     console.error('Failed to submit form:', error);
       
-      // More detailed error logging
-      console.error('Error details:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
+  //     // More detailed error logging
+  //     console.error('Error details:', {
+  //       status: error.response?.status,
+  //       data: error.response?.data,
+  //       message: error.message
+  //     });
   
-      if (error.response?.data?.message && Array.isArray(error.response.data.message)) {
-        error.response.data.message.forEach((message: string) => {
-          showNotification('error', message);
-        });
-      } else {
-        const errorMessage = error.response?.data?.message || 'Failed to create branch agreement';
-        showNotification('error', errorMessage);
-      }
-    } finally {
-      setSubmitting(false);
-      setLoading(false)
-    }
-  };
+  //     if (error.response?.data?.message && Array.isArray(error.response.data.message)) {
+  //       error.response.data.message.forEach((message: string) => {
+  //         showNotification('error', message);
+  //       });
+  //     } else {
+  //       const errorMessage = error.response?.data?.message || 'Failed to create branch agreement';
+  //       showNotification('error', errorMessage);
+  //     }
+  //   } finally {
+  //     setSubmitting(false);
+  //     setLoading(false)
+  //   }
+  // };
 return (
     <div className="p-2 bg-white rounded-lg">
       <div className="flex gap-2 items-center mb-3">
@@ -545,19 +621,39 @@ return (
                   id="agreementDocument"
                   name="agreementDocument"
                   type="file"
-                  accept=".pdf,.zip,.jpeg,.jpg,.png,.gif"
-                  onChange={(event) => {
+                  accept=".pdf,.zip,.jpg,.jpeg,.png,.gif,application/pdf,application/zip,image/jpeg,image/png,image/gif"
+                  onChange={async (event) => {
                     const file = event.target.files?.[0];
                     if (file) {
+                      // Validate file size (20MB max)
                       if (file.size > 20 * 1024 * 1024) {
-                        showNotification('danger', 'File size exceeds 20MB limit');
+                        showNotification('error', 'File size exceeds 20MB limit');
                         event.target.value = '';
                         return;
                       }
+                
+                      // Validate file type
+                      const allowedTypes = [
+                        'application/pdf',
+                        'application/zip',
+                        'application/x-zip-compressed',
+                        'image/jpeg',
+                        'image/jpg',
+                        'image/png',
+                        'image/gif'
+                      ];
+                
+                      if (!allowedTypes.includes(file.type)) {
+                        showNotification('error', 'Only PDF, ZIP, JPEG, PNG, and GIF files are allowed');
+                        event.target.value = '';
+                        return;
+                      }
+                
                       setFieldValue('agreementDocument', file);
                     }
                   }}
                   onClick={(event) => {
+                    // Clear previous selection to allow re-selecting same file
                     (event.target as HTMLInputElement).value = '';
                   }}
                 />

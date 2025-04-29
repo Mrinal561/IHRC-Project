@@ -64,8 +64,8 @@ interface BranchFormData {
     lease_status: string
     //   validity: string;
     document?: string
-    se_document: string | null
-    lease_document: string | null
+    se_document: DocumentPayload | null;
+    lease_document: DocumentPayload | null;
     document_validity_type: string
     se_validity?: string
     lease_validity?: string
@@ -84,6 +84,13 @@ interface District {
     id: number
     name: string
 }
+
+interface DocumentPayload {
+    data: string;
+    filename: string;
+    mimetype: string;
+}
+
 
 const validationSchema = yup.object().shape({
     group_id: yup
@@ -167,12 +174,20 @@ const validationSchema = yup.object().shape({
             then: (schema) => schema.required('Lease status is required'),
             otherwise: (schema) => schema.notRequired(),
         }),
-    lease_document: yup
-        .string()
+        lease_document: yup
+        .mixed()
         .nullable()
         .when('type', {
             is: 'rented',
-            then: (schema) => schema.required('Lease document is required'),
+            then: (schema) => schema.required('Lease document is required')
+                .test(
+                    'is-valid-document',
+                    'Lease document must include data, filename and mimetype',
+                    (value) => {
+                        if (!value) return false;
+                        return value.data && value.filename && value.mimetype;
+                    }
+                ),
             otherwise: (schema) => schema.notRequired(),
         }),
     lease_validity: yup
@@ -197,12 +212,20 @@ const validationSchema = yup.object().shape({
             then: (schema) => schema.required('SE status is required'),
             otherwise: (schema) => schema.notRequired(),
         }),
-    se_document: yup
-        .string()
+        se_document: yup
+        .mixed()
         .nullable()
         .when('type', {
             is: (val) => val === 'rented' || val === 'owned',
-            then: (schema) => schema.required('SE document is required'),
+            then: (schema) => schema.required('SE document is required')
+                .test(
+                    'is-valid-document',
+                    'SE document must include data, filename and mimetype',
+                    (value) => {
+                        if (!value) return false;
+                        return value.data && value.filename && value.mimetype;
+                    }
+                ),
             otherwise: (schema) => schema.notRequired(),
         }),
     register_number: yup
@@ -349,8 +372,8 @@ const AddBranchForm: React.FC = () => {
         // },
         // register_number: '',
         lease_status: '',
-        se_document: '',
-        lease_document: '',
+        se_document: null,
+    lease_document: null,
         document_validity_type: 'fixed',
         se_validity: '',
         lease_validity: '',
@@ -680,39 +703,62 @@ const AddBranchForm: React.FC = () => {
         }
     }, [selectedCompany])
 
-    const handleSeDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
+    const handleSeDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader()
-            reader.onload = () => {
-                const base64String = (reader.result as string).split(',')[1]
-                setSeDocument(base64String)
-                setFormData((prev) => ({
+            try {
+                const base64String = await convertFileToBase64(file);
+                setFormData(prev => ({
                     ...prev,
-                    se_document: base64String,
-                }))
+                    se_document: {
+                        data: base64String,
+                        filename: file.name,
+                        mimetype: file.type
+                    },
+                    // document: file.name // Keep this if still needed elsewhere
+                }));
+            } catch (error) {
+                console.error('Error processing SE document:', error);
+                showNotification('error', 'Failed to process SE document');
             }
-            reader.readAsDataURL(file)
         }
-    }
-
-    const handleLeaseDocumentUpload = (
-        e: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-        const file = e.target.files?.[0]
+    };
+    
+    const handleLeaseDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader()
-            reader.onload = () => {
-                const base64String = (reader.result as string).split(',')[1]
-                setLeaseDocument(base64String)
-                setFormData((prev) => ({
+            try {
+                const base64String = await convertFileToBase64(file);
+                setFormData(prev => ({
                     ...prev,
-                    lease_document: base64String,
-                }))
+                    lease_document: {
+                        data: base64String,
+                        filename: file.name,
+                        mimetype: file.type
+                    },
+                    // document: file.name // Keep this if still needed elsewhere
+                }));
+            } catch (error) {
+                console.error('Error processing lease document:', error);
+                showNotification('error', 'Failed to process lease document');
             }
-            reader.readAsDataURL(file)
         }
-    }
+    };
+    
+    // Helper function to convert file to base64
+    const convertFileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                // Extract base64 part (remove data URL prefix)
+                const result = reader.result as string;
+                const base64Data = result.split(',')[1];
+                resolve(base64Data);
+            };
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
+        });
+    };
 
     useEffect(() => {
         setFormData((prev) => ({

@@ -15,6 +15,15 @@ import { createptsetup } from '@/store/slices/ptSetup/ptSetupSlice'
 import * as yup from 'yup'
 import OutlinedPasswordInput from '@/components/ui/OutlinedInput/OutlinedPasswordInput'
 
+
+interface CertificateData {
+    data: string;
+    filename: string;
+    mimetype: string;
+}
+
+
+
 const ptSetupSchema = yup.object().shape({
     state_id: yup
         .number()
@@ -94,7 +103,7 @@ interface ValidationErrors {
     [key: string]: string
 }
 
-interface PTSetupData {
+export interface PTSetupData {
     group_id: number
     company_id: number
     state_id: number
@@ -108,8 +117,8 @@ interface PTSetupData {
     password: string
     email: string
     mobile: string // Changed from mobile_no to mobile and type to string
-    ec_certificate: string
-    rc_certificate: string
+    ec_certificate?: CertificateData;
+    rc_certificate?: CertificateData;
     ptec_frequency: string
     ptrc_frequency: string
 }
@@ -156,8 +165,6 @@ const PTSetupPage = () => {
         password: '',
         email: '',
         mobile: '',
-        ec_certificate: '',
-        rc_certificate: '',
         ptec_frequency: '',
         ptrc_frequency: '',
     })
@@ -419,57 +426,76 @@ const PTSetupPage = () => {
         return null
     }
 
-    // Update the certificate upload handlers
-    const handleCertificateUpload = async (type: 'ec' | 'rc', file: File) => {
-        try {
-            // Validate file type
-            // const typeError = validateFileType(file);
-            // if (typeError) {
-            //     setErrors(prev => ({
-            //         ...prev,
-            //         [`${type}_certificate`]: typeError
-            //     }));
-            //     return;
-            // }
+    const showNotification = (
+        type: 'success' | 'info' | 'error' | 'warning',
+        message: string,
+    ) => {
+        toast.push(
+            <Notification
+                title={type.charAt(0).toUpperCase() + type.slice(1)}
+                type={type}
+                closable={true}
+            >
+                {message}
+            </Notification>,
+        );
+    };
 
-            // Validate file size
-            const sizeError = validateFileSize(file)
-            if (sizeError) {
-                setErrors((prev) => ({
-                    ...prev,
-                    [`${type}_certificate`]: sizeError,
-                }))
-                return
-            }
+    const handleCertificateUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        certificateType: 'ec' | 'rc'
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-            // If validations pass, convert to base64
-            const base64String = await convertToBase64(file)
-            setPtSetupData((prev) => ({
-                ...prev,
-                [`${type}_certificate`]: base64String,
-            }))
-
-            // Clear any previous errors
-            setErrors((prev) => ({
-                ...prev,
-                [`${type}_certificate`]: undefined,
-            }))
-
-            // Validate the field using Yup schema
-            await validateField(`${type}_certificate`, base64String)
-        } catch (error) {
-            console.error(`Error processing ${type} certificate:`, error)
-            setErrors((prev) => ({
-                ...prev,
-                [`${type}_certificate`]: 'Failed to process certificate',
-            }))
-            toast.push(
-                <Notification title="Error" closable={true} type="danger">
-                    Failed to process certificate
-                </Notification>,
-            )
+        // Validate file size (20MB max)
+        if (file.size > 20 * 1024 * 1024) {
+            showNotification('error', 'File size exceeds 20MB limit');
+            return;
         }
-    }
+
+        // Validate file type
+        const allowedTypes = [
+            'application/pdf',
+            'application/zip',
+            'application/x-zip-compressed',
+            'image/jpeg',
+            'image/png',
+            'image/gif'
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            showNotification('error', 'Only PDF, ZIP, JPEG, PNG, and GIF files are allowed');
+            return;
+        }
+
+        try {
+            const base64String = await convertToBase64(file);
+            
+            if (certificateType === 'ec') {
+                setPtSetupData(prev => ({
+                    ...prev,
+                    ec_certificate: {
+                        data: base64String,
+                        filename: file.name,
+                        mimetype: file.type
+                    }
+                }));
+            } else {
+                setPtSetupData(prev => ({
+                    ...prev,
+                    rc_certificate: {
+                        data: base64String,
+                        filename: file.name,
+                        mimetype: file.type
+                    }
+                }));
+            }
+        } catch (error) {
+            console.error('File upload error:', error);
+            showNotification('error', 'Failed to process file');
+        }
+    };
 
     // Submit handler
     const handleSubmit = async () => {
@@ -868,15 +894,11 @@ const PTSetupPage = () => {
                             20mb)) <span className="text-red-500">*</span>
                         </p>
                         <div className="space-y-2">
-                            <Input
-                                type="file"
-                                accept=".pdf , .zip , .jpg"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0]
-                                    if (file)
-                                        handleCertificateUpload('rc', file)
-                                }}
-                            />
+                        <Input
+                            accept=".pdf,.zip,.jpg,.jpeg,.png,.gif,application/pdf,application/zip,image/jpeg,image/png,image/gif"
+                            type="file"
+                            onChange={(e) => handleCertificateUpload(e, 'rc')}
+                        />
 
                             {errors.rc_certificate && (
                                 <p className="text-red-500 text-xs">
@@ -893,14 +915,10 @@ const PTSetupPage = () => {
                         </p>
                         <div className="space-y-2">
                             <Input
-                                type="file"
-                                accept=".pdf , .zip , .jpg"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0]
-                                    if (file)
-                                        handleCertificateUpload('ec', file)
-                                }}
-                            />
+                            accept=".pdf,.zip,.jpg,.jpeg,.png,.gif,application/pdf,application/zip,image/jpeg,image/png,image/gif"
+                            type="file"
+                            onChange={(e) => handleCertificateUpload(e, 'ec')}
+                        />
 
                             {errors.ec_certificate && (
                                 <p className="text-red-500 text-xs">
