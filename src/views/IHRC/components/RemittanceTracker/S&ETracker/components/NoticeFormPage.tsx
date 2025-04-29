@@ -57,7 +57,12 @@ const validationSchema = Yup.object().shape({
     related_act: Yup.string()
         .required('Related act is required')
         .trim(),
-    notice_document: Yup.string()
+        notice_document: Yup.object()
+        .shape({
+            data: Yup.string().required('File data is required'),
+            filename: Yup.string().required('Filename is required'),
+            mimetype: Yup.string().required('Mimetype is required')
+        })
         .required('Notice document is required'),
     notice_detail: Yup.string()
         .required('Notice details are required')
@@ -232,29 +237,66 @@ const NoticeFormPage = ({ onSuccess }) => {
         }))
     }
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            if (file.size > 20 * 1024 * 1024) { // 20MB limit
-                showError('File size should not exceed 20MB')
-                return
-            }
-            const reader = new FileReader()
-            reader.onload = () => {
-                const base64String = (reader.result as string).split(',')[1]
-                setFileBase64(base64String)
-                setFormData((prev) => ({
-                    ...prev,
-                    notice_document: base64String,
-                }))
-                setErrors((prev) => ({
-                    ...prev,
-                    notice_document: '',
-                }))
-            }
-            reader.readAsDataURL(file)
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+    
+        // Check file size (20MB limit)
+        if (file.size > 20 * 1024 * 1024) {
+            showError('File size should not exceed 20MB');
+            return;
         }
-    }
+    
+        // Check allowed file types
+        const allowedTypes = [
+            'application/pdf',
+            'application/zip',
+            'application/x-zip-compressed',
+            'image/jpeg',
+            'image/png',
+            'image/gif'
+        ];
+        
+        if (!allowedTypes.includes(file.type)) {
+            showError('Only PDF, ZIP, JPG, PNG, GIF files are allowed');
+            return;
+        }
+    
+        try {
+            const base64String = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const result = reader.result as string;
+                    resolve(result.split(',')[1]); // Extract just the base64 part
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+    
+            const documentData = {
+                data: base64String,
+                filename: file.name,
+                mimetype: file.type
+            };
+    
+            setFormData(prev => ({
+                ...prev,
+                notice_document: documentData
+            }));
+            setErrors(prev => ({
+                ...prev,
+                notice_document: ''
+            }));
+            toast.push(
+                <Notification title="Success" type="success" closable={true}>
+                    File uploaded successfully
+                </Notification>
+            );
+        } catch (error) {
+            console.error('Error processing file:', error);
+            showError('Failed to process file');
+        }
+    };
 
   //   const showErrors = (errors: FormErrors) => {
   //     const errorMessages = Object.values(errors);
@@ -300,28 +342,35 @@ const NoticeFormPage = ({ onSuccess }) => {
     }
 };
 
-    const handleSubmit = async () => {
-        const isValid = await validateForm()
-        if (!isValid) return
+const handleSubmit = async () => {
+    const isValid = await validateForm();
+    if (!isValid) return;
 
-        try {
-            setIsLoading(true)
-            const resultAction = await dispatch(createNotice(formData)).unwrap()
-            if (resultAction) {
-                toast.push(
-                    <Notification title="Success" type="success" closable={true}>
-                        Notice uploaded successfully
-                    </Notification>
-                )
-                onSuccess?.()
-                navigate(-1)
-            }
-        } catch (error) {
-            showError('Failed to submit notice')
-        } finally {
-            setIsLoading(false)
+    try {
+        setIsLoading(true);
+        
+        // Prepare the form data with proper document format
+        const submitData = {
+            ...formData,
+            // Convert dates to ISO string if needed
+            // Include document only if it exists and is in the correct format
+            notice_document: formData.notice_document && typeof formData.notice_document === 'object' 
+                ? formData.notice_document 
+                : undefined
+        };
+
+        const resultAction = await dispatch(createNotice(submitData)).unwrap();
+        if (resultAction) {
+          
+            onSuccess?.();
+            navigate(-1);
         }
+    } catch (error) {
+       throw error
+    } finally {
+        setIsLoading(false);
     }
+};
 
     const showFieldError = (fieldName: string) => {
         return errors[fieldName] ? (
@@ -523,9 +572,12 @@ const NoticeFormPage = ({ onSuccess }) => {
                             type="file"
                             onChange={handleFileChange}
                             className="w-full"
-                            accept=".pdf,.jpg,.zip,.jpeg,.png"
-                        />
-                        {showFieldError('notice_document')}
+                            accept=".pdf,.zip,.jpg,.jpeg,.png,.gif"
+                            />
+                        {errors.notice_document && (
+        <span className="text-red-500 text-sm mt-1">{errors.notice_document}</span>
+    )}
+    
                     </div>
                 </div>
 

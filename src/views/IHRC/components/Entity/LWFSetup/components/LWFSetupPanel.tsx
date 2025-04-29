@@ -1,664 +1,3 @@
-// import React, { useState, useEffect } from 'react';
-// import { ActionMeta, MultiValue } from 'react-select';
-// import { useDispatch } from 'react-redux';
-// import { AppDispatch } from '@/store';
-// // import { Button } from '@/components/ui/button';
-// import { Button } from '@/components/ui';
-// // import { Input } from '@/components/ui/input';
-// import {Input} from '@/components/ui';
-// import OutlinedSelect from '@/components/ui/Outlined';
-// import OutlinedInput from '@/components/ui/OutlinedInput';
-// // import { DatePicker } from '@/components/ui/date-picker';
-// import DatePicker from '@/components/ui/DatePicker/DatePicker';
-// import { Dialog } from '@/components/ui/dialog';
-// // import { Select } from '@/components/ui/select';
-// import {Select} from '@/components/ui';
-// // import { toast } from '@/components/ui/toast';
-// // import { Notification } from '@/components/ui/notification';
-// import {toast, Notification} from '@/components/ui';
-// import httpClient from '@/api/http-client';
-// import { endpoints } from '@/api/endpoint';
-// // import DistrictAutosuggest from '../../Branch/components/DistrictAutoSuggest';
-// import DistrictAutosuggest from '../../ESICSetup/components/DistrictAutoSuggest';
-// import LocationAutosuggest from '../../Branch/components/LocationAutosuggest';
-// import * as yup from 'yup';
-// import OutlinedPasswordInput from '@/components/ui/OutlinedInput/OutlinedPasswordInput';
-
-// const validationSchema = yup.object().shape({
-//   state_id: yup
-//   .number()
-//   .required('State is required')
-//   .positive('Please select a valid state'),
-//   district_id: yup
-//   .number()
-//   .required('District is required')
-//   .positive('Please select a valid district'),
-//   location: yup.string().required('Location is required'),
-//   register_number: yup.string().required('Registration number is required')
-//     .matches(/^[A-Za-z0-9-]+$/, 'Registration number can only contain letters, numbers, and hyphens'),
-//   register_date: yup.date().required('Registration date is required')
-//     .max(new Date(), 'Registration date cannot be in the future'),
-//   remmit_mode: yup.string().required('Remittance mode is required')
-//     .oneOf(['online', 'offline'], 'Invalid remittance mode'),
-//   // username: yup.string().required('User ID is required')
-//   //   .min(4, 'User ID must be at least 4 characters'),
-//   // password: yup.string().required('Password is required')
-//   //   .min(6, 'Password must be at least 6 characters')
-//   //   .matches(
-//   //     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-//   //     'Must include A-Z, a-z, 0-9, @$!%*?& (Weak Password)'
-//   // ),
-//   signatory_data: yup.array().min(1, 'At least one signatory is required'),
-//   // certificate: yup.string().required('Certificate is required'),
-// });
-
-// interface ValidationErrors {
-//   [key: string]: string;
-// }
-
-// interface LWFSetupPanelProps {
-//   onClose: () => void;
-//   addLWFSetup: (data: any) => void;
-//   companyId:string;
-//   groupId:string;
-//   companyName:string;
-//   groupName:string;
-// }
-
-// interface SelectOption {
-//   value: string;
-//   label: string;
-// }
-
-// interface DistrictValue {
-//   id: number | null;
-//   name: string;
-// }
-
-// interface StateOption extends SelectOption {}
-// interface DistrictOption extends SelectOption {}
-// interface LocationOption extends SelectOption {}
-// interface UserSignatory {
-//   id: number;
-//   name: string;
-// }
-
-// const LWFSetupPanel: React.FC<LWFSetupPanelProps> = ({
-//   onClose,
-//   addLWFSetup,
-//   companyId,
-//   companyName,
-//   groupId,
-//    groupName
-// }) => {
-//   const dispatch = useDispatch<AppDispatch>();
-//   const [errors, setErrors] =  useState<ValidationErrors>({});
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [companyGroups, setCompanyGroups] = useState<SelectOption[]>([]);
-//   const [selectedCompanyGroup, setSelectedCompanyGroup] = useState<SelectOption | null>(null);
-//   const [companies, setCompanies] = useState<SelectOption[]>([]);
-//   const [selectedCompany, setSelectedCompany] = useState<SelectOption | null>(null);
-//   const [users, setUsers] = useState<any[]>([]);
-//   const [selectedSignatories, setSelectedSignatories] = useState<UserSignatory[]>([]);
-
-//   const [states, setStates] = useState<StateOption[]>([]);
-//   const [selectedStates, setSelectedStates] = useState<SelectOption | null>(null);
-//   const [districts, setDistricts] = useState<DistrictOption[]>([]);
-//   const [selectedDistrict, setSelectedDistrict] = useState<DistrictValue>({
-//     id: null,
-//     name: ''
-//   });
-//   const [selectedDistrictId, setSelectedDistrictId] = useState<number | null>(null);
-//   const [locations, setLocations] = useState<LocationOption[]>([]);
-//   const [selectedLocation, setSelectedLocation] = useState('');
-//   const [fileBase64, setFileBase64] = useState<string>('');
-
-//   const [formData, setFormData] = useState<{
-//     group_id: number;
-//     company_id: number;
-//     state_id: number;
-//     district_id: number;
-//     location: string;
-//     register_number: string;
-//     register_date: Date | null;
-//     remmit_mode: string;
-//     username: string;
-//     password: string;
-//     signatory_data: { signatory_id: number }[];
-//     certificate: string;
-//   }>({
-//     group_id: 0,
-//     company_id: 0,
-//     state_id: 0,
-//     district_id: 0,
-//     location: '',
-//     register_number: '',
-//     register_date: null,
-//     remmit_mode: '',
-//     username: '',
-//     password: '',
-//     signatory_data: [],
-//     certificate: ''
-//   });
-
-//   const remittanceModeOptions = [
-//     { value: 'online', label: 'Online' },
-//     { value: 'offline', label: 'Offline' }
-//   ];
-
-//   const showNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
-//     toast.push(
-//       <Notification
-//         title={type.charAt(0).toUpperCase() + type.slice(1)}
-//         type={type}
-//       >
-//         {message}
-//       </Notification>
-//     );
-//   };
-
-//   const convertToBase64 = (file: File): Promise<string> => {
-//     return new Promise((resolve, reject) => {
-//       const reader = new FileReader();
-//       reader.onload = () => {
-//         const base64String = (reader.result as string).split(',')[1];
-//         resolve(base64String);
-//       };
-//       reader.onerror = reject;
-//       reader.readAsDataURL(file);
-//     });
-//   };
-
-//   // Load Company Groups
-//   const loadCompanyGroups = async () => {
-//     try {
-//       const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
-//         params: { ignorePlatform: true },
-//       });
-//       setCompanyGroups(
-//         data.data.map((v: any) => ({
-//           label: v.name,
-//           value: String(v.id),
-//         }))
-//       );
-//     } catch (error) {
-//       console.error('Failed to load company groups:', error);
-//       showNotification('danger', 'Failed to load company groups');
-//     }
-//   };
-
-//   // Load Companies based on selected group
-//   const loadCompanies = async (groupId: string[] | number[]) => {
-//     try {
-//       const groupIdParam = [`${groupId}`];
-//       const { data } = await httpClient.get(endpoints.company.getAll(), {
-//         params: {
-//           'group_id[]': groupIdParam
-//         }
-//       });
-
-//       if (data?.data) {
-//         const formattedCompanies = data.data.map((company: any) => ({
-//           label: company.name,
-//           value: String(company.id),
-//         }));
-//         setCompanies(formattedCompanies);
-//       } else {
-//         setCompanies([]);
-//         showNotification('info', 'No companies found for this group');
-//       }
-//     } catch (error: any) {
-//       console.error('Failed to load companies:', error);
-//       showNotification('danger', error.response?.data?.message || 'Failed to load companies');
-//       setCompanies([]);
-//     }
-//   };
-
-//   // Load States
-//   const loadStates = async () => {
-//     try {
-//       // setIsLoading(true);
-//       const response = await httpClient.get(endpoints.common.state());
-
-//       if (response.data) {
-//         const formattedStates = response.data .filter((state: any) => state.lwf_active)
-//                 .map((state: any) => ({
-//                     label: state.name,
-//                     value: String(state.id),
-//                     // Preserve additional state details
-//                     lwf_active: state.lwf_active
-//                 }))
-//         setStates(formattedStates);
-//       }
-//     } catch (error) {
-//       console.error('Failed to load states:', error);
-//       showNotification('danger', 'Failed to load states');
-//     }
-//   };
-
-//   // Load Users/Signatories
-//   const loadUsers = async () => {
-//     try {
-//       const response = await httpClient.get(endpoints.user.getAll(),{
-//         params: {
-//           'company_id[]': companyId
-//         }
-//       });
-//       if(response.data){
-//         const authorizedSignatories = response.data.data.filter(user => user.user_details.auth_signatory);
-//         setUsers(authorizedSignatories);
-//       }
-//     } catch (error) {
-//       console.error('Failed to fetch users:', error);
-//       showNotification('danger', 'Failed to load users');
-//     }
-//   };
-
-//   useEffect(() => {
-//     loadCompanyGroups();
-//     loadStates();
-//     loadUsers();
-//   }, []);
-
-//   useEffect(() => {
-//     if (selectedCompanyGroup?.value) {
-//       setFormData(prev => ({
-//         ...prev,
-//         group_id: parseInt(selectedCompanyGroup.value)
-//       }));
-//       setSelectedCompany(null);
-//       loadCompanies(selectedCompanyGroup.value);
-//     } else {
-//       setCompanies([]);
-//     }
-//   }, [selectedCompanyGroup]);
-
-//   useEffect(() => {
-//     if (selectedCompany?.value) {
-//       setFormData(prev => ({
-//         ...prev,
-//         company_id: parseInt(selectedCompany.value)
-//       }));
-//     }
-//   }, [selectedCompany]);
-
-//   const validateForm = async () => {
-//     try {
-//       await validationSchema.validate(formData, { abortEarly: false });
-//       setErrors({});
-//       return true;
-//     } catch (yupError) {
-//       if (yupError instanceof yup.ValidationError) {
-//         const newErrors: ValidationErrors = {};
-//         yupError.inner.forEach((error) => {
-//           if (error.path) {
-//             newErrors[error.path] = error.message;
-//           }
-//         });
-//         setErrors(newErrors);
-//       }
-//       return false;
-//     }
-//   };
-
-//   const handleSubmit = async () => {
-//     console.log(formData);
-//     try {
-//       setIsLoading(true);
-//       const isValid = await validateForm();
-//       if (!isValid) {
-//         toast.push(
-//           <Notification title="Error" closable={true} type="danger">
-//           Please fix the validation errors
-//           </Notification>
-//       );
-//         return;
-//       }
-//       const data = {
-//         ...formData,
-//         company_id:companyId,
-//         group_id: groupId,
-//       }
-//       const response = await httpClient.post(endpoints.lwfSetup.create(), data);
-//       if(response){
-//         addLWFSetup(response.data);
-//         onClose();
-//         showNotification('success', 'LWF Setup created successfully');
-//       }
-//     } catch (error: any) {
-//       console.error('Failed to create LWF Setup:', error);
-//       showNotification('danger', error.response?.data?.message || 'Failed to create LWF Setup');
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   const validateField = async (fieldName: string, value: any) => {
-//     try {
-//       await validationSchema.validateAt(fieldName, { ...formData, [fieldName]: value });
-//       setErrors(prev => ({ ...prev, [fieldName]: undefined }));
-//     } catch (error) {
-//       if (error instanceof yup.ValidationError) {
-//         setErrors(prev => ({ ...prev, [fieldName]: error.message }));
-//       }
-//     }
-//   };
-
-//   // Modify state change handlers to include validation
-//   const handleStateChange = (option: SelectOption | null) => {
-//     setSelectedStates(option);
-//     setSelectedDistrict({ id: null, name: '' });
-//     setSelectedLocation('');
-//     setDistricts([]);
-//     setLocations([]);
-
-//     const stateId = option ? parseInt(option.value) : 0;
-//     setFormData(prev => ({
-//       ...prev,
-//       state_id: stateId
-//     }));
-//     validateField('state_id', stateId);
-//   };
-
-//   const handleDistrictChange = (district: DistrictValue) => {
-//     setSelectedDistrict(district);
-//     const districtId = district.id || 0;
-//     setFormData(prev => ({
-//       ...prev,
-//       district_id: districtId
-//     }));
-//     validateField('district_id', districtId);
-//     setSelectedDistrictId(districtId);
-//   };
-
-//   const handleLocationChange = (value: string) => {
-//     setSelectedLocation(value);
-//     setFormData(prev => ({
-//       ...prev,
-//       location: value
-//     }));
-//     validateField('location', value);
-//   };
-
-//   const handleRegisterNumberChange = (value: string) => {
-//     setFormData(prev => ({
-//       ...prev,
-//       register_number: value
-//     }));
-//     validateField('register_number', value);
-//   };
-
-//   const handleRegisterDateChange = (date: Date | null) => {
-//     setFormData(prev => ({
-//       ...prev,
-//       register_date: date
-//     }));
-//     validateField('register_date', date);
-//   };
-
-//   const handleRemitModeChange = (option: SelectOption | null) => {
-//     const value = option?.value || '';
-//     setFormData(prev => ({
-//       ...prev,
-//       remmit_mode: value
-//     }));
-//     validateField('remmit_mode', value);
-//   };
-
-//   const handleUsernameChange = (value: string) => {
-//     setFormData(prev => ({
-//       ...prev,
-//       username: value
-//     }));
-//     validateField('username', value);
-//   };
-
-//   const handlePasswordChange = (value: string) => {
-//     setFormData(prev => ({
-//       ...prev,
-//       password: value
-//     }));
-//     validateField('password', value);
-//   };
-
-//   const handleSignatoryChange = (
-//     newValue: MultiValue<{ value: string; label: string }>,
-//     actionMeta: ActionMeta<{ value: string; label: string }>,
-//   ) => {
-//     const selectedUserIds = newValue
-//       .map(option => parseInt(option.value))
-//       .filter(id => !isNaN(id));
-
-//     const newSignatoryData = selectedUserIds.map((id) => ({
-//       signatory_id: id,
-//     }));
-
-//     setFormData(prev => ({
-//       ...prev,
-//       signatory_data: newSignatoryData,
-//     }));
-//     validateField('signatory_data', newSignatoryData);
-
-//     const newSelectedSignatories = selectedUserIds.map((id) => {
-//       const user = users.find((u) => u.id === id);
-//       return user ? user : { id, name: '' };
-//     });
-//     setSelectedSignatories(newSelectedSignatories);
-//   };
-
-//   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = e.target.files?.[0];
-//     if (file) {
-//       try {
-//         const base64String = await convertToBase64(file);
-//         setFormData(prev => ({
-//           ...prev,
-//           certificate: base64String
-//         }));
-//         validateField('certificate', base64String);
-//       } catch (error) {
-//         console.error('Error converting file to base64:', error);
-//         showNotification('danger', 'Failed to process file');
-//       }
-//     }
-//   };
-
-//   return (
-//     <div className="p-2">
-//       <div className="grid grid-cols-4 gap-4 mb-4">
-//         {/* First Row - 4 fields */}
-//         <div className="space-y-2">
-//           <p className="text-sm font-medium">Company Group</p>
-//           <OutlinedInput
-//             label="Company Group"
-//             value={groupName}
-//             disabled
-//           />
-//         </div>
-
-//         <div className="space-y-2">
-//           <p className="text-sm font-medium">Company</p>
-//           <OutlinedInput
-//             label="Company"
-//             value={companyName}
-//             disabled
-//           />
-//         </div>
-
-//         <div className="space-y-2">
-//           <p className="text-sm font-medium">State <span className="text-red-500">*</span></p>
-//           <OutlinedSelect
-//             label="Select State"
-//             options={states}
-//             value={selectedStates}
-//             onChange={handleStateChange}
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.state_id && (
-//               <p className="text-red-500 text-xs mt-1">{errors.state_id}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         <div className="space-y-1">
-//           <DistrictAutosuggest
-//             value={selectedDistrict}
-//             onChange={handleDistrictChange}
-//             stateId={selectedStates?.value ? parseInt(selectedStates.value) : undefined}
-//             onDistrictSelect={(id) => setSelectedDistrictId(id)}
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.district_id && (
-//               <p className="text-red-500 text-xs mt-1">{errors.district_id}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         {/* Second Row - 4 fields */}
-//         <div className="space-y-1">
-//           <LocationAutosuggest
-//             value={selectedLocation}
-//             onChange={handleLocationChange}
-//             districtId={selectedDistrictId}
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.location && (
-//               <p className="text-red-500 text-xs mt-1">{errors.location}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         <div className="space-y-2">
-//           <p className="text-sm font-medium">Registration Number <span className="text-red-500">*</span></p>
-//           <OutlinedInput
-//             label="Enter Registration No."
-//             value={formData.register_number}
-//             onChange={handleRegisterNumberChange}
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.register_number && (
-//               <p className="text-red-500 text-xs mt-1">{errors.register_number}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         <div className="space-y-2">
-//           <p className="text-sm font-medium">LWF Registration Date <span className="text-red-500">*</span></p>
-//           <DatePicker
-//             size="sm"
-//             placeholder="Select Registration Date"
-//             value={formData.register_date}
-//             onChange={handleRegisterDateChange}
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.register_date && (
-//               <p className="text-red-500 text-xs mt-1">{errors.register_date}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         <div className="space-y-2">
-//           <p className="text-sm font-medium">Remittance Mode <span className="text-red-500">*</span></p>
-//           <OutlinedSelect
-//             label="Select Mode"
-//             options={remittanceModeOptions}
-//             value={remittanceModeOptions.find(option => option.value === formData.remmit_mode)}
-//             onChange={handleRemitModeChange}
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.remmit_mode && (
-//               <p className="text-red-500 text-xs mt-1">{errors.remmit_mode}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         {/* Rest of the form - Username and Password */}
-//         <div className="space-y-2">
-//           <p className="text-sm font-medium">LWF User</p>
-//           <OutlinedInput
-//             label="Enter LWF User"
-//             value={formData.username}
-//             onChange={handleUsernameChange}
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.username && (
-//               <p className="text-red-500 text-xs mt-1">{errors.username}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         <div className="space-y-2">
-//           <p className="text-sm font-medium">Password</p>
-//           <OutlinedPasswordInput
-//             label="Enter Password"
-//             value={formData.password}
-//             onChange={handlePasswordChange}
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.password && (
-//               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         {/* Upload Document */}
-//         <div className="col-span-2 space-y-1">
-//           <p className="text-sm font-medium">Certificate Upload (PDF/Zip/Image, Max 20MB) <span className="text-red-500">*</span></p>
-//           <Input
-//             type="file"
-//             onChange={handleFileUpload}
-//             accept=".pdf, .zip, .jpg"
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.certificate && (
-//               <p className="text-red-500 text-xs mt-1">{errors.certificate}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         {/* Authorized Signatory */}
-//         <div className="col-span-4 space-y-1">
-//           <p className="text-sm font-medium">Select Authorized Signatory <span className="text-red-500">*</span></p>
-//           <Select
-//             isMulti
-//             options={users.map(user => ({
-//               value: String(user.user_details.id),
-//               label: `${user.user_details.name}`,
-//             }))}
-//             onChange={handleSignatoryChange}
-//           />
-//           <div className="min-h-[10px]">
-//             {errors.signatory_data && (
-//               <p className="text-red-500 text-xs mt-1">{errors.signatory_data}</p>
-//             )}
-//           </div>
-//         </div>
-
-//         {/* Buttons */}
-//         <div className="col-span-4 flex justify-end space-x-2">
-//           <Button
-//             variant="plain"
-//             size="sm"
-//             onClick={onClose}
-//           >
-//             Cancel
-//           </Button>
-//           <Button
-//             variant="solid"
-//             size="sm"
-//             onClick={handleSubmit}
-//             loading={isLoading}
-//           >
-//             Confirm
-//           </Button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default LWFSetupPanel;
-
 import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '@/store'
@@ -711,6 +50,14 @@ const validationSchema = yup.object().shape({
             'Invalid email address.',
         )
         .required('Email is required'),
+    certificate: yup
+        .object()
+        .shape({
+            data: yup.string().required('File data is required'),
+            filename: yup.string().required('Filename is required'),
+            mimetype: yup.string().required('Mimetype is required')
+        })
+        .required('Certificate is required')
 })
 
 interface ValidationErrors {
@@ -818,14 +165,56 @@ const LWFSetupPanel: React.FC<LWFSetupPanelProps> = ({
         return new Promise((resolve, reject) => {
             const reader = new FileReader()
             reader.onload = () => {
-                const base64String = (reader.result as string).split(',')[1]
-                resolve(base64String)
+                resolve(reader.result as string)
             }
             reader.onerror = reject
             reader.readAsDataURL(file)
         })
     }
 
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+    
+        // Check file size (20MB limit)
+        if (file.size > 20 * 1024 * 1024) {
+            showNotification('danger', 'File size exceeds 20MB limit')
+            return
+        }
+    
+        // Check allowed file types
+        const allowedTypes = [
+            'application/pdf',
+            'application/zip',
+            'application/x-zip-compressed',
+            'image/jpeg',
+            'image/png',
+            'image/gif'
+        ]
+        
+        if (!allowedTypes.includes(file.type)) {
+            showNotification('danger', 'Only PDF, ZIP, JPG, PNG, GIF files are allowed')
+            return
+        }
+    
+        try {
+            const base64Data = await convertToBase64(file)
+            const certificateData = {
+                data: base64Data.split(',')[1], // Extract just the base64 part
+                filename: file.name,
+                mimetype: file.type
+            }
+            
+            setFormData(prev => ({
+                ...prev,
+                certificate: certificateData
+            }))
+            validateField('certificate', certificateData)
+        } catch (error) {
+            console.error('Error processing file:', error)
+            showNotification('danger', 'Failed to process file')
+        }
+    }
     // Load States
     const loadStates = async () => {
         try {
@@ -875,39 +264,34 @@ const LWFSetupPanel: React.FC<LWFSetupPanelProps> = ({
             setIsLoading(true)
             const isValid = await validateForm()
             if (!isValid) {
-                toast.push(
-                    <Notification title="Error" closable={true} type="danger">
-                        Please fix the validation errors
-                    </Notification>,
-                )
+                showNotification('danger', 'Please fix the validation errors')
                 return
             }
-            const data = {
+    
+            // Prepare the data with certificate if it exists
+            const submitData = {
                 ...formData,
-                company_id: companyId,
-                group_id: groupId,
+                company_id: parseInt(companyId),
+                group_id: parseInt(groupId),
+                register_date: formData.register_date?.toISOString() || '',
+                // Include certificate only if it exists and is in the correct format
+                certificate: formData.certificate && typeof formData.certificate === 'object' 
+                    ? formData.certificate 
+                    : undefined
             }
+    
             const response = await httpClient.post(
                 endpoints.lwfSetup.create(),
-                data,
+                submitData
             )
-            // const response = await dispatch(createLwfSetup(data))
-            // .unwrap()
-            // .catch((error: any) => {
-            //     throw error
-            // })
-            if (response) {
+    
+            if (response.data) {
                 addLWFSetup(response.data)
                 onClose()
                 showNotification('success', 'LWF Setup created successfully')
             }
         } catch (error: any) {
-            console.error('Failed to create LWF Setup:', error)
-            // showNotification(
-            //     'danger',
-            //     error.response?.data?.message || 'Failed to create LWF Setup',
-            // )
-            throw error;
+           throw error
         } finally {
             setIsLoading(false)
         }
@@ -968,22 +352,7 @@ const LWFSetupPanel: React.FC<LWFSetupPanelProps> = ({
         validateField(field, value)
     }
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            try {
-                const base64String = await convertToBase64(file)
-                setFormData((prev) => ({
-                    ...prev,
-                    certificate: base64String,
-                }))
-                validateField('certificate', base64String)
-            } catch (error) {
-                console.error('Error converting file to base64:', error)
-                showNotification('danger', 'Failed to process file')
-            }
-        }
-    }
+   
 
     return (
         <div className="p-2">
@@ -1220,7 +589,7 @@ const LWFSetupPanel: React.FC<LWFSetupPanelProps> = ({
                     <Input
                         type="file"
                         onChange={handleFileUpload}
-                        accept=".pdf, .zip, .jpg, .jpeg, .png"
+                          accept=".pdf,.zip,.jpg,.jpeg,.png,.gif,application/pdf,application/zip,image/jpeg,image/png,image/gif"
                     />
                     <div style={{ height: '10px' }}>
                         {errors.certificate && (

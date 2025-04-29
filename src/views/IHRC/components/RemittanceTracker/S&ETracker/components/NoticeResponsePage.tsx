@@ -24,9 +24,14 @@ const validationSchema = Yup.object().shape({
     .required('Reply date is required')
     .max(new Date(), 'Future dates are not allowed')
     .nullable(),
-  reply_document: Yup.string()
-    .required('Notice document is required'),
+ 
 });
+
+interface FileData {
+  data: string;
+  filename: string;
+  mimetype: string;
+}
 
 interface FormErrors {
   [key: string]: string;
@@ -38,6 +43,9 @@ const NoticeResponsePage = () => {
   const noticeId = location.state?.noticeId;
   const [notice, setNotice] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [fileData, setFileData] = useState<FileData | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [errors, setErrors] = useState<FormErrors>({});
 
   const [form, setForm] = useState({
@@ -92,26 +100,54 @@ const NoticeResponsePage = () => {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 20 * 1024 * 1024) { // 20MB limit
-        toast.push(
-          <Notification title="Error" closable={true} type="error">
-            File size should not exceed 20MB
-          </Notification>
-        );
-        return;
-      }
-      try {
-        const base64String = await convertToBase64(file);
-        handleChange('reply_document', base64String);
-      } catch (error) {
-        console.error('Error converting file:', error);
-        toast.push(
-          <Notification title="Error" closable={true} type="error">
-            Error processing file
-          </Notification>
-        );
-      }
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/zip',
+      'application/x-zip-compressed',
+      'image/jpeg',
+      'image/png',
+      'image/gif'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.push(
+        <Notification title="Error" type="error" closable={true}>
+          Only PDF, ZIP, and image files (JPEG, PNG, GIF) are allowed
+        </Notification>
+      );
+      return;
+    }
+
+    // Validate file size (20MB max)
+    if (file.size > 20 * 1024 * 1024) {
+      toast.push(
+        <Notification title="Error" type="error" closable={true}>
+          File size must be less than 20MB
+        </Notification>
+      );
+      return;
+    }
+
+    setSelectedFile(file);
+
+    try {
+      const base64String = await convertToBase64(file);
+      const fileData = {
+        data: base64String,
+        filename: file.name,
+        mimetype: file.type
+      };
+      setFileData(fileData);
+    } catch (error) {
+      console.error('Error converting file:', error);
+      toast.push(
+        <Notification title="Error" type="error" closable={true}>
+          Error processing file
+        </Notification>
+      );
     }
   };
 
@@ -119,12 +155,8 @@ const NoticeResponsePage = () => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
-        if (reader.result && typeof reader.result === 'string') {
-          const base64String = reader.result.split(',')[1];
-          resolve(base64String);
-        } else {
-          reject(new Error('Failed to read file as base64'));
-        }
+        const base64String = (reader.result as string).split(',')[1];
+        resolve(base64String);
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
@@ -159,12 +191,19 @@ const NoticeResponsePage = () => {
 
     try {
       setIsLoading(true);
-      const response = await httpClient.post(endpoints.noticeTracker.noticeReply(noticeId), {
+      
+      // Prepare payload according to backend requirements
+      const payload = {
         notice_sent_at: form.notice_sent_at,
         notice_reply: form.notice_reply,
         status: form.status,
-        reply_documents: form.reply_document ? [form.reply_document] : []
-      });
+        reply_documents: fileData ? [fileData] : []
+      };
+
+      const response = await httpClient.post(
+        endpoints.noticeTracker.noticeReply(noticeId),
+        payload
+      );
 
       if (response.data) {
         toast.push(
@@ -175,12 +214,7 @@ const NoticeResponsePage = () => {
         navigate(-1);
       }
     } catch (error) {
-      console.error('Failed to submit reply:', error);
-      // toast.push(
-      //   <Notification title="Error" type="error">
-      //     Failed to submit reply
-      //   </Notification>
-      // );
+     throw error
     } finally {
       setIsLoading(false);
     }

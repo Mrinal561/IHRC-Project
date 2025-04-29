@@ -6,6 +6,7 @@ import {
     toast,
     Notification,
     Input,
+    Tooltip,
 } from '@/components/ui'
 import OutlinedInput from '@/components/ui/OutlinedInput'
 import { useDispatch } from 'react-redux'
@@ -152,17 +153,61 @@ const PTEditedData: React.FC<PTEditedDataProps> = ({
             console.error('Error fetching PT data:', err)
             setError('Failed to load PT details')
             setLoading(false)
-            openNotification('danger', 'Failed to load PT details')
+            openNotification('error', 'Failed to load PT details')
         }
     }
+
+    // const handleSubmit = async () => {
+    //     try {
+    //         setLoader(true)
+    //         const isValid = await validateForm()
+    //         if (!isValid) return
+    //         // Implement your update logic similar to LW
+    //         const updateData = {
+    //             register_number: formData.register_number,
+    //             enroll_number: formData.enroll_number,
+    //             username: formData.username,
+    //             password: formData.password,
+    //             email: formData.email,
+    //             mobile: formData.mobile,
+    //             register_date: formData.register_date || '',
+    //             remmit_mode: formData.remmit_mode,
+    //             ec_certificate: formData.ec_certificate,
+    //             rc_certificate: formData.rc_certificate,
+    //         }
+
+    //         const resultAction = await dispatch(
+    //             updatePT({
+    //                 id: id,
+    //                 data: updateData,
+    //             }),
+    //         )
+
+    //         //   onSubmit(formData);
+    //         if (resultAction) {
+    //             onClose()
+
+    //             if (onRefresh) {
+    //                 onRefresh()
+    //             }
+    //             openNotification('success', 'PT Setup edited successfully')
+    //         }
+    //     } catch (err) {
+    //         console.error('Error submitting PT data:', err)
+    //         openNotification('error', 'Failed to save changes')
+    //     } finally {
+    //         setLoader(false)
+    //     }
+    // }
 
     const handleSubmit = async () => {
         try {
             setLoader(true)
             const isValid = await validateForm()
             if (!isValid) return
-            // Implement your update logic similar to LW
-            const updateData = {
+    
+            // Prepare the update data
+            const updateData: any = {
                 register_number: formData.register_number,
                 enroll_number: formData.enroll_number,
                 username: formData.username,
@@ -171,36 +216,42 @@ const PTEditedData: React.FC<PTEditedDataProps> = ({
                 mobile: formData.mobile,
                 register_date: formData.register_date || '',
                 remmit_mode: formData.remmit_mode,
-                ec_certificate: formData.ec_certificate,
-                rc_certificate: formData.rc_certificate,
             }
-
-            const resultAction = await dispatch(
+    
+            // Add certificate data if it exists and is a new upload
+            if (formData.ec_certificate && typeof formData.ec_certificate === 'object') {
+                updateData.ec_certificate = formData.ec_certificate
+            }
+    
+            if (formData.rc_certificate && typeof formData.rc_certificate === 'object') {
+                updateData.rc_certificate = formData.rc_certificate
+            }
+    
+            // Dispatch the action and wait for the result
+            const result = await dispatch(
                 updatePT({
                     id: id,
                     data: updateData,
-                }),
-            )
-
-            //   onSubmit(formData);
-            if (resultAction) {
+                })
+            ).unwrap() // unwrap() is important to properly handle the Promise
+    
+            // Only show success and close if the API call was successful
+            if (result) {
+                openNotification('success', 'PT Setup updated successfully')
                 onClose()
-
                 if (onRefresh) {
                     onRefresh()
                 }
-                openNotification('success', 'PT Setup edited successfully')
             }
         } catch (err) {
-            console.error('Error submitting PT data:', err)
-            openNotification('danger', 'Failed to save changes')
+           throw err
         } finally {
             setLoader(false)
         }
     }
 
     const openNotification = (
-        type: 'success' | 'info' | 'danger' | 'warning',
+        type: 'success' | 'info' | 'error' | 'warning',
         message: string,
     ) => {
         toast.push(
@@ -217,8 +268,7 @@ const PTEditedData: React.FC<PTEditedDataProps> = ({
         return new Promise((resolve, reject) => {
             const reader = new FileReader()
             reader.onload = () => {
-                const base64String = (reader.result as string).split(',')[1]
-                resolve(base64String)
+                resolve(reader.result as string)
             }
             reader.onerror = reject
             reader.readAsDataURL(file)
@@ -231,27 +281,57 @@ const PTEditedData: React.FC<PTEditedDataProps> = ({
     ) => {
         const file = e.target.files?.[0]
         if (file) {
+            // Check file size (20MB limit)
+            if (file.size > 20 * 1024 * 1024) {
+                toast.push(
+                    <Notification title="Error" type="error">
+                        File size exceeds 20MB limit
+                    </Notification>,
+                )
+                return
+            }
+    
+            // Check allowed file types
+            const allowedTypes = [
+                'application/pdf',
+                'application/zip',
+                'application/x-zip-compressed',
+                'image/jpeg',
+                'image/png',
+                'image/gif'
+            ]
+            
+            if (!allowedTypes.includes(file.type)) {
+                toast.push(
+                    <Notification title="Error" type="error">
+                        Invalid file type. Only PDF, ZIP, JPG, PNG, GIF are allowed
+                    </Notification>,
+                )
+                return
+            }
+    
             try {
                 const base64String = await convertToBase64(file)
+                const certificateData = {
+                    data: base64String,
+                    filename: file.name,
+                    mimetype: file.type
+                }
+                
                 setFormData((prev) => ({
                     ...prev,
-                    [certificateType]: base64String,
+                    [certificateType]: certificateData
                 }))
-                // toast.push(
-                //     <Notification title="Success" type="success">
-                //         {certificateType === 'ec_certificate' ? 'EC' : 'RC'} Certificate uploaded successfully
-                //     </Notification>,
-                // )
+                
+               
             } catch (error) {
                 console.error(
-                    `Error converting ${certificateType} file to base64:`,
+                    `Error processing ${certificateType} file:`,
                     error,
                 )
                 toast.push(
-                    <Notification title="Error" closable={true} type="danger">
-                        Failed to process{' '}
-                        {certificateType === 'ec_certificate' ? 'EC' : 'RC'}{' '}
-                        certificate
+                    <Notification title="Error" type="error">
+                        Failed to process {certificateType === 'ec_certificate' ? 'EC' : 'RC'} certificate
                     </Notification>,
                 )
             }
@@ -471,7 +551,7 @@ const PTEditedData: React.FC<PTEditedDataProps> = ({
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
                 <div className="flex flex-col gap-2">
                     <label> Email ID</label>
                     <div className="w-full">
@@ -535,9 +615,6 @@ const PTEditedData: React.FC<PTEditedDataProps> = ({
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
                 <div className="flex flex-col gap-2">
                     <label>PT Registration Date</label>
                     <div className="w-full">
@@ -565,6 +642,10 @@ const PTEditedData: React.FC<PTEditedDataProps> = ({
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         EC Certificate Upload (PDF/ZIP/IMG • 20MB)
@@ -576,16 +657,18 @@ const PTEditedData: React.FC<PTEditedDataProps> = ({
                                 handleFileChange(e, 'ec_certificate')
                             }
                             className="w-full"
-                            accept=".pdf"
+                            accept=".pdf,.zip,.jpg,.jpeg,.png,.gif,application/pdf,application/zip,image/jpeg,image/png,image/gif"
                         />
                         {formData.rc_certificate && (
-                            <button
+                            <Tooltip title="View Document">
+
+                            <Button
                                 onClick={handleECDocumentView}
                                 className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
-                                title="View Document"
-                            >
+                                >
                                 <Eye size={20} />
-                            </button>
+                            </Button>
+                                </Tooltip>
                         )}
                     </div>
                 </div>
@@ -600,16 +683,18 @@ const PTEditedData: React.FC<PTEditedDataProps> = ({
                                 handleFileChange(e, 'rc_certificate')
                             }
                             className="w-full"
-                            accept=".pdf"
+                            accept=".pdf,.zip,.jpg,.jpeg,.png,.gif,application/pdf,application/zip,image/jpeg,image/png,image/gif"
                         />
                         {formData.ec_certificate && (
-                            <button
-                                onClick={handleRCDocumentView}
-                                className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
-                                title="View Document"
-                            >
-                                <Eye size={20} />
-                            </button>
+                           <Tooltip title="View Document">
+
+                           <Button
+                               onClick={handleECDocumentView}
+                               className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
+                               >
+                               <Eye size={20} />
+                           </Button>
+                               </Tooltip>
                         )}
                     </div>
                 </div>

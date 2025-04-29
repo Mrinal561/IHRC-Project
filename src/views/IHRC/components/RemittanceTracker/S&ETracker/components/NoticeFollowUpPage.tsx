@@ -31,8 +31,13 @@ const validationSchema = Yup.object().shape({
   notice_detail: Yup.string()
     .required('Notice details are required')
     .trim(),
-  notice_document: Yup.string()
-    .required('Notice document is required'),
+    notice_document: Yup.object()
+    .shape({
+        data: Yup.string().required('File data is required'),
+        filename: Yup.string().required('Filename is required'),
+        mimetype: Yup.string().required('Mimetype is required')
+    })
+    .required('Notice document is required')
 });
 
 interface FormErrors {
@@ -116,29 +121,68 @@ const NoticeFollowUpPage = () => {
   // Handle file upload
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 20 * 1024 * 1024) { // 20MB limit
+    if (!file) return;
+
+    // Check file size (20MB limit)
+    if (file.size > 20 * 1024 * 1024) {
         toast.push(
-          <Notification title="Error" closable={true} type="error">
-            File size should not exceed 20MB
-          </Notification>
+            <Notification title="Error" type="error" closable={true}>
+                File size should not exceed 20MB
+            </Notification>
         );
         return;
-      }
-      try {
-        const base64String = await convertToBase64(file);
-        handleChange('notice_document', base64String);
-      } catch (error) {
-        console.error('Error converting file:', error);
-        toast.push(
-          <Notification title="Error" closable={true} type="error">
-            Error processing file
-          </Notification>
-        );
-      }
     }
-  };
 
+    // Check allowed file types
+    const allowedTypes = [
+        'application/pdf',
+        'application/zip',
+        'application/x-zip-compressed',
+        'image/jpeg',
+        'image/png',
+        'image/gif'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+        toast.push(
+            <Notification title="Error" type="error" closable={true}>
+                Only PDF, ZIP, JPG, PNG, GIF files are allowed
+            </Notification>
+        );
+        return;
+    }
+
+    try {
+        const base64String = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const result = reader.result as string;
+                resolve(result.split(',')[1]); // Extract just the base64 part
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+
+        const documentData = {
+            data: base64String,
+            filename: file.name,
+            mimetype: file.type
+        };
+
+        setForm(prev => ({
+            ...prev,
+            notice_document: documentData
+        }));
+       
+    } catch (error) {
+        console.error('Error processing file:', error);
+        toast.push(
+            <Notification title="Error" type="error" closable={true}>
+                Failed to process file
+            </Notification>
+        );
+    }
+};
   // Convert file to base64
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -182,41 +226,46 @@ const NoticeFollowUpPage = () => {
     if (!isValid) return;
 
     try {
-      setIsLoading(true);
+        setIsLoading(true);
 
-      // Prepare the payload for the follow-up notice API
-      const payload = {
-        notice_type: form.notice_type,
-        notice_date: form.notice_date,
-        reference_number: form.reference_number,
-        notice_detail: form.notice_detail,
-        notice_document: form.notice_document,
-        // Fields fetched from notice details API
-        group_id: form.group_id,
-        company_id: form.company_id,
-        district_id: form.district_id,
-        location: String(form.location),
-        criticality: form.criticality,
-        related_act: form.related_act,
-      };
+        // Prepare the payload with proper document format
+        const payload = {
+            notice_type: form.notice_type,
+            notice_date: form.notice_date,
+            reference_number: form.reference_number,
+            notice_detail: form.notice_detail,
+            // Include document only if it exists and is in the correct format
+            notice_document: form.notice_document && typeof form.notice_document === 'object' 
+                ? form.notice_document 
+                : undefined,
+            // Other fields from the form
+            group_id: form.group_id,
+            company_id: form.company_id,
+            district_id: form.district_id,
+            location: String(form.location),
+            criticality: form.criticality,
+            related_act: form.related_act
+        };
 
-      // Call the follow-up notice API
-      const response = await httpClient.post(endpoints.noticeTracker.followupNoticeCreate(noticeId), payload);
-
-      if (response.data) {
-        toast.push(
-          <Notification title="Success" type="success" closable={true}>
-            Follow-up notice created successfully
-          </Notification>
+        const response = await httpClient.post(
+            endpoints.noticeTracker.followupNoticeCreate(noticeId), 
+            payload
         );
-        navigate(-1); // Navigate back after success
-      }
+
+        if (response.data) {
+            toast.push(
+                <Notification title="Success" type="success" closable={true}>
+                    Follow-up notice created successfully
+                </Notification>
+            );
+            navigate(-1);
+        }
     } catch (error) {
-      console.error('Failed to create follow-up notice:', error);
+       throw error
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
   // Show field error messages
   const showFieldError = (fieldName: string) => {

@@ -189,47 +189,75 @@ const BranchAgreementEditForm = () => {
     }
   }, [id]);
 
+  const convertFileToCertificateData = async (file: File): Promise<{
+    data: string;
+    filename: string;
+    mimetype: string;
+  }> => {
+    const base64String = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Split to get only the base64 data without the mime prefix
+        const result = reader.result as string;
+        resolve(result.split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  
+    return {
+      data: base64String,
+      filename: file.name,
+      mimetype: file.type
+    };
+  };
+  
+  // Update your handleFormSubmit function
   const handleFormSubmit = async (
-    values: FormValues,
+    values: FormValues, 
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
   ) => {
     try {
-      let base64Document = '';
-      if (values.agreementDocument instanceof File) {
-        base64Document = await convertFileToBase64(values.agreementDocument);
-      }
+      setLoading(true);
   
-      const requestBody = {
-        branch_id: parseInt(values.branch, 10), 
+      // Prepare the request body
+      const requestBody: any = {
+        branch_id: parseInt(values.branch, 10),
         agreement_type: values.agreementType,
-        owner_id: parseInt(values.ownerName, 10), 
+        sub_category: values.subCategory,
+        owner_id: parseInt(values.ownerName, 10),
         partner_name: values.partnerName,
         partner_number: values.partnerContact,
-        start_date: format(new Date(values.startDate), 'yyyy-MM-dd'),
-        end_date: format(new Date(values.endDate), 'yyyy-MM-dd'),
-        sub_category: values.subCategory,
+        start_date: values.startDate,
+        end_date: values.endDate,
         applicable_for_all: values.applicableForAllCompany
       };
   
       // Only include document if a new one was uploaded
-      if (base64Document) {
-        requestBody['agreement_document'] = base64Document;
+      if (values.agreementDocument && values.agreementDocument instanceof File) {
+        const agreementDocument = await convertFileToCertificateData(values.agreementDocument);
+        requestBody.agreement_document = agreementDocument;
       }
   
-      await httpClient.put(
+      // Make the API call
+      const response = await httpClient.put(
         endpoints.branchAgreement.update(id),
         requestBody
       );
+
+      if(response) { 
+        showNotification('success', 'Branch agreement updated successfully');
+        navigate('/agreements');
+      }
   
-      showNotification('success', 'Agreement updated successfully');
-      navigate('/agreements');
-    } catch (error) {
-      console.error('Failed to update agreement:', error);
-      showNotification('error', 'Failed to update agreement');
+    } catch (error: any) {
+    throw error
     } finally {
       setSubmitting(false);
+      setLoading(false);
     }
   };
+  
   
   // Add the convertFileToBase64 function if it's not already there
   const convertFileToBase64 = (file: File): Promise<string> => {
@@ -480,33 +508,52 @@ const BranchAgreementEditForm = () => {
                 Agreement Document
               </label>
               <div className="flex items-center gap-2">
-                <Input
-                  type="file"
-                  accept=".pdf,.zip,.jpeg,.jpg,.png,.gif"
-                  onChange={(e) => {
-                    const file = e.currentTarget.files?.[0];
-                    if (file) {
-                      if (file.size > 20 * 1024 * 1024) {
-                        showNotification('error', 'File size exceeds 20MB limit');
-                        e.target.value = '';
-                        return;
-                      }
-                      setFieldValue('agreementDocument', file);
-                    }
-                  }}
-                  className="w-full"
-                />
+              <Input
+      type="file"
+      accept=".pdf,.zip,.jpg,.jpeg,.png,.gif"
+      onChange={async (event) => {
+        const file = event.target.files?.[0];
+        if (file) {
+          // Validate file size (20MB max)
+          if (file.size > 20 * 1024 * 1024) {
+            showNotification('error', 'File size exceeds 20MB limit');
+            event.target.value = '';
+            return;
+          }
+
+          // Validate file type
+          const allowedTypes = [
+            'application/pdf',
+            'application/zip',
+            'application/x-zip-compressed',
+            'image/jpeg',
+            'image/png',
+            'image/gif'
+          ];
+
+          if (!allowedTypes.includes(file.type)) {
+            showNotification('error', 'Only PDF, ZIP, JPEG, PNG, and GIF files are allowed');
+            event.target.value = '';
+            return;
+          }
+
+          setFieldValue('agreementDocument', file);
+        }
+      }}
+      onClick={(event) => {
+        // Clear previous selection to allow re-selecting same file
+        (event.target as HTMLInputElement).value = '';
+      }}
+    />
                 {values.existingDocument && ( 
                 <Tooltip title="View Document">
-                  <button
+                  <Button
                   onClick={handleDocumentView(values.existingDocument)}
                     className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
-                    title="View Document"
-                    type="button"
                   >
                    
                     <Eye size={20} />
-                  </button>
+                  </Button>
                   </Tooltip>
                 )}
               </div>

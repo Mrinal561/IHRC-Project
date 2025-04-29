@@ -6,6 +6,7 @@ import {
     toast,
     Notification,
     Input,
+    Tooltip,
 } from '@/components/ui'
 import OutlinedInput from '@/components/ui/OutlinedInput'
 import OutlinedSelect from '@/components/ui/Outlined'
@@ -115,7 +116,7 @@ const LWFEditedData: React.FC<LWFEditedDataProps> = ({
         password: '',
         register_date: '',
         remmit_mode: '',
-        certificate: '',
+        // certificate: '',
         signatory_id: 0,
         email: '',
         mobile_number: '',
@@ -172,7 +173,7 @@ const LWFEditedData: React.FC<LWFEditedDataProps> = ({
             console.error('Error fetching LWF data:', err)
             setError('Failed to load LWF details')
             setLoading(false)
-            openNotification('danger', 'Failed to load LWF details')
+            openNotification('error', 'Failed to load LWF details')
         }
     }
 
@@ -211,7 +212,7 @@ const LWFEditedData: React.FC<LWFEditedDataProps> = ({
     }
 
     const openNotification = (
-        type: 'success' | 'info' | 'danger' | 'warning',
+        type: 'success' | 'info' | 'error' | 'warning',
         message: string,
     ) => {
         toast.push(
@@ -223,38 +224,103 @@ const LWFEditedData: React.FC<LWFEditedDataProps> = ({
             </Notification>,
         )
     }
-    const convertToBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = () => {
-                const base64String = (reader.result as string).split(',')[1]
-                resolve(base64String)
-            }
-            reader.onerror = reject
-            reader.readAsDataURL(file)
-        })
-    }
-
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            try {
-                const base64String = await convertToBase64(file)
-                setFormData((prev) => ({
-                    ...prev,
-                    certificate: base64String,
-                }))
-            } catch (error) {
-                console.error('Error converting file to base64:', error)
-                toast.push(
-                    <Notification title="Error" closable={true} type="danger">
-                        Failed to process certificate
-                    </Notification>,
-                )
-            }
+   // Update the convertToBase64 function
+const convertToBase64 = (file: File): Promise<{ data: string; filename: string; mimetype: string }> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+            const result = reader.result as string;
+            resolve({
+                data: result.split(',')[1], // Extract just the base64 part
+                filename: file.name,
+                mimetype: file.type
+            });
         }
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+    })
+}
+
+// Update the handleFileChange function
+const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Check file size (20MB limit)
+    if (file.size > 20 * 1024 * 1024) {
+        openNotification('error', 'File size exceeds 20MB limit')
+        return
     }
 
+    // Check allowed file types
+    const allowedTypes = [
+        'application/pdf',
+        'application/zip',
+        'application/x-zip-compressed',
+        'image/jpeg',
+        'image/png',
+        'image/gif'
+    ]
+    
+    if (!allowedTypes.includes(file.type)) {
+        openNotification('error', 'Only PDF, ZIP, JPG, PNG, GIF files are allowed')
+        return
+    }
+
+    try {
+        const certificateData = await convertToBase64(file)
+        setFormData(prev => ({
+            ...prev,
+            certificate: certificateData
+        }))
+        openNotification('success', 'File uploaded successfully')
+    } catch (error) {
+        console.error('Error processing file:', error)
+        openNotification('error', 'Failed to process file')
+    }
+}
+
+// Update the handleSubmit function
+const handleSubmit = async () => {
+    try {
+        setLoader(true)
+        const isValid = await validateForm()
+        if (!isValid) return
+
+        // Prepare the data with certificate if it exists
+        const updateData = {
+            register_number: formData.register_number,
+            username: formData.username,
+            password: formData.password,
+            register_date: formData.register_date || '',
+            remmit_mode: formData.remmit_mode,
+            signatory_id: formData.signatory_id,
+            email: formData.email,
+            mobile_number: formData.mobile_number,
+            // Only include certificate if it's a new upload
+            certificate: formData.certificate && typeof formData.certificate === 'object' 
+                ? formData.certificate 
+                : undefined
+        }
+
+        const resultAction = await dispatch(
+            updateLwf({
+                id: id,
+                data: updateData,
+            }),
+        ).unwrap() // Use unwrap() to properly handle the Promise
+
+        if (resultAction) {
+            onClose()
+            onRefresh?.()
+            openNotification('success', 'LWF Setup updated successfully')
+        }
+    } catch (error: any) {
+       throw error
+    } finally {
+        setLoader(false)
+    }
+}
     const validateField = async (field: keyof LWFSetupData, value: any) => {
         try {
             // Create a schema for just this field
@@ -290,45 +356,7 @@ const LWFEditedData: React.FC<LWFEditedDataProps> = ({
     }
 
     // Modified handleSubmit to still do a final validation
-    const handleSubmit = async () => {
-        try {
-            setLoader(true)
-            const isValid = await validateForm()
-            if (!isValid) return
-
-            const updateData = {
-                register_number: formData.register_number,
-                username: formData.username,
-                password: formData.password,
-                register_date: formData.register_date || '',
-                remmit_mode: formData.remmit_mode,
-                signatory_id: formData.signatory_id,
-                certificate: formData.certificate,
-                email: formData.email,
-                mobile_number: formData.mobile_number,
-            }
-
-            const resultAction = await dispatch(
-                updateLwf({
-                    id: id,
-                    data: updateData,
-                }),
-            )
-
-            if (resultAction) {
-                onClose()
-                if (onRefresh) {
-                    onRefresh()
-                }
-                openNotification('success', 'LWF Setup edited successfully')
-            }
-        } catch (err) {
-            console.error('Error submitting LWF data:', err)
-            openNotification('danger', 'Failed to save changes')
-        } finally {
-            setLoader(false)
-        }
-    }
+    
 
     // For the Select component, we need to modify its onChange handler
     const handleRemitModeChange = (
@@ -560,16 +588,17 @@ const LWFEditedData: React.FC<LWFEditedDataProps> = ({
                             type="file"
                             onChange={handleFileChange}
                             className="w-full"
-                            accept=".pdf"
+                             accept=".pdf,.zip,.jpg,.jpeg,.png,.gif,application/pdf,application/zip,image/jpeg,image/png,image/gif"
                         />
                         {formData.certificate && (
-                            <button
-                                onClick={handleDocumentView}
-                                className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
-                                title="View Document"
-                            >
-                                <Eye size={20} />
-                            </button>
+                            <Tooltip title = "View Document">
+                                                           <Button
+                                                           className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
+                                                               onClick={handleDocumentView}
+                                                               >
+                                                               <Eye size={20} />
+                                                           </Button>
+                                                               </Tooltip>
                         )}
                     </div>
                 </div>

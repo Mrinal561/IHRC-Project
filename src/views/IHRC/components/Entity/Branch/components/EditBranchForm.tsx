@@ -48,6 +48,14 @@ interface AgreementSection {
     partner_contact: string
 }
 
+
+interface DocumentPayload {
+    data: string;
+    filename: string;
+    mimetype: string;
+}
+
+
 interface BranchFormData {
     group_id: number
     company_id: number
@@ -71,8 +79,8 @@ interface BranchFormData {
     lease_status: string
     //   validity: string;
     document?: string
-    se_document: string | null
-    lease_document: string | null
+    se_document: DocumentPayload | null;
+    lease_document: DocumentPayload | null;
     document_validity_type: string
     se_validity?: string
     lease_validity?: string
@@ -307,8 +315,8 @@ const AddBranchForm: React.FC = () => {
         // },
         // register_number: '',
         lease_status: '',
-        se_document: '',
-        lease_document: '',
+        se_document: null,
+        lease_document: null,
         document_validity_type: 'fixed',
         se_validity: '',
         lease_validity: '',
