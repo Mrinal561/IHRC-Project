@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux'
 import { createPfTracker } from '@/store/slices/pfSetup/pfTrackerSlice'
 import { showErrorNotification } from '@/components/ui/ErrorMessage'
 import { addMonths, format, parse, startOfYear } from 'date-fns'
+import { error } from 'console'
 
 const documentPath = '../store/AllMappedCompliancesDetails.xls'
 
@@ -210,19 +211,32 @@ const PFTrackerBulkUpload: React.FC<PFTrackerBulkUploadProps> = ({
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
-        } catch (error) {
-            console.error('Download error:', error)
-            toast.push(
-                <Notification
-                    title="error"
-                    closable={true}
-                    type="error"
-                >
-                    No PF Setup data found for your company
-                </Notification>,
-            )
-            // throw error;
-        }
+        } catch (error: any) {
+                console.error('Download error:', error);
+                
+                // If we have a response with data
+                if (error.response?.data) {
+                    // For blob responses, we need to read the blob to get the error message
+                    if (error.response.data instanceof Blob) {
+                        const reader = new FileReader();
+                        reader.onload = function() {
+                            try {
+                                const errorData = JSON.parse(reader.result);
+                                showErrorNotification(errorData.message || 'Download failed');
+                            } catch (e) {
+                                showErrorNotification('Download failed. Please try again.');
+                            }
+                        };
+                        reader.readAsText(error.response.data);
+                    } else {
+                        // For non-blob responses
+                        showErrorNotification(error.response.data.message || 'Download failed');
+                    }
+                } else {
+                    // If no response data is available
+                    showErrorNotification(error.message || 'Download failed. Please try again.');
+                }
+            }
     }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
