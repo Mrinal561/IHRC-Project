@@ -1121,8 +1121,8 @@ const PFEditPage: React.FC = () => {
     }
 
     const handleSignatoryChange = (
-        newValue: MultiValue<SelectOption>,
-        actionMeta: ActionMeta<SelectOption>,
+         newValue: MultiValue<{ value: string; label: string }>,
+               actionMeta: ActionMeta<{ value: string; label: string }>,
     ) => {
         const selectedUserIds = newValue.map((option) => parseInt(option.value))
         const newSignatoryData = selectedUserIds.map((id) => {
@@ -1130,17 +1130,20 @@ const PFEditPage: React.FC = () => {
             return {
                 signatory_id: id,
                 dsc_validity: null,
+                e_sign: '',
                 e_sign_status: 'active',
-                details: {
-                    id: user?.id || 0,
-                    name: user?.name || '',
-                    email: user?.email || '',
-                    mobile: user?.mobile || '',
-                    Role: {
-                        id: user?.Role.id || 0,
-                        name: user?.Role.name || '',
-                    },
-                },
+                dsc_document: '',
+
+                // details: {
+                //     id: user?.id || 0,
+                //     name: user?.name || '',
+                //     email: user?.email || '',
+                //     mobile: user?.mobile || '',
+                //     Role: {
+                //         id: user?.Role.id || 0,
+                //         name: user?.Role.name || '',
+                //     },
+                // },
             }
         })
 
