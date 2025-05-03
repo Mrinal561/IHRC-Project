@@ -461,16 +461,7 @@ const PFEditPage: React.FC = () => {
                 dsc_validity: null,
                 e_sign: '',
                 e_sign_status: 'active',
-                details: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    mobile: user.mobile,
-                    Role: {
-                        id: user.Role.id,
-                        name: user.Role.name,
-                    },
-                },
+                dsc_document: '',
             }
         })
 
