@@ -13,7 +13,11 @@ export type EsiSetupData = {
     signatory_data: {
         signatory_id: number;
     }[]; 
-    certificate?: string;
+    certificate?: {
+        data: string;
+        filename: string;
+        mimetype: string;
+    };
     email:string;
     mobile_number:string;
 }
