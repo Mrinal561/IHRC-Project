@@ -174,13 +174,13 @@ const PFTrackerEditDialog: React.FC<PFTrackerEditDialogProps> = ({
       await validationSchema.validate(editedData, { abortEarly: false });
     // Create updateData object (matching the original updateTracker data expectation)
     const updateData = {
-      no_of_emp: editedData.no_of_emp || '0',
+      no_of_emp: Number(editedData.no_of_emp) || 0,
       delay_reason: editedData.delay_reason || '',
-      epf_wage: editedData.epf_wage || '0',
-      eps_wage: editedData.eps_wage || '0',
-      edli_wage: editedData.edli_wage || '0',
-      total_challan_amt: editedData.total_challan_amt || '0',
-      total_paid_amt: editedData.total_paid_amt || '0',
+      epf_wage: Number(editedData.epf_wage) || 0,
+      eps_wage: Number(editedData.eps_wage) || 0,
+      edli_wage: Number(editedData.edli_wage) || 0,
+      total_challan_amt: Number(editedData.total_challan_amt) || 0,
+      total_paid_amt: Number(editedData.total_paid_amt) || 0,
       payment_date: editedData.payment_date || '',
       challan_type: editedData.challan_type,
       trrn_no: editedData.trrn_no || '',
