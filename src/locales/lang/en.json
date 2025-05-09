@@ -48,6 +48,14 @@
 
             }
         },
+        "poshTracker": {
+            "poshTracker": "POSH",
+            "collapse": {
+                "collapse": "POSH",
+                "item1": "POSH Return",
+                "item2": "Committee"
+            }
+        },
 
         "remittanceTracker": {
             "remittanceTracker": "Remittance Tracker",
@@ -86,6 +94,7 @@
                 }
 
             }
-        }
+        },
+        "posh": "POSH"
         }
 }
