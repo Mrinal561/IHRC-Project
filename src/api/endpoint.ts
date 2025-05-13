@@ -183,6 +183,23 @@ export const endpoints = {
         getById: (id: any) => api(`companyadmin/ptsetup/ptec-tracker/${id}`),
         update: (id: any) => api(`/companyadmin/ptsetup/ptec-tracker/${id}`),
     },
+    poshSetup: {
+    detail: (id:any) => api(`companyadmin/posh-setup/${id}`),
+    list: () => api('companyadmin/posh-setu'),
+    createUpdate: () => api('companyadmin/posh-setup'),
+    detailbyCompany: (id: any) => api(`companyadmin/posh-setup/company/${id}`),
+    committeeList: () => api("companyadmin/posh-setup/committees"),
+    committeeData: () => api("companyadmin/posh-setup/committee/export"),
+    createCommittee: () => api("companyadmin/posh-setup/committee"),
+    createPoshReturn: () => api("companyadmin/posh-setup/posh-return"),
+    poshReturnList: () => api("companyadmin/posh-setup/posh-return/list"),
+    poshReturnExport: () => api("companyadmin/posh-setup/posh-return/export"),
+    poshCommitteeExport: () => api("companyadmin/posh-setup/committee/export"),
+    poshReturnBulkDocumentDownload: () => api("companyadmin/posh-setup/posh-return/bulk-download"),
+    poshReturnIndividualDocumentDownload: (id: any) => api(`companyadmin/posh-setup/posh-return/report/${id}`),
+    poshCommitteeIndividualDocumentDownload: (id: any) => api(`/companyadmin/posh-setup/committee/policy/${id}`)
+    },
+    
     pfiwtracker: {
         download: () => api('companyadmin/pfsetup/pfiw-tracker/exportdata'),
         bulkupload: () => api('/companyadmin/pfsetup/pfiw-tracker'),
@@ -267,23 +284,18 @@ export const endpoints = {
         download: () => api('companyadmin/agreement/agreement-data/export')
 
     },
-        notification:{
+    notification:{
             notification:() => api('notifications/settings'),
             unmarkedlist:()=> api('/notifications?unmarked=true'),
             allList:()=> api(`/notifications`),
             markRead:(id:any)=> api(`notification/read/${id}`)
         },
-        forgotpassword:{
+    forgotpassword:{
             forgot:()=> api('forgot-password'),
             reset:() => api(`reset-password`),
             verifyToken: () => api(`/verify-reset-token`)
         },
-        graph:{
-            // dueDate:(type:any,code:any,financialYear:any)=> api(`companyadmin/graph/graph-data?type=${type}&code=${code}&financial_year=${financialYear}`),
-            // challanamount:(type:any,code:any,financialYear:any)=> api(`companyadmin/graph/challan-amount?type=${type}&code=${code}&financialYear=${financialYear}`),
-            // challancounts:(type:any,code:any,financialYear:any)=> api(`companyadmin/graph/challan-counts?type=${type}&code=${code}&financial_year=${financialYear}`),
-            // analytics:(type:any,code:any,financialYear:any)=> api(`companyadmin/graph/challan-analytics?type=${type}&code=${code}&financialYear=${financialYear}`),
-
+     graph:{
             branchType: () => api(`companyadmin/graph/branch-types`),
             branchStatus: () => api(`companyadmin/graph/branch-status`),
             agreementStatus: () => api(`companyadmin/graph/agreement-status`),

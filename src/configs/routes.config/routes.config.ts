@@ -502,6 +502,17 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'entityMenu.poshSetup',
+        path: `${APP_PREFIX_PATH}/IHRC/posh-setup/:companyName`,
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Entity/PoshSetup/PoshSetup'
+                ),
+        ),
+        authority: [],
+    },
+    {
         key: 'entityMenu.companyDetails',
         path: `${APP_PREFIX_PATH}/IHRC/company-details/:companyName`,
         component: lazy(
@@ -752,6 +763,7 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+   
     {
         key: 'role.permission',
         path: '/role-permission',

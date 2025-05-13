@@ -1,225 +1,552 @@
-import React, { useState } from 'react';
-import {Button, Dialog, Input, Notification } from '@/components/ui';
+import React, { useState, useEffect } from 'react';
+import { Button, Dialog, Input, Notification } from '@/components/ui';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
 import PoshBulkUpload from './components/PoshBulkUpload';
 import PoshTable from './components/PoshTable';
 import { HiPlusCircle, HiDownload } from 'react-icons/hi';
-import OutlinedOutlinedSelect from '@/components/ui/Outlined/Outlined';
-import { AdaptableCard } from '@/components/shared'
+import { AdaptableCard } from '@/components/shared';
 import OutlinedInput from '@/components/ui/OutlinedInput';
+import httpClient from '@/api/http-client';
+import { endpoints } from '@/api/endpoint';
+import { useAppSelector } from '@/store';
+import useAuth from '@/utils/hooks/useAuth';
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface PoshTableData {
+  id: string;
+  companyGroup: string;
+  company: string;
+  branch: string;
+  complaintsReceived: number;
+  complaintsDisposed: number;
+  pendingCases: number;
+  workshops: number;
+  actionTaken: string;
+  returnLevel: string;
+}
+
+interface PoshReturn {
+  id: string;
+  company_id: string;
+  company_name: string;
+  branch_id: string;
+  branch_name: string;
+  complaints_received: number;
+  complaints_disposed: number;
+  pending_cases: number;
+  workshop_conducted: number;
+  nature_of_action_taken: string;
+  return_level: string;
+  created_at: string;
+}
 
 const Posh = () => {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
-    const [formData, setFormData] = useState({
-        company: '',
-        branch: '',
-        complaintsReceived: 0,
-        complaintsDisposed: 0,
-        pendingCases: 0,
-        workshops: 1,
-        actionTaken: '',
-        returnLevel: 'branch'
-    });
-    const [poshData, setPoshData] = useState([]);
-    
-    // Assuming you have companies and branches data in your Redux store
-    // const companies = useAppOutlinedSelector(state => state.company.data);
-    // const branches = useAppOutlinedSelector(state => state.branch.data);
-    
-    const returnLevelOptions = [
-        { value: 'branch', label: 'Branch Level' },
-        { value: 'district', label: 'District Level' }
-    ];
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    company_id: '',
+    branch_id: '',
+    complaints_received: 0,
+    complaints_disposed: 0,
+    pending_cases: 0,
+    workshop_conducted: 1,
+    nature_of_action_taken: '',
+    return_level: 'branch'
+  });
+  const [poshData, setPoshData] = useState<PoshTableData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [companies, setCompanies] = useState<SelectOption[]>([]);
+  const [branches, setBranches] = useState<SelectOption[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [companyGroupId, setCompanyGroupId] = useState('');
+  
 
-    const handleInputChange = (name, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+  
+  // Using your existing useAuth hook as-is
+  const auth = useAuth();
+  const userId = auth?.user?.id || 0; // Fallback to 0 if not available
 
-    const handleSubmit = () => {
-        // Validate workshops - minimum 1
-        if (formData.workshops < 1) {
-            // Notification.warning({
-            //     title: 'Validation Error',
-            //     message: 'Number of workshops must be at least 1'
-            // });
-            return;
+  const currentFinancialYear = useAppSelector((state: any) => state.common?.currentFinancialYear || '');
+  const [isBulkDownloadOpen, setIsBulkDownloadOpen] = useState(false);
+  const [bulkDownloadData, setBulkDownloadData] = useState({
+    company_id: '',
+    year: currentFinancialYear,
+    type: 'branch' as 'branch' | 'district'
+  });
+
+  const returnLevelOptions = [
+    { value: 'branch', label: 'Branch Level' },
+    { value: 'district', label: 'District Level' }
+  ];
+
+  useEffect(() => {
+    fetchCompanyGroups();
+    fetchPoshReturns();
+  }, []);
+
+  const fetchCompanyGroups = async () => {
+    try {
+      const response = await httpClient.get(endpoints.companyGroup.getAll(), {
+        params: { ignorePlatform: true }
+      });
+      
+      if (response.data.data?.length > 0) {
+        const defaultGroup = response.data.data[0];
+        setCompanyGroupId(defaultGroup.id);
+        fetchCompanies(defaultGroup.id);
+      }
+    } catch (error) {
+      console.error('Failed to fetch company groups:', error);
+    }
+  };
+
+  const fetchCompanies = async (groupId: string) => {
+    try {
+      const response = await httpClient.get(endpoints.company.getAll(), {
+        params: { 'group_id[]': groupId }
+      });
+      
+      const formattedCompanies = response.data?.data?.map((company: any) => ({
+        value: company.id.toString(),
+        label: company.name
+      }));
+      
+      setCompanies(formattedCompanies || []);
+    } catch (error) {
+      console.error('Failed to fetch companies:', error);
+    }
+  };
+
+  const fetchBranches = async (companyId: string) => {
+    try {
+      const response = await httpClient.get(endpoints.branch.getAllBranch(), {
+        params: { 'company_id[]': companyId }
+      });
+      
+      const formattedBranches = response.data?.data?.map((branch: any) => ({
+        value: branch.id.toString(),
+        label: `${branch.name} (${branch.Location?.name}/${branch.District?.name}/${branch.State?.name})`
+      }));
+      
+      setBranches(formattedBranches || []);
+    } catch (error) {
+      console.error('Failed to fetch branches:', error);
+    }
+  };
+
+  const fetchPoshReturns = async () => {
+    setLoading(true);
+    try {
+      const response = await httpClient.get(endpoints.poshSetup.poshReturnList(), {
+        params: {
+          financial_year: currentFinancialYear,
+          created_by: userId,
+          search: searchTerm
         }
+      });
+      
+      const transformedData = response.data.data.map((item: any) => ({
+        id: item.id,
+        companyGroup: 'IHRC',
+        company: item.company_name,
+        branch: item.branch_name,
+        complaintsReceived: item.complaints_received,
+        complaintsDisposed: item.complaints_disposed,
+        pendingCases: item.pending_cases,
+        workshops: item.workshop_conducted,
+        actionTaken: item.nature_of_action_taken,
+        returnLevel: item.return_level === 'branch' ? 'Branch Level' : 'District Level'
+      }));
+      
+      setPoshData(transformedData);
+    } catch (error) {
+      console.error('Failed to fetch POSH returns:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // In a real app, you would call an API here
-        const newEntry = {
-            id: Date.now().toString(),
-            companyGroup: 'IHRC', // Default as per requirements
-            ...formData,
-            // company: companies.find(c => c.id === formData.company)?.name || '',
-            // branch: branches.find(b => b.id === formData.branch)?.name || ''
-        };
+  const handleInputChange = (name: string, value: string | number) => {
+    if (name === 'company_id') {
+      fetchBranches(value as string);
+      setFormData(prev => ({
+        ...prev,
+        company_id: value as string,
+        branch_id: ''
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
 
-        // setPoshData(prev => [...prev, newEntry]);
-        setIsDialogOpen(false);
-        setFormData({
-            company: '',
-            branch: '',
-            complaintsReceived: 0,
-            complaintsDisposed: 0,
-            pendingCases: 0,
-            workshops: 1,
-            actionTaken: '',
-            returnLevel: 'branch'
-        });
+  const handleSubmit = async () => {
+    if (formData.workshop_conducted < 1) {
+      
+      return;
+    }
 
-        // Notification.success({
-        //     title: 'Success',
-        //     message: 'POSH return added successfully'
-        // });
-    };
+    try {
+      await httpClient.post(endpoints.poshSetup.createPoshReturn(), {
+        ...formData,
+        company_id: Number(formData.company_id),
+        branch_id: Number(formData.branch_id),
+        created_by: userId
+      });
 
-    // const handleDownloadReport = (id) => {
-    //     const item = poshData.find(item => item.id === id);
-    //     if (!item) return;
+      
 
-    //     // In a real app, you would call an API to generate the PDF
-    //     // For demo, we'll just show a notification
-    //     Notification.info({
-    //         title: 'Download Started',
-    //         message: `Downloading report for ${item.company} - ${item.branch}`
-    //     });
-    // };
+      setIsDialogOpen(false);
+      resetForm();
+      fetchPoshReturns();
+    } catch (error) {
+    
+    }
+  };
 
-    return (
-        <AdaptableCard className="h-full" bodyClass="h-full">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
-                <div className="mb-4 lg:mb-0">
-                    <h3 className="text-2xl font-bold">POSH Returns</h3>
-                </div>
-                <div className="flex gap-2">
-                    <OutlinedInput label={'Search by branch'} value={''} onChange={function (value: string): void {
-                        throw new Error('Function not implemented.');
-                    } }></OutlinedInput>
-                    <Button size='sm' variant='solid' icon={<HiDownload />}>Download Data</Button>
-                    <PoshBulkUpload />
-                    <Button
-                        variant="solid"
-                        size="sm"
-                        icon={<HiPlusCircle />}
-                        onClick={() => setIsDialogOpen(true)}
-                    >
-                        Add Return
-                    </Button>
-                </div>
+  const resetForm = () => {
+    setFormData({
+      company_id: '',
+      branch_id: '',
+      complaints_received: 0,
+      complaints_disposed: 0,
+      pending_cases: 0,
+      workshop_conducted: 1,
+      nature_of_action_taken: '',
+      return_level: 'branch'
+    });
+  };
+
+//   const handleDownloadReport = async (id: string) => {
+//     try {
+//       const response = await httpClient.get(endpoints.poshSetup.exportReport(id), {
+//         responseType: 'blob'
+//       });
+      
+//       const url = window.URL.createObjectURL(new Blob([response.data]));
+//       const link = document.createElement('a');
+//       link.href = url;
+//       link.setAttribute('download', `posh-report-${id}.pdf`);
+//       document.body.appendChild(link);
+//       link.click();
+//       document.body.removeChild(link);
+//       window.URL.revokeObjectURL(url);
+
+//       Notification.info({
+//         title: 'Download Started',
+//         message: 'POSH report download has started'
+//       });
+//     } catch (error) {
+//       Notification.error({
+//         title: 'Error',
+//         message: 'Failed to download report'
+//       });
+//     }
+//   };
+
+  const handleDownloadAllData = async () => {
+    try {
+      const response = await httpClient.get(endpoints.poshSetup.poshReturnExport(), {
+        params: {
+          financial_year: currentFinancialYear,
+          created_by: userId
+        },
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `posh-data-export.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+     
+    } catch (error) {
+     
+    }
+  };
+
+  const handleBulkUploadSuccess = () => {
+    setIsBulkUploadOpen(false);
+    fetchPoshReturns();
+  };
+
+  const handleBulkDownload = async () => {
+    try {
+      const response = await httpClient.get(
+        endpoints.poshSetup.poshReturnBulkDocumentDownload(), 
+        {
+          params: {
+            type: bulkDownloadData.type,
+            company_id: bulkDownloadData.company_id,
+            year: bulkDownloadData.year
+          },
+          responseType: 'blob'
+        }
+      );
+  
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `posh-reports-${bulkDownloadData.company_id}-${bulkDownloadData.year}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+  
+      setIsBulkDownloadOpen(false);
+     
+    } catch (error) {
+     throw error
+    }
+  };
+
+  const handleDownloadReport = async (id: string) => {
+    try {
+      const response = await httpClient.get(
+        endpoints.poshSetup.poshReturnIndividualDocumentDownload(id), 
+        {
+          responseType: 'blob'
+        }
+      );
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `posh-report-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+  
+     
+    } catch (error) {
+     
+    }
+  };
+
+  return (
+    <AdaptableCard className="h-full" bodyClass="h-full">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
+        <div className="mb-4 lg:mb-0">
+          <h3 className="text-2xl font-bold">POSH Returns</h3>
+        </div>
+        <div className="flex gap-2">
+          <OutlinedInput 
+            label={'Search by branch'} 
+            value={searchTerm}
+            onChange={(value) => {
+              setSearchTerm(value);
+              fetchPoshReturns();
+            }}
+          />
+          <Button 
+            size='sm' 
+            variant='solid' 
+            icon={<HiDownload />}
+            onClick={handleDownloadAllData}
+          >
+            Download Data
+          </Button>
+          <Button 
+    size='sm' 
+    variant='solid' 
+    icon={<HiDownload />}
+    onClick={() => setIsBulkDownloadOpen(true)}
+  >
+     Download Reports
+  </Button>
+          <PoshBulkUpload 
+            isOpen={isBulkUploadOpen}
+            onClose={() => setIsBulkUploadOpen(false)}
+            onSuccess={handleBulkUploadSuccess}
+          />
+          <Button
+            variant="solid"
+            size="sm"
+            icon={<HiPlusCircle />}
+            onClick={() => setIsDialogOpen(true)}
+          >
+            Add Return
+          </Button>
+        </div>
+      </div>
+
+      <PoshTable 
+        data={poshData}
+        loading={loading} 
+        onDownload={handleDownloadReport}      />
+
+<Dialog
+  isOpen={isBulkDownloadOpen}
+  onClose={() => setIsBulkDownloadOpen(false)}
+  onRequestClose={() => setIsBulkDownloadOpen(false)}
+  width={600}
+>
+  <h5 className="mb-6">Bulk Download POSH Reports</h5>
+  <div className="grid gap-4">
+    <div>
+      <label className="block text-sm font-medium mb-2">Select Company</label>
+      <OutlinedSelect
+        options={companies}
+        value={companies.find(option => option.value === bulkDownloadData.company_id) || null}
+        onChange={(selectedOption) => setBulkDownloadData(prev => ({
+          ...prev,
+          company_id: selectedOption?.value || ''
+        }))}
+        label="Select Company"
+      />
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium mb-2">Select Year</label>
+      <Input
+        type="text"
+        value={bulkDownloadData.year}
+        onChange={(e) => setBulkDownloadData(prev => ({
+          ...prev,
+          year: e.target.value
+        }))}
+      />
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium mb-2">Report Type</label>
+      <OutlinedSelect
+        options={[
+          { value: 'branch', label: 'Branch Level Reports' },
+          { value: 'district', label: 'District Level Reports' }
+        ]}
+        value={bulkDownloadData.type === 'branch' 
+          ? { value: 'branch', label: 'Branch Level Reports' }
+          : { value: 'district', label: 'District Level Reports' }}
+        onChange={(selectedOption) => setBulkDownloadData(prev => ({
+          ...prev,
+          type: selectedOption?.value as 'branch' | 'district'
+        }))}
+        label="Select Report Type"
+      />
+    </div>
+
+    <div className="flex justify-end gap-2 mt-4">
+      <Button variant="plain" onClick={() => setIsBulkDownloadOpen(false)}>
+        Cancel
+      </Button>
+      <Button 
+        variant="solid" 
+        onClick={handleBulkDownload}
+        disabled={!bulkDownloadData.company_id || !bulkDownloadData.year}
+      >
+        Download Reports
+      </Button>
+    </div>
+  </div>
+</Dialog>
+
+      <Dialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onRequestClose={() => setIsDialogOpen(false)}
+        width={800}
+      >
+        <h5 className="mb-6">Add POSH Return</h5>
+        <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Select Company</label>
+              <OutlinedSelect
+                options={companies}
+                value={companies.find(option => option.value === formData.company_id) || null}
+                onChange={(selectedOption) => handleInputChange('company_id', selectedOption?.value || '')}
+                label="Select Company"
+              />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Select Branch</label>
+              <OutlinedSelect
+                options={branches}
+                value={branches.find(option => option.value === formData.branch_id) || null}
+                onChange={(selectedOption) => handleInputChange('branch_id', selectedOption?.value || '')}
+                label="Select Branch"
+                disabled={!formData.company_id}
+              />
+            </div>
+          </div>
 
-            <PoshTable 
-                data={poshData}
-                loading={false} onDownload={undefined}                // onDownload={handleDownloadReport}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Complaints Received</label>
+              <Input
+                type="number"
+                min="0"
+                value={formData.complaints_received}
+                onChange={(e) => handleInputChange('complaints_received', parseInt(e.target.value) || 0)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Complaints Disposed</label>
+              <Input
+                type="number"
+                min="0"
+                value={formData.complaints_disposed}
+                onChange={(e) => handleInputChange('complaints_disposed', parseInt(e.target.value) || 0)}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Pending Cases (90+ days)</label>
+              <Input
+                type="number"
+                min="0"
+                value={formData.pending_cases}
+                onChange={(e) => handleInputChange('pending_cases', parseInt(e.target.value) || 0)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Workshops Conducted</label>
+              <Input
+                type="number"
+                min="1"
+                value={formData.workshop_conducted}
+                onChange={(e) => handleInputChange('workshop_conducted', parseInt(e.target.value) || 1)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Nature of Action Taken</label>
+            <Input
+              textArea
+              rows={3}
+              value={formData.nature_of_action_taken}
+              onChange={(e) => handleInputChange('nature_of_action_taken', e.target.value)}
+              placeholder="Describe the actions taken..."
             />
+          </div>
 
-            {/* Add Return Dialog */}
-            <Dialog
-                isOpen={isDialogOpen}
-                onClose={() => setIsDialogOpen(false)}
-                onRequestClose={() => setIsDialogOpen(false)}
-                width={800}
-            >
-                <h5 className="mb-6">Add POSH Return</h5>
-                <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Select Company</label>
-                            <OutlinedSelect
-                                options=''
-                                value={formData.company}
-                                onChange={(value) => handleInputChange('company', value)}
-                                label="Select Company"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Select Branch</label>
-                            <OutlinedSelect
-                                options=''
-                                value={formData.branch}
-                                onChange={(value) => handleInputChange('branch', value)}
-                                label="Select Branch"
-                                disabled={!formData.company}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Complaints Received</label>
-                            <Input
-                                type="number"
-                                min="0"
-                                value={formData.complaintsReceived}
-                                onChange={(e) => handleInputChange('complaintsReceived', parseInt(e.target.value) || 0)}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Complaints Disposed</label>
-                            <Input
-                                type="number"
-                                min="0"
-                                value={formData.complaintsDisposed}
-                                onChange={(e) => handleInputChange('complaintsDisposed', parseInt(e.target.value) || 0)}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Pending Cases (90+ days)</label>
-                            <Input
-                                type="number"
-                                min="0"
-                                value={formData.pendingCases}
-                                onChange={(e) => handleInputChange('pendingCases', parseInt(e.target.value) || 0)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Workshops Conducted</label>
-                            <Input
-                                type="number"
-                                min="1"
-                                value={formData.workshops}
-                                onChange={(e) => handleInputChange('workshops', parseInt(e.target.value) || 1)}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Return Level</label>
-                            <OutlinedSelect
-                                options={returnLevelOptions}
-                                value={formData.returnLevel}
-                                onChange={(value) => handleInputChange('returnLevel', value)} label={'Return Level'}                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Nature of Action Taken</label>
-                        <Input
-                            textArea
-                            rows={3}
-                            value={formData.actionTaken}
-                            onChange={(e) => handleInputChange('actionTaken', e.target.value)}
-                            placeholder="Describe the actions taken..."
-                        />
-                    </div>
-
-                    <div className="flex justify-end gap-2 mt-4">
-                        <Button variant="plain" onClick={() => setIsDialogOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button variant="solid" onClick={handleSubmit}>
-                            Confirm
-                        </Button>
-                    </div>
-                </div>
-            </Dialog>
-        </AdaptableCard>
-    );
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="plain" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="solid" onClick={handleSubmit} loading={loading}>
+              Confirm
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    </AdaptableCard>
+  );
 };
 
 export default Posh;

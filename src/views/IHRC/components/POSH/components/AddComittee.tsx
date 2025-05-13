@@ -1,37 +1,48 @@
 import React, { useState } from 'react';
-import { Button, Dialog, Input, Notification, Select, Tooltip } from '@/components/ui';
+import { Button, Dialog, Input, Notification, Tooltip } from '@/components/ui';
 import { HiPlus, HiTrash, HiDownload } from 'react-icons/hi';
-import { useAppSelector } from '@/store';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
 import { IoArrowBack } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
+import httpClient from '@/api/http-client';
+import { endpoints } from '@/api/endpoint';
+import useAuth from '@/utils/hooks/useAuth';
 
 interface CommitteeMember {
-    name: string;
+    fullName: string;
     designation: string;
     email: string;
     mobile: string;
 }
 
 const AddCommittee = () => {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        company: '',
-        committeeType: '',
+        company_id: '',
+        committee_type: '',
         members: [
-            { name: '', designation: '', email: '', mobile: '' },
-            { name: '', designation: '', email: '', mobile: '' },
-            { name: '', designation: '', email: '', mobile: '' },
-            { name: '', designation: '', email: '', mobile: '' }
+            { fullName: '', designation: '', email: '', mobile: '' },
+            { fullName: '', designation: '', email: '', mobile: '' },
+            { fullName: '', designation: '', email: '', mobile: '' },
+            { fullName: '', designation: '', email: '', mobile: '' }
         ]
     });
 
-    // const companies = useAppSelector(state => state.company.data);
-    
+// In your component
+const auth = useAuth();
+const userId = (auth as any).user?.id || 0; // Fallback to 0 if not available    const userId = user?.id || 0;
+    const navigate = useNavigate();
+
     const committeeTypeOptions = [
         { value: 'one', label: 'One' },
         { value: 'zone', label: 'Zone' },
         { value: 'state', label: 'State Wise' }
+    ];
+
+    // Mock companies - replace with your actual company data
+    const companies = [
+        { value: '1', label: 'Adani Solutions' },
+        { value: '2', label: 'Adani Power' }
     ];
 
     const handleInputChange = (field: string, value: string, memberIndex?: number, memberField?: keyof CommitteeMember) => {
@@ -52,7 +63,7 @@ const AddCommittee = () => {
             ...formData,
             members: [
                 ...formData.members,
-                { name: '', designation: '', email: '', mobile: '' }
+                { fullName: '', designation: '', email: '', mobile: '' }
             ]
         });
     };
@@ -68,90 +79,119 @@ const AddCommittee = () => {
         setFormData({ ...formData, members: updatedMembers });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Validate required fields
-        if (!formData.company || !formData.committeeType) {
-           
+        if (!formData.company_id || !formData.committee_type) {
+         
             return;
         }
-
+    
         // Validate at least 4 members
         if (formData.members.length < 4) {
-           
+            
             return;
         }
-
-        // Validate member details
-        for (const member of formData.members) {
-            if (!member.name || !member.designation || !member.email || !member.mobile) {
-               
-                return;
-            }
+    
+        // Prepare the request data
+        const requestData = {
+            company_id: Number(formData.company_id), // Ensure it's a number
+            committee_type: formData.committee_type, // Extract just the value
+            committee: formData.members,
+            created_by: userId
+        };
+    
+        try {
+            setLoading(true);
+            const response = await httpClient.post(
+                endpoints.poshSetup.createCommittee(),
+                requestData
+            );
+    
+          
+            navigate('/committee');
+        } catch (error) {
+            
+        } finally {
+            setLoading(false);
         }
-
-        // Submit logic would go here
-       
-        resetForm();
     };
 
     const resetForm = () => {
         setFormData({
-            company: '',
-            committeeType: '',
+            company_id: '',
+            committee_type: '',
             members: [
-                { name: '', designation: '', email: '', mobile: '' },
-                { name: '', designation: '', email: '', mobile: '' },
-                { name: '', designation: '', email: '', mobile: '' },
-                { name: '', designation: '', email: '', mobile: '' }
+                { fullName: '', designation: '', email: '', mobile: '' },
+                { fullName: '', designation: '', email: '', mobile: '' },
+                { fullName: '', designation: '', email: '', mobile: '' },
+                { fullName: '', designation: '', email: '', mobile: '' }
             ]
         });
-        setIsDialogOpen(false);
     };
 
-    const downloadTemplate = (format: 'pdf' | 'word') => {
-        
-    };
+    // const downloadTemplate = async (format: 'pdf' | 'word') => {
+    //     try {
+    //         const endpoint = format === 'pdf' 
+    //             ? endpoints.poshSetup.downloadPdfTemplate()
+    //             : endpoints.poshSetup.downloadWordTemplate();
 
-    const company = [
-        { value: "adani_solution", name: 'Adani SOlution' },
-    ]
+    //         const response = await httpClient.get(endpoint, {
+    //             responseType: 'blob'
+    //         });
+            
+    //         const url = window.URL.createObjectURL(new Blob([response.data]));
+    //         const link = document.createElement('a');
+    //         link.href = url;
+    //         link.setAttribute('download', `committee-template.${format}`);
+    //         document.body.appendChild(link);
+    //         link.click();
+    //         document.body.removeChild(link);
+    //         window.URL.revokeObjectURL(url);
 
-    const navigate = useNavigate()
+    //         Notification.info({
+    //             title: 'Download Started',
+    //             message: `Committee ${format.toUpperCase()} template download has started`
+    //         });
+    //     } catch (error) {
+    //         Notification.error({
+    //             title: 'Error',
+    //             message: `Failed to download ${format.toUpperCase()} template`
+    //         });
+    //     }
+    // };
 
     return (
         <div className="p-6">
             <div className="">
                 <div className='flex gap-2 items-center'>
-
-                 <Button
-                                    size="sm"
-                                    variant="plain"
-                                    icon={
-                                        <IoArrowBack className="text-[#72828e] hover:text-[#5d6169]" />
-                                    }
-                                    onClick={() => navigate(-1)}
-                                />
-                <h2 className="text-2xl font-bold">Add New Committee</h2>
-                                    </div>
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={<IoArrowBack className="text-[#72828e] hover:text-[#5d6169]" />}
+                        onClick={() => navigate(-1)}
+                    />
+                    <h2 className="text-2xl font-bold">Add New Committee</h2>
+                </div>
                 
                 {/* Company and Committee Type */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-8">
                     <div>
                         <label className="block text-sm font-medium mb-2">Company</label>
                         <OutlinedSelect
-                            options={company}
-                            value={formData.company}
-                            // onChange={(value) => handleInputChange('company', value)}
-                            label="Select Company" onChange={undefined}                        />
+  options={companies}
+  value={companies.find(opt => opt.value === formData.company_id)}
+  onChange={(selected) => handleInputChange('company_id', selected?.value || '')}
+  label="Select Company"
+/>
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-2">Committee Type</label>
                         <OutlinedSelect
-                            options={committeeTypeOptions}
-                            value={formData.committeeType}
-                            onChange={(value) => handleInputChange('committeeType', value)}
-                            label="Select Committee Type"
-                        />
+    options={committeeTypeOptions}
+    value={committeeTypeOptions.find(opt => opt.value === formData.committee_type)}
+    onChange={(selected) => handleInputChange('committee_type', selected?.value || '')}
+    label="Select Committee Type"
+/>
                     </div>
                 </div>
 
@@ -170,8 +210,8 @@ const AddCommittee = () => {
                                      `Member ${index + 1}`}
                                 </label>
                                 <Input
-                                    value={member.name}
-                                    onChange={(e) => handleInputChange('', e.target.value, index, 'name')}
+                                    value={member.fullName}
+                                    onChange={(e) => handleInputChange('', e.target.value, index, 'fullName')}
                                     placeholder="Full Name"
                                 />
                             </div>
@@ -201,7 +241,7 @@ const AddCommittee = () => {
                                     type="tel"
                                 />
                             </div>
-                            {/* <div className="flex justify-end">
+                            <div className="flex justify-end">
                                 {index >= 4 && (
                                     <Tooltip title="Remove member">
                                         <Button
@@ -213,7 +253,7 @@ const AddCommittee = () => {
                                         />
                                     </Tooltip>
                                 )}
-                            </div> */}
+                            </div>
                         </div>
                     ))}
 
@@ -263,6 +303,7 @@ const AddCommittee = () => {
                     <Button
                         variant="solid"
                         onClick={handleSubmit}
+                        loading={loading}
                     >
                         Confirm
                     </Button>

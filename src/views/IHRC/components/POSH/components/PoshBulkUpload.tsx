@@ -187,7 +187,7 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
                 <h5 className="mb-4">POSH Bulk Upload</h5>
                 
                 {/* Company and Year Selection */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label className="block text-sm mb-2">Company</label>
                         <OutlinedSelect
@@ -209,7 +209,7 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
                             label="Select Year"
                         />
                     </div>
-                </div>
+                </div> */}
 
                 {/* Download Format Section */}
                 <div className="my-4 flex gap-2 items-center">
@@ -221,7 +221,6 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
                         <Button 
                             size="xs" 
                             icon={<HiDownload />}
-                            disabled={!selectedCompany || !selectedYear}
                         >
                             Download
                         </Button>
@@ -249,11 +248,7 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
                     onChange={(e) => setRemark(e.target.value)}
                 />
 
-                <div className='grid grid-cols-2 items-center'>
-                    <p>Return will be prepared at:</p>
-                    <OutlinedSelect label={'Select Level'} options={levelOptions} value={undefined} onChange={undefined} />
-                </div>
-
+               
                 {/* Action Buttons */}
                 <div className="mt-6 text-right flex gap-2 justify-end items-center">
                     <Button

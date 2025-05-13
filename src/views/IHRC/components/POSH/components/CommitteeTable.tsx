@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataTable } from '@/components/shared';
-import { Button, Tooltip } from '@/components/ui';
+import { Button, Tooltip, Notification } from '@/components/ui';
 import { HiDownload } from 'react-icons/hi';
+import httpClient from '@/api/http-client';
+import { endpoints } from '@/api/endpoint';
+import useAuth from '@/utils/hooks/useAuth';
+import { useAppSelector } from '@/store';
 
 interface CommitteeMember {
-    name: string;
+    fullName: string;
     designation: string;
     email: string;
     mobile: string;
@@ -12,65 +16,103 @@ interface CommitteeMember {
 
 interface CommitteeData {
     id: string;
-    company: string;
-    committeeType: string;
-    members: CommitteeMember[];
-    createdAt: string;
+    uuid: string;
+    company_id: number;
+    company_name: string;
+    committee_type: string;
+    committee: CommitteeMember[];
+    created_by: number;
+    created_by_name: string;
+    created_at: string;
+    updated_at: string;
 }
 
 const CommitteeTable = () => {
-    // Dummy data with members
-    const data: CommitteeData[] = [
-        {
-            id: '1',
-            company: 'ABC Corp',
-            committeeType: 'State Wise',
-            members: [
-                { name: 'John Doe', designation: 'Chairperson', email: 'john@abc.com', mobile: '9876543210' },
-                { name: 'Jane Smith', designation: 'Member', email: 'jane@abc.com', mobile: '9876543211' },
-                { name: 'Robert Johnson', designation: 'Member', email: 'robert@abc.com', mobile: '9876543212' },
-                { name: 'Emily Davis', designation: 'Member', email: 'emily@abc.com', mobile: '9876543213' }
-            ],
-            createdAt: '2023-05-15'
-        },
-        {
-            id: '2',
-            company: 'XYZ Ltd',
-            committeeType: 'Zone',
-            members: [
-                { name: 'Michael Brown', designation: 'Chairperson', email: 'michael@xyz.com', mobile: '9876543220' },
-                { name: 'Sarah Wilson', designation: 'Member', email: 'sarah@xyz.com', mobile: '9876543221' },
-                { name: 'David Taylor', designation: 'Member', email: 'david@xyz.com', mobile: '9876543222' },
-                { name: 'Lisa Anderson', designation: 'Member', email: 'lisa@xyz.com', mobile: '9876543223' },
-                { name: 'James Martinez', designation: 'Member', email: 'james@xyz.com', mobile: '9876543224' }
-            ],
-            createdAt: '2023-06-20'
-        }
-    ];
+    const [data, setData] = useState<CommitteeData[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const auth = useAuth();
+    const userId = auth?.user?.id || 0;
+    const currentFinancialYear = useAppSelector((state: any) => state.common?.currentFinancialYear || '');
 
+    const fetchCommittees = async () => {
+        setLoading(true);
+        try {
+            const response = await httpClient.get(endpoints.poshSetup.committeeList(), {
+                params: {
+                    financial_year: currentFinancialYear,
+                    created_by: userId,
+                    search: searchTerm
+                }
+            });
+
+            const formattedData = response.data.data.map((committee: any) => ({
+                ...committee,
+                committee: Array.isArray(committee.committee) ? 
+                    committee.committee : 
+                    JSON.parse(committee.committee || '[]')
+            }));
+
+            setData(formattedData);
+        } catch (error) {
+            console.error('Failed to fetch committees:', error);
+         
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDownload = async (id: string) => {
+        try {
+            const response = await httpClient.get(
+                endpoints.poshSetup.poshCommitteeIndividualDocumentDownload(id), 
+                {
+                    responseType: 'blob'
+                }
+            );
+            
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `committee-policy-${id}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error('Download error:', error);
+          
+        }
+    };
+
+
+    useEffect(() => {
+        fetchCommittees();
+    }, [searchTerm, currentFinancialYear]);
+ 
+ 
     const columns = [
         {
             header: 'Company',
             enableSorting: false,
-            accessorKey: 'company',
-            cell: ({ row }) => <div className="w-40 truncate">{row.original.company}</div>
+            accessorKey: 'company_name',
+            cell: ({ row }) => <div className="w-40 truncate">{row.original.company_name}</div>
         },
         {
             header: 'Committee Type',
             enableSorting: false,
-
-            accessorKey: 'committeeType',
-            cell: ({ row }) => <div className="w-40">{row.original.committeeType}</div>
+            accessorKey: 'committee_type',
+            cell: ({ row }) => <div className="w-40">{row.original.committee_type}</div>
         },
         {
             header: 'Member 1',
             enableSorting: false,
-
             cell: ({ row }) => (
                 <div className="w-48">
                     {row.original.members[0] ? (
                         <>
-                            <div className="font-medium">{row.original.members[0].name}</div>
+                            <div className="font-medium">{row.original.members[0].fullName}</div>
                             <div className="text-xs text-gray-500">{row.original.members[0].designation}</div>
                         </>
                     ) : '-'}
@@ -80,12 +122,11 @@ const CommitteeTable = () => {
         {
             header: 'Member 2',
             enableSorting: false,
-
             cell: ({ row }) => (
                 <div className="w-48">
                     {row.original.members[1] ? (
                         <>
-                            <div className="font-medium">{row.original.members[1].name}</div>
+                            <div className="font-medium">{row.original.members[1].fullName}</div>
                             <div className="text-xs text-gray-500">{row.original.members[1].designation}</div>
                         </>
                     ) : '-'}
@@ -95,12 +136,11 @@ const CommitteeTable = () => {
         {
             header: 'Member 3',
             enableSorting: false,
-
             cell: ({ row }) => (
                 <div className="w-48">
                     {row.original.members[2] ? (
                         <>
-                            <div className="font-medium">{row.original.members[2].name}</div>
+                            <div className="font-medium">{row.original.members[2].fullName}</div>
                             <div className="text-xs text-gray-500">{row.original.members[2].designation}</div>
                         </>
                     ) : '-'}
@@ -110,12 +150,11 @@ const CommitteeTable = () => {
         {
             header: 'Member 4',
             enableSorting: false,
-
             cell: ({ row }) => (
                 <div className="w-48">
                     {row.original.members[3] ? (
                         <>
-                            <div className="font-medium">{row.original.members[3].name}</div>
+                            <div className="font-medium">{row.original.members[3].fullName}</div>
                             <div className="text-xs text-gray-500">{row.original.members[3].designation}</div>
                         </>
                     ) : '-'}
@@ -125,7 +164,6 @@ const CommitteeTable = () => {
         {
             header: 'Additional Members',
             enableSorting: false,
-
             cell: ({ row }) => (
                 <div className="w-40">
                     {row.original.members.length > 4 ? 
@@ -137,11 +175,9 @@ const CommitteeTable = () => {
         {
             header: 'Created At',
             enableSorting: false,
-
-            accessorKey: 'createdAt',
             cell: ({ row }) => (
                 <div className="w-40">
-                    {new Date(row.original.createdAt).toLocaleDateString()}
+                    {new Date(row.original.created_at).toLocaleDateString()}
                 </div>
             )
         },
@@ -150,28 +186,28 @@ const CommitteeTable = () => {
             id: 'actions',
             cell: ({ row }) => (
                 <Tooltip title="Download Policy">
-                    <Button
-                        size="sm"
-                        icon={<HiDownload />}
-                        onClick={() => console.log('Download', row.original.id)}
-                    />
-                </Tooltip>
+                <Button
+                    size="sm"
+                    icon={<HiDownload />}
+                    onClick={() => handleDownload(row.original.id)}
+                />
+            </Tooltip>
             )
         }
     ];
-
     return (
         <DataTable
             columns={columns}
             data={data}
+            loading={loading}
             pagingData={{
                 total: data.length,
                 pageIndex: 1,
                 pageSize: 10
             }}
             stickyHeader={true}
-                    stickyFirstColumn={true}
-                    stickyLastColumn={true}
+            stickyFirstColumn={true}
+            stickyLastColumn={true}
         />
     );
 };
