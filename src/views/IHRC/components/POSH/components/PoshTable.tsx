@@ -1,7 +1,7 @@
 import React from 'react';
 import DataTable from '@/components/shared/DataTable';
 import { Button, Tooltip } from '@/components/ui';
-import { HiDownload } from 'react-icons/hi';
+import { HiDownload, HiOutlineViewGrid } from 'react-icons/hi';
 
 interface PoshTableData {
     id: string;
@@ -82,10 +82,20 @@ const PoshTable = ({ data, loading, onDownload }: PoshTableProps) => {
     ];
 
     return (
+        <div className='relative'>
+{data.length === 0 ? (
+      <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+           <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+           <p className="text-center">No Data Available</p>
+         </div>
+): (
+
         <div className="relative">
             <DataTable
                 columns={columns}
                 data={data}
+                skeletonAvatarColumns={[0]}
+                skeletonAvatarProps={{ className: 'rounded-md' }}
                 loading={loading}
                 pagingData={{
                     total: data.length,
@@ -95,8 +105,10 @@ const PoshTable = ({ data, loading, onDownload }: PoshTableProps) => {
                 stickyHeader={true}
                 stickyFirstColumn={true}
                 stickyLastColumn={true}
-            />
+                />
         </div>
+)}
+                </div>
     );
 };
 

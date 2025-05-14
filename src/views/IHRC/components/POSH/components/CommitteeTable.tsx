@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DataTable } from '@/components/shared';
 import { Button, Tooltip, Notification } from '@/components/ui';
-import { HiDownload } from 'react-icons/hi';
+import { HiDownload, HiOutlineViewGrid } from 'react-icons/hi';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 import useAuth from '@/utils/hooks/useAuth';
@@ -196,19 +196,30 @@ const CommitteeTable = () => {
         }
     ];
     return (
-        <DataTable
-            columns={columns}
-            data={data}
-            loading={loading}
-            pagingData={{
-                total: data.length,
-                pageIndex: 1,
-                pageSize: 10
-            }}
-            stickyHeader={true}
-            stickyFirstColumn={true}
-            stickyLastColumn={true}
-        />
+        <div className="relative">
+            {data.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+                       <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+                       <p className="text-center">No Data Available</p>
+                     </div>
+            ): (
+
+                <DataTable
+                columns={columns}
+                data={data}
+                loading={loading}
+                pagingData={{
+                    total: data.length,
+                    pageIndex: 1,
+                    pageSize: 10
+                }}
+                stickyHeader={true}
+                stickyFirstColumn={true}
+                stickyLastColumn={true}
+            />
+            )}
+        </div>
+       
     );
 };
 
