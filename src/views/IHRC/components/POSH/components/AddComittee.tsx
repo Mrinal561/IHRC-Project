@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Dialog, Input, Notification, Tooltip } from '@/components/ui';
 import { HiPlus, HiTrash, HiDownload } from 'react-icons/hi';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
@@ -15,8 +15,16 @@ interface CommitteeMember {
     mobile: string;
 }
 
+interface SelectOption {
+    value: string;
+    label: string;
+}
+
 const AddCommittee = () => {
     const [loading, setLoading] = useState(false);
+    const [companies, setCompanies] = useState<SelectOption[]>([]);
+    const [companyGroups, setCompanyGroups] = useState('');
+    const [companyGroupId, setCompanyGroupId] = useState('');
     const [formData, setFormData] = useState({
         company_id: '',
         committee_type: '',
@@ -28,9 +36,8 @@ const AddCommittee = () => {
         ]
     });
 
-// In your component
-const auth = useAuth();
-const userId = (auth as any).user?.id || 0; // Fallback to 0 if not available    const userId = user?.id || 0;
+    const auth = useAuth();
+    const userId = (auth as any).user?.id || 0;
     const navigate = useNavigate();
 
     const committeeTypeOptions = [
@@ -39,11 +46,48 @@ const userId = (auth as any).user?.id || 0; // Fallback to 0 if not available   
         { value: 'state', label: 'State Wise' }
     ];
 
-    // Mock companies - replace with your actual company data
-    const companies = [
-        { value: '1', label: 'Adani Solutions' },
-        { value: '2', label: 'Adani Power' }
-    ];
+    useEffect(() => {
+        loadCompanyGroups();
+    }, []);
+
+    const loadCompanyGroups = async () => {
+        try {
+            const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
+                params: { ignorePlatform: true }
+            });
+            if (data.data && data.data.length > 0) {
+                const defaultGroup = data.data[0];
+                setCompanyGroups(defaultGroup.name);
+                setCompanyGroupId(defaultGroup.id);
+                loadCompanies(defaultGroup.id);
+            }
+        } catch (error) {
+            console.error('Failed to load company groups:', error);
+            Notification.error({
+                title: 'Error',
+                message: 'Failed to load company groups'
+            });
+        }
+    };
+
+    const loadCompanies = async (groupId: string) => {
+        try {
+            const { data } = await httpClient.get(endpoints.company.getAll(), {
+                params: { 'group_id[]': groupId }
+            });
+            const formattedCompanies = data?.data?.map((company: any) => ({
+                label: company.name,
+                value: String(company.id)
+            }));
+            setCompanies(formattedCompanies || []);
+        } catch (error) {
+            console.error('Failed to load companies:', error);
+            Notification.error({
+                title: 'Error',
+                message: 'Failed to load companies'
+            });
+        }
+    };
 
     const handleInputChange = (field: string, value: string, memberIndex?: number, memberField?: keyof CommitteeMember) => {
         if (memberIndex !== undefined && memberField !== undefined) {
@@ -70,7 +114,10 @@ const userId = (auth as any).user?.id || 0; // Fallback to 0 if not available   
 
     const removeMemberRow = (index: number) => {
         if (formData.members.length <= 4) {
-           
+            Notification.warning({
+                title: 'Warning',
+                message: 'Minimum 4 members are required'
+            });
             return;
         }
         
@@ -88,14 +135,24 @@ const userId = (auth as any).user?.id || 0; // Fallback to 0 if not available   
     
         // Validate at least 4 members
         if (formData.members.length < 4) {
-            
+          
+            return;
+        }
+    
+        // Validate all required member fields
+        const invalidMembers = formData.members.some(member => 
+            !member.fullName || !member.designation
+        );
+        
+        if (invalidMembers) {
+          
             return;
         }
     
         // Prepare the request data
         const requestData = {
-            company_id: Number(formData.company_id), // Ensure it's a number
-            committee_type: formData.committee_type, // Extract just the value
+            company_id: Number(formData.company_id),
+            committee_type: formData.committee_type,
             committee: formData.members,
             created_by: userId
         };
@@ -106,11 +163,12 @@ const userId = (auth as any).user?.id || 0; // Fallback to 0 if not available   
                 endpoints.poshSetup.createCommittee(),
                 requestData
             );
-    
+    if(response) {
+        navigate('/committee');
+    }
           
-            navigate('/committee');
-        } catch (error) {
-            
+        } catch (error: any) {
+           
         } finally {
             setLoading(false);
         }
@@ -129,37 +187,6 @@ const userId = (auth as any).user?.id || 0; // Fallback to 0 if not available   
         });
     };
 
-    // const downloadTemplate = async (format: 'pdf' | 'word') => {
-    //     try {
-    //         const endpoint = format === 'pdf' 
-    //             ? endpoints.poshSetup.downloadPdfTemplate()
-    //             : endpoints.poshSetup.downloadWordTemplate();
-
-    //         const response = await httpClient.get(endpoint, {
-    //             responseType: 'blob'
-    //         });
-            
-    //         const url = window.URL.createObjectURL(new Blob([response.data]));
-    //         const link = document.createElement('a');
-    //         link.href = url;
-    //         link.setAttribute('download', `committee-template.${format}`);
-    //         document.body.appendChild(link);
-    //         link.click();
-    //         document.body.removeChild(link);
-    //         window.URL.revokeObjectURL(url);
-
-    //         Notification.info({
-    //             title: 'Download Started',
-    //             message: `Committee ${format.toUpperCase()} template download has started`
-    //         });
-    //     } catch (error) {
-    //         Notification.error({
-    //             title: 'Error',
-    //             message: `Failed to download ${format.toUpperCase()} template`
-    //         });
-    //     }
-    // };
-
     return (
         <div className="p-6">
             <div className="">
@@ -173,26 +200,42 @@ const userId = (auth as any).user?.id || 0; // Fallback to 0 if not available   
                     <h2 className="text-2xl font-bold">Add New Committee</h2>
                 </div>
                 
-                {/* Company and Committee Type */}
+                {/* Company Group and Company */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-8">
+                    {/* Company Group (read-only) */}
+                    {/* <div>
+                        <label className="block text-sm font-medium mb-2">Company Group</label>
+                        <Input
+                            value={companyGroups}
+                            onChange={() => {}}
+                            readOnly
+                        />
+                    </div> */}
+                    
+                    {/* Company Select */}
                     <div>
                         <label className="block text-sm font-medium mb-2">Company</label>
                         <OutlinedSelect
-  options={companies}
-  value={companies.find(opt => opt.value === formData.company_id)}
-  onChange={(selected) => handleInputChange('company_id', selected?.value || '')}
-  label="Select Company"
-/>
+                            options={companies}
+                            value={companies.find(opt => opt.value === formData.company_id)}
+                            onChange={(selected) => handleInputChange('company_id', selected?.value || '')}
+                            label="Select Company"
+                        />
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-2">Committee Type</label>
                         <OutlinedSelect
-    options={committeeTypeOptions}
-    value={committeeTypeOptions.find(opt => opt.value === formData.committee_type)}
-    onChange={(selected) => handleInputChange('committee_type', selected?.value || '')}
-    label="Select Committee Type"
-/>
+                            options={committeeTypeOptions}
+                            value={committeeTypeOptions.find(opt => opt.value === formData.committee_type)}
+                            onChange={(selected) => handleInputChange('committee_type', selected?.value || '')}
+                            label="Select Committee Type"
+                        />
                     </div>
+                </div>
+
+                {/* Committee Type */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                   
                 </div>
 
                 {/* Committee Members */}
@@ -268,29 +311,6 @@ const userId = (auth as any).user?.id || 0; // Fallback to 0 if not available   
                         </Button>
                     </div>
                 </div>
-
-                {/* Template Download */}
-                {/* <div className="mb-8">
-                    <h3 className="text-lg font-semibold mb-4">Download Template</h3>
-                    <div className="flex gap-4">
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiDownload />}
-                            onClick={() => downloadTemplate('pdf')}
-                        >
-                            Download PDF Template
-                        </Button>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiDownload />}
-                            onClick={() => downloadTemplate('word')}
-                        >
-                            Download Word Template
-                        </Button>
-                    </div>
-                </div> */}
 
                 {/* Form Actions */}
                 <div className="flex justify-end gap-4 border-t pt-6">

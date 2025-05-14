@@ -223,4 +223,5 @@ const CommitteeTable = () => {
     );
 };
 
+
 export default CommitteeTable;
