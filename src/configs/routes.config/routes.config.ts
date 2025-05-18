@@ -499,6 +499,14 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'companySetup.collapse.auditorSetup',
+        path: '/auditor-setup',
+        component: lazy(
+            () => import('@/views/IHRC/components/AuditorSetup/AuditorSetup'),
+        ),
+        authority: [],
+    },
+    {
         key: 'companySetup.collapse.userAccess',
         path: '/userAccess',
         component: lazy(

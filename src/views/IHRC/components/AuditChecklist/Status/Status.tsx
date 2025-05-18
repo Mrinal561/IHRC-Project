@@ -203,8 +203,9 @@ const [permissionCheckComplete, setPermissionCheckComplete] = useState(false)
 // }
 
 const viewOptions = [
-  { label: 'Approver', value: 'owner' },
-  { label: 'Owner', value: 'approvevr' },
+  { label: 'Approver', value: 'approver' },
+  { label: 'Owner', value: 'owner' },
+  { label: 'Auditor', value: 'auditor' },
 ]
   return (
     <div className="flex flex-col gap-4 mb-8">

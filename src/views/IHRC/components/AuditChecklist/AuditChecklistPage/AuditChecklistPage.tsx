@@ -5,6 +5,7 @@ import React, { useState } from 'react'
 import { HiDownload, HiUpload } from 'react-icons/hi'
 import AuditChecklistTable from './components/AuditChecklistTable'
 import Company from '../../Home/components/Company'
+import OutlinedSelect from '@/components/ui/Outlined/Outlined'
 
 const AuditChecklistPage = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -80,6 +81,10 @@ const AuditChecklistPage = () => {
                 shouldCloseOnOverlayClick={false}
             >
                 <h5 className="mb-4">Bulk Upload</h5>
+                <div className='flex flex-col gap-2'>
+                    <p>Company</p>
+                    <OutlinedSelect label="Select Company" options={undefined} value={undefined} onChange={undefined} />
+                </div>
                 <div className="my-4 flex gap-2 items-center">
                     <p>Download Format</p>
                     <a

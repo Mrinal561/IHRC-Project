@@ -643,3 +643,239 @@ const UserAddForm = () => {
 }
 
 export default UserAddForm
+
+
+
+
+// import React, { useState } from 'react'
+// import { useNavigate } from 'react-router-dom'
+// import { Button, DatePicker } from '@/components/ui'
+// import { IoArrowBack } from 'react-icons/io5'
+// import OutlinedInput from '@/components/ui/OutlinedInput'
+// import OutlinedSelect from '@/components/ui/Outlined'
+// import * as yup from 'yup'
+// import { Formik, Field, Form } from 'formik'
+
+// interface SelectOption {
+//     value: string
+//     label: string
+// }
+
+// const validationSchema = yup.object().shape({
+//     company: yup.string().required('Company is required'),
+//     auditFirmName: yup.string().required('Audit Firm Name is required'),
+//     auditorName: yup.string().required('Auditor Name is required'),
+//     email: yup
+//         .string()
+//         .email('Invalid email address')
+//         .required('Email is required'),
+//     mobile: yup
+//         .string()
+//         .matches(/^[0-9]{10}$/, 'Mobile number must be 10 digits')
+//         .required('Mobile number is required'),
+//     auditFrequency: yup.string().required('Audit Frequency is required'),
+// })
+
+// const UserAddForm = () => {
+//     const navigate = useNavigate()
+//     const [isSubmitting, setIsSubmitting] = useState(false)
+
+//     const auditFrequencyOptions: SelectOption[] = [
+//         { value: 'monthly', label: 'Monthly' },
+//         { value: 'quarterly', label: 'Quarterly' },
+//         { value: 'half_yearly', label: 'Half Yearly' },
+//         { value: 'yearly', label: 'Yearly' },
+//     ]
+
+//     const handleSubmit = (values: any) => {
+//         setIsSubmitting(true)
+//         console.log('Form submitted:', values)
+//         // Simulate form submission
+//         setTimeout(() => {
+//             setIsSubmitting(false)
+//             alert('Form submitted successfully!')
+//         }, 1000)
+//     }
+
+//     return (
+//         <div className="p-2 bg-white rounded-lg">
+//             <div className="flex items-center gap-2 mb-3">
+//                 <Button
+//                     size="sm"
+//                     variant="plain"
+//                     icon={<IoArrowBack className="text-[#72828e] hover:text-[#5d6169]" />}
+//                     onClick={() => navigate(-1)}
+//                 />
+//                 <h3 className="text-2xl font-semibold">Add Auditor</h3>
+//             </div>
+
+//             <Formik
+//                 initialValues={{
+//                     company: '',
+//                     auditFirmName: '',
+//                     auditorName: '',
+//                     email: '',
+//                     mobile: '',
+//                     auditFrequency: '',
+//                 }}
+//                 validationSchema={validationSchema}
+//                 onSubmit={handleSubmit}
+//             >
+//                 {({ setFieldValue, values, errors, touched }) => (
+//                     <Form>
+//                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 my-8">
+//                             {/* Company */}
+//                             <div className="flex flex-col gap-2">
+//                                 <p className="mb-2">
+//                                     Company <span className="text-red-500">*</span>
+//                                 </p>
+//                                 <Field
+//                                     name="company"
+//                                     render={({ field }: any) => (
+//                                         <OutlinedInput
+//                                             {...field}
+//                                             label="Enter Company Name"
+//                                             value={values.company}
+//                                             onChange={(value: string) =>
+//                                                 setFieldValue('company', value)
+//                                             }
+//                                             error={touched.company && errors.company}
+//                                         />
+//                                     )}
+//                                 />
+//                             </div>
+
+//                             {/* Audit Firm Name */}
+//                             <div className="flex flex-col gap-2">
+//                                 <p className="mb-2">
+//                                     Audit Firm Name <span className="text-red-500">*</span>
+//                                 </p>
+//                                 <Field
+//                                     name="auditFirmName"
+//                                     render={({ field }: any) => (
+//                                         <OutlinedInput
+//                                             {...field}
+//                                             label="Enter Audit Firm Name"
+//                                             value={values.auditFirmName}
+//                                             onChange={(value: string) =>
+//                                                 setFieldValue('auditFirmName', value)
+//                                             }
+//                                             error={touched.auditFirmName && errors.auditFirmName}
+//                                         />
+//                                     )}
+//                                 />
+//                             </div>
+
+//                             {/* Auditor's Name */}
+//                             <div className="flex flex-col gap-2">
+//                                 <p className="mb-2">
+//                                     Auditor's Name <span className="text-red-500">*</span>
+//                                 </p>
+//                                 <Field
+//                                     name="auditorName"
+//                                     render={({ field }: any) => (
+//                                         <OutlinedInput
+//                                             {...field}
+//                                             label="Enter Auditor's Name"
+//                                             value={values.auditorName}
+//                                             onChange={(value: string) =>
+//                                                 setFieldValue('auditorName', value)
+//                                             }
+//                                             error={touched.auditorName && errors.auditorName}
+//                                         />
+//                                     )}
+//                                 />
+//                             </div>
+
+//                             {/* Email */}
+//                             <div className="flex flex-col gap-2">
+//                                 <p className="mb-2">
+//                                     Email ID <span className="text-red-500">*</span>
+//                                 </p>
+//                                 <Field
+//                                     name="email"
+//                                     render={({ field }: any) => (
+//                                         <OutlinedInput
+//                                             {...field}
+//                                             label="Enter Email"
+//                                             value={values.email}
+//                                             onChange={(value: string) =>
+//                                                 setFieldValue('email', value)
+//                                             }
+//                                             error={touched.email && errors.email}
+//                                         />
+//                                     )}
+//                                 />
+//                             </div>
+
+//                             {/* Mobile Number */}
+//                             <div className="flex flex-col gap-2">
+//                                 <p className="mb-2">
+//                                     Mobile Number <span className="text-red-500">*</span>
+//                                 </p>
+//                                 <Field
+//                                     name="mobile"
+//                                     render={({ field }: any) => (
+//                                         <OutlinedInput
+//                                             {...field}
+//                                             label="Enter Mobile Number"
+//                                             value={values.mobile}
+//                                             onChange={(value: string) =>
+//                                                 setFieldValue('mobile', value)
+//                                             }
+//                                             error={touched.mobile && errors.mobile}
+//                                         />
+//                                     )}
+//                                 />
+//                             </div>
+
+//                             {/* Audit Frequency */}
+//                             <div className="flex flex-col gap-2">
+//                                 <p className="mb-2">
+//                                     Audit Frequency <span className="text-red-500">*</span>
+//                                 </p>
+//                                 <Field name="auditFrequency">
+//                                     {({ field }: any) => (
+//                                         <OutlinedSelect
+//                                             label="Select Audit Frequency"
+//                                             options={auditFrequencyOptions}
+//                                             value={auditFrequencyOptions.find(
+//                                                 (option) => option.value === values.auditFrequency
+//                                             )}
+//                                             onChange={(selectedOption: SelectOption | null) => {
+//                                                 setFieldValue(
+//                                                     'auditFrequency',
+//                                                     selectedOption ? selectedOption.value : null
+//                                                 )
+//                                             }}
+//                                         />
+//                                     )}
+//                                 </Field>
+//                             </div>
+//                         </div>
+
+//                         {/* Submit Button */}
+//                         <div className="flex justify-end gap-2 mt-4">
+//                             <Button
+//                                 variant="plain"
+//                                 onClick={() => navigate(-1)}
+//                                 type="button"
+//                             >
+//                                 Cancel
+//                             </Button>
+//                             <Button 
+//                                 type="submit" 
+//                                 variant="solid" 
+//                                 loading={isSubmitting}
+//                             >
+//                                 Confirm
+//                             </Button>
+//                         </div>
+//                     </Form>
+//                 )}
+//             </Formik>
+//         </div>
+//     )
+// }
+
+// export default UserAddForm

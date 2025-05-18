@@ -504,3 +504,232 @@ const UserTable: React.FC<{
 }
 
 export default UserTable
+
+
+
+
+
+
+// import React from 'react'
+// import {
+//     Table,
+//     Button,
+//     Dialog,
+//     Tooltip,
+//     Notification,
+//     toast,
+// } from '@/components/ui'
+// import { FiTrash } from 'react-icons/fi'
+// import { MdEdit } from 'react-icons/md'
+// import DataTable from '@/components/shared/DataTable'
+// import { useNavigate } from 'react-router-dom'
+
+// interface Auditor {
+//     id: string
+//     company: string
+//     auditFirmName: string
+//     auditorName: string
+//     email: string
+//     mobile: string
+//     auditFrequency: string
+// }
+
+// const UserTable: React.FC = () => {
+//     const navigate = useNavigate()
+//     const [dialogIsOpen, setDialogIsOpen] = React.useState(false)
+//     const [itemToDelete, setItemToDelete] = React.useState<string | null>(null)
+
+//     // Dummy data
+//     const dummyData: Auditor[] = [
+//         {
+//             id: '1',
+//             company: 'ABC Corporation',
+//             auditFirmName: 'Deloitte',
+//             auditorName: 'John Smith',
+//             email: 'john.smith@deloitte.com',
+//             mobile: '9876543210',
+//             auditFrequency: 'Quarterly'
+//         },
+//         {
+//             id: '2',
+//             company: 'XYZ Ltd',
+//             auditFirmName: 'PwC',
+//             auditorName: 'Sarah Johnson',
+//             email: 'sarah.j@pwc.com',
+//             mobile: '8765432109',
+//             auditFrequency: 'Yearly'
+//         },
+//         {
+//             id: '3',
+//             company: 'Global Enterprises',
+//             auditFirmName: 'EY',
+//             auditorName: 'Michael Brown',
+//             email: 'michael.b@ey.com',
+//             mobile: '7654321098',
+//             auditFrequency: 'Monthly'
+//         },
+//         {
+//             id: '4',
+//             company: 'Tech Solutions',
+//             auditFirmName: 'KPMG',
+//             auditorName: 'Emily Davis',
+//             email: 'emily.d@kpmg.com',
+//             mobile: '6543210987',
+//             auditFrequency: 'Half Yearly'
+//         }
+//     ]
+
+//     const columns = [
+//         {
+//             header: 'Company',
+//             accessorKey: 'company',
+//             enableSorting: false,
+//             cell: (props: any) => (
+//                 <div className="w-32 truncate">
+//                     {props.getValue() as string}
+//                 </div>
+//             ),
+//         },
+//         {
+//             header: 'Audit Firm Name',
+//             accessorKey: 'auditFirmName',
+//                         enableSorting: false,
+
+//             cell: (props: any) => (
+//                 <div className="w-32 truncate">
+//                     {props.getValue() as string}
+//                 </div>
+//             ),
+//         },
+//         {
+//             header: 'Auditor Name',
+//             accessorKey: 'auditorName',
+//                         enableSorting: false,
+
+//             cell: (props: any) => (
+//                 <div className="w-32 truncate">
+//                     {props.getValue() as string}
+//                 </div>
+//             ),
+//         },
+//         {
+//             header: 'Email ID',
+//             accessorKey: 'email',
+//                         enableSorting: false,
+
+//             cell: (props: any) => (
+//                 <div className="w-40 truncate">
+//                     {props.getValue() as string}
+//                 </div>
+//             ),
+//         },
+//         {
+//             header: 'Mobile Number',
+//             accessorKey: 'mobile',
+//                         enableSorting: false,
+
+//             cell: (props: any) => (
+//                 <div className="w-36 truncate">
+//                     {props.getValue() as string}
+//                 </div>
+//             ),
+//         },
+//         {
+//             header: 'Audit Frequency',
+//             accessorKey: 'auditFrequency',
+//                         enableSorting: false,
+
+//             cell: (props: any) => (
+//                 <div className="w-32 truncate">
+//                     {props.getValue() as string}
+//                 </div>
+//             ),
+//         },
+//         {
+//             header: 'Actions',
+//             id: 'actions',
+//             cell: ({ row }: any) => (
+//                 <div className="flex items-center gap-2">
+//                     <Tooltip title="Edit Auditor Details">
+//                         <Button
+//                             size="sm"
+//                             onClick={() => navigate(`/edit-auditor/${row.original.id}`)}
+//                             icon={<MdEdit />}
+//                             className="text-blue-500"
+//                         />
+//                     </Tooltip>
+//                     <Tooltip title="Delete Auditor">
+//                         <Button
+//                             size="sm"
+//                             onClick={() => openDeleteDialog(row.original.id)}
+//                             icon={<FiTrash />}
+//                             className="text-red-500"
+//                         />
+//                     </Tooltip>
+//                 </div>
+//             ),
+//         },
+//     ]
+
+//     const openDeleteDialog = (auditorId: string) => {
+//         setItemToDelete(auditorId)
+//         setDialogIsOpen(true)
+//     }
+
+//     const handleDeleteConfirm = () => {
+//         if (itemToDelete) {
+//             // In a real app, you would make an API call here
+//             toast.push(
+//                 <Notification title="Success" type="success">
+//                     Auditor deleted successfully
+//                 </Notification>,
+//             )
+//             handleDialogClose()
+//         }
+//     }
+
+//     const handleDialogClose = () => {
+//         setDialogIsOpen(false)
+//         setItemToDelete(null)
+//     }
+
+//     return (
+//         <div className="relative">
+//             <DataTable
+//                 columns={columns}
+//                 data={dummyData}
+//                 pagingData={{
+//                     total: dummyData.length,
+//                     pageIndex: 1,
+//                     pageSize: 10,
+//                 }}
+//             />
+
+//             <Dialog
+//                 isOpen={dialogIsOpen}
+//                 onClose={handleDialogClose}
+//                 onRequestClose={handleDialogClose}
+//             >
+//                 <h5 className="mb-4">Confirm Deleting Auditor</h5>
+//                 <p>
+//                     Are you sure you want to delete this auditor? This action cannot
+//                     be undone.
+//                 </p>
+//                 <div className="text-right mt-6">
+//                     <Button
+//                         className="ltr:mr-2 rtl:ml-2"
+//                         variant="plain"
+//                         onClick={handleDialogClose}
+//                     >
+//                         Cancel
+//                     </Button>
+//                     <Button variant="solid" onClick={handleDeleteConfirm}>
+//                         Confirm
+//                     </Button>
+//                 </div>
+//             </Dialog>
+//         </div>
+//     )
+// }
+
+// export default UserTable

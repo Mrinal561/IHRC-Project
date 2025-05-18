@@ -25,7 +25,7 @@ export type DueComplianceDetailData = {
     uuid: string
     ac_compliance_id: number
     proof_document: string | null
-    status: 'pending' | 'completed' | 'due' | 'overdue'
+    status: 'pending' | 'due' | 'overdue'
     compliance_detail: {
         id: number
         uuid: string
@@ -218,71 +218,9 @@ const dummyDueComplianceData: DueComplianceDetailData[] = [
       ApprovedBy: null,
       AssignedComplianceRemark: []
     },
+  
     {
       id: 3,
-      uuid: 'comp-003',
-      ac_compliance_id: 103,
-      proof_document: 'https://example.com/proof3.pdf',
-      status: 'completed',
-      compliance_detail: {
-        id: 103,
-        uuid: 'detail-003',
-        legislation: 'Financial Regulations Act',
-        category: 'Financial',
-        penalty_type: 'Monetary Fine',
-        default_due_date: {
-          first_date: '2023-03-31',
-          last_date: '2023-03-31'
-        },
-        scheduled_frequency: 'monthly',
-        proof_mandatory: true,
-        header: 'Monthly Financial Disclosure',
-        description: 'Submission of monthly financial statements',
-        penalty_description: 'Fine up to $10,000 per day of delay',
-        applicability: 'All financial transactions',
-        bare_act_text: 'Section 5(1) of the Financial Regulations Act',
-        type: 'Monthly Filing',
-        clause: '5.1',
-        frequency: 'Monthly',
-        statutory_auth: 'Financial Regulatory Authority',
-        approval_required: true,
-        criticality: 'high',
-        created_type: 'system',
-        created_at: '2023-01-01T00:00:00Z',
-        updated_at: '2023-01-01T00:00:00Z',
-      },
-      upload_date: '2023-03-25',
-      first_due_date: '2023-03-31',
-      due_date: '2023-03-31',
-      data_status: 'completed',
-      uploaded_by: 202,
-      approved_by: 302,
-      created_by: 1,
-      created_at: '2023-01-01T00:00:00Z',
-      updated_at: '2023-03-25T00:00:00Z',
-      UploadBy: {
-        id: 202,
-        first_name: 'Robert',
-        last_name: 'Johnson',
-        email: 'robert.j@example.com',
-        mobile: 9876543211
-      },
-      ApprovedBy: {
-        id: 302,
-        name: 'Emily Davis'
-      },
-      AssignedComplianceRemark: [
-        {
-          id: 2,
-          remark: 'Submitted on time',
-          created_by: 1,
-          created_at: '2023-03-25T00:00:00Z',
-          updated_at: '2023-03-25T00:00:00Z'
-        }
-      ]
-    },
-    {
-      id: 4,
       uuid: 'comp-004',
       ac_compliance_id: 104,
       proof_document: null,
