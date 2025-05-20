@@ -313,5 +313,18 @@ export const endpoints = {
             branchStatusGraph: () => api(`companyadmin/graph/branch-status-graph`),
             calendar: () => api(`companyadmin/graph/compliance-calendar-dates`)
         },
+    return: {
+        create: () => api('companyadmin/returns'),
+        bulkCreate: () => api('companyadmin/returns/bulk-upload'),
+        update: (id: any) => api(`companyadmin/returns/${id}`),
+        list: () => api('companyadmin/returns'),
+        detail: (id: any) => api(`companyadmin/returns/${id}`),
+        template: () => api('companyadmin/returns/export/template'),
+        downloadData: () => api('companyadmin/returns/export/data'),
+        returnActList: () => api('return-superadmin/act-name'),
+        returnList: () => api('return-superadmin/return-name'),
+        getList: () => api('return-superadmin/all')
+
+    }
         
 }

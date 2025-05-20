@@ -670,6 +670,28 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'returnTracker.add',
+        path: '/add-return-tracker',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/ReturnTracker/components/ReturnTrackerAddForm'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'returnTracker.edit',
+        path: '/edit-return-tracker',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/ReturnTracker/components/ReturnTrackerEditForm'
+                ),
+        ),
+        authority: [],
+    },
+    {
         key: 'remittanceTrackerCreate.collapse.item7',
         path: '/notice-tracker/create',
         component: lazy(
