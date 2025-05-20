@@ -95,6 +95,7 @@
 
             }
         },
-        "posh": "POSH"
+        "posh": "POSH",
+        "return": "Return"
         }
 }

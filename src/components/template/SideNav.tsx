@@ -1261,6 +1261,16 @@ const adminnav: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
+     {
+        key: 'returnTraccker',
+        path: '/return-tracker',
+        title: 'Return Tracker',
+        translateKey: 'nav.return',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
+    },
    
 ];
 
@@ -1361,6 +1371,16 @@ const usernav: NavigationTree[] = [
         path: '/notice-tracker',
         title: 'Notice Tracker',
         translateKey: 'nav.notice',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
+    },
+    {
+        key: 'returnTraccker',
+        path: '/return-tracker',
+        title: 'Return Tracker',
+        translateKey: 'nav.return',
         icon: 'remittanceCollapse',
         type: NAV_ITEM_TYPE_ITEM,
         authority: [],
@@ -1542,7 +1562,7 @@ const filterNavigation = (
     // Ensure "Return Tracker" is always shown after "Notice Tracker"
     const noticeTrackerIndex = filteredNav.findIndex(item => item.key === 'notice');
     if (noticeTrackerIndex !== -1) {
-        const returnTrackerItem = {
+        const poshItem = {
                 key: 'posh.collapse',
                 path: '/poshTracker',
                 title: 'POSH',
@@ -1573,9 +1593,19 @@ const filterNavigation = (
                     },
                 ]
         };
+        const returnItem = {
+             key: 'returnTraccker',
+            path: '/return-tracker',
+            title: 'Return Tracker',
+            translateKey: 'nav.return',
+            icon: 'remittanceCollapse',
+            type: NAV_ITEM_TYPE_ITEM,
+            authority: [],
+            subMenu: []
+        }
 
         // Insert "Return Tracker" after "Notice Tracker"
-        filteredNav.splice(noticeTrackerIndex + 1, 0, returnTrackerItem);
+        filteredNav.splice(noticeTrackerIndex + 1, 0, poshItem, returnItem);
     }
 
     return filteredNav;

@@ -659,6 +659,17 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'returnTracker',
+        path: '/return-tracker',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/ReturnTracker/ReturnTracker'
+                ),
+        ),
+        authority: [],
+    },
+    {
         key: 'remittanceTrackerCreate.collapse.item7',
         path: '/notice-tracker/create',
         component: lazy(
