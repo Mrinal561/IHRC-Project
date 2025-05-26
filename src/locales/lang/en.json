@@ -3,10 +3,10 @@
         "home": "Dashboard",
         "collapseMenu": {
             "collapseMenu": "Audit Checklist",
-            "item1": "Compliance Checklist",
+            "item1": "Status",
             "item2": "Custom Checklist",
-            "item3": "Due Compliance",
-            "item4": "Status",
+            "item3": "Compliance Checklist",
+            "item4": "Due Compliance",
             "item5": "Compliance Certificate",
             "item6": "History"
 

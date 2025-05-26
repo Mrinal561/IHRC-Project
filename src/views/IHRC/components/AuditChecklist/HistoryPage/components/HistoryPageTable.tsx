@@ -372,6 +372,7 @@ interface ComplianceData {
     id: number
     uuid: string
     record_id: string
+    company: string
     proof_document: string | null
     status: string
     data_status: string
@@ -400,6 +401,7 @@ const HistoryPageTable: React.FC = () => {
             uuid: '550e8400-e29b-41d4-a716-446655440000',
             record_id: 'COMP-2023-001',
             proof_document: 'document1.pdf',
+            company: "Adani Solutions",
             status: 'completed',
             data_status: 'Complied',
             compliance_detail: {
@@ -423,6 +425,7 @@ const HistoryPageTable: React.FC = () => {
             uuid: '550e8400-e29b-41d4-a716-446655440001',
             record_id: 'COMP-2023-002',
             proof_document: 'document2.pdf',
+            company: "Adani Tech",
             status: 'completed',
             data_status: 'Complied',
             compliance_detail: {
@@ -447,6 +450,7 @@ const HistoryPageTable: React.FC = () => {
             record_id: 'COMP-2023-003',
             proof_document: 'document3.pdf',
             status: 'completed',
+            company: "Adani Solutions",
             data_status: 'Complied',
             compliance_detail: {
                 id: 103,
@@ -479,14 +483,27 @@ const HistoryPageTable: React.FC = () => {
             ),
         },
         {
-            header: 'Legislation',                enableSorting: false,
+            header: 'Company',                
+            enableSorting: false,
+
+            accessorKey: 'company',
+            cell: (props) => {
+                             const value = props.getValue() as string
+return(
+    <div className="w-40 text-start">{value}</div>
+)
+            },
+        },
+        {
+            header: 'Legislation(Act Name)',                
+            enableSorting: false,
 
             accessorKey: 'compliance_detail.legislation',
             cell: (props) => {
                 const value = props.getValue() as string
                 return (
                     <Tooltip title={value} placement="top">
-                        <div className="w-28 truncate">{value}</div>
+                        <div className="w-64 truncate">{value}</div>
                     </Tooltip>
                 )
             },
@@ -499,42 +516,17 @@ const HistoryPageTable: React.FC = () => {
                 const value = props.getValue() as string
                 return (
                     <Tooltip title={value} placement="top">
-                        <div className="w-40 truncate">{value}</div>
+                        <div className="w-64 truncate">{value}</div>
                     </Tooltip>
-                )
-            },
-        },
-        {
-            header: 'Compliance Status',                enableSorting: false,
-
-            accessorKey: 'data_status',
-            cell: (props) => {
-                const criticality = props.getValue()
-                return (
-                    <div className="w-24 font-semibold truncate">
-                        {criticality === 'Complied' ? (
-                            <span className="text-green-500">
-                                {criticality}
-                            </span>
-                        ) : criticality === 'NA' ? (
-                            <span className="text-yellow-500">
-                                {criticality}
-                            </span>
-                        ) : criticality === 'Not Complied' ? (
-                            <span className="text-red-500">
-                                {criticality}
-                            </span>
-                        ) : (
-                            <span></span>
-                        )}
-                    </div>
                 )
             },
         },
         {
             header: 'Actions',
             id: 'actions',
-            cell: ({ row }) => (
+            cell: ({ row }) => {
+                return(
+                <div className='flex gap-2 items-center'>
                 <Tooltip title="View Compliance Detail">
                     <Button
                         size="sm"
@@ -551,9 +543,17 @@ const HistoryPageTable: React.FC = () => {
                             )
                         }}
                         icon={<RiEyeLine />}
-                    />
+                        />
                 </Tooltip>
-            ),
+                <Tooltip title="Download History">
+                     <Button
+                        size="sm"
+                        icon={<HiDownload />}
+                        />
+                </Tooltip>
+                        </div>
+            )
+        },
         },
     ]
 

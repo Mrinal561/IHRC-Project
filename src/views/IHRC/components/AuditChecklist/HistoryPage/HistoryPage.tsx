@@ -153,12 +153,15 @@ const [permissionCheckComplete, setPermissionCheckComplete] = useState(false)
                     <h3 className="text-2xl font-bold">Compliance History</h3>
                     <p className="text-gray-600">View your company's compliance history</p>
                 </div>
-                <HistoryPageTableTool />
       </div>
+      <div className='flex flex-col gap-3'>
+
+                <HistoryPageTableTool />
       {/* <div className='mb-8'>
         <Company />
-      </div> */}
+        </div> */}
                 <HistoryPageTable />
+        </div>
         </AdaptableCard>
   )
 }

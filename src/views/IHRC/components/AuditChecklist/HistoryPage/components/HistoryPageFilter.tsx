@@ -1,169 +1,189 @@
-import React, { useState, useRef, forwardRef } from 'react'
-import { HiOutlineFilter, HiOutlineSearch } from 'react-icons/hi'
-import { FormItem, FormContainer, Input, Button, Checkbox, Drawer } from '@/components/ui'
+import React, { useState } from 'react';
+import OutlinedSelect from '@/components/ui/Outlined/Outlined';
+import { Notification, toast } from '@/components/ui';
+import { HiDownload } from 'react-icons/hi';
+import Button from '@/components/ui/Button';
 
-import { Field, Form, Formik, FormikProps, FieldProps } from 'formik'
-import type { MouseEvent } from 'react'
-
-type FormModel = {
-  complianceId: string
-  complianceCategorization: string[]
-  location: string[]
+interface SelectOption {
+  value: string;
+  label: string;
 }
 
-type FilterFormProps = {
-  onSubmitComplete?: () => void
+interface HistoryFilterProps {
+  onCompanyChange?: (company: SelectOption | null) => void;
+  onStateChange?: (state: SelectOption | null) => void;
+  onActChange?: (act: SelectOption | null) => void;
+  onMonthChange?: (month: SelectOption | null) => void;
+  onComplianceTypeChange?: (type: SelectOption | null) => void;
+  onDownload?: () => void;
 }
 
-type DrawerFooterProps = {
-  onSaveClick: (event: MouseEvent<HTMLButtonElement>) => void
-  onCancel: (event: MouseEvent<HTMLButtonElement>) => void
-}
+const HistoryPageFilter: React.FC<HistoryFilterProps> = ({
+  onCompanyChange,
+  onStateChange,
+  onActChange,
+  onMonthChange,
+  onComplianceTypeChange,
+  onDownload
+}) => {
+  const [selectedCompany, setSelectedCompany] = useState<SelectOption | null>(null);
+  const [selectedState, setSelectedState] = useState<SelectOption | null>(null);
+  const [selectedAct, setSelectedAct] = useState<SelectOption | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<SelectOption | null>(null);
+  const [selectedComplianceType, setSelectedComplianceType] = useState<SelectOption | null>(null);
 
-const FilterForm = forwardRef<FormikProps<FormModel>, FilterFormProps>(
-  ({ onSubmitComplete }, ref) => {
-    const handleSubmit = (values: FormModel) => {
-      onSubmitComplete?.()
-      console.log(values) // Replace with your filter logic
-    }
+  // Dummy data for companies
+  const companies: SelectOption[] = [
+    { label: 'Adani Solutions', value: 'adani-solutions' },
+    { label: 'Adani Tech', value: 'adani-tech' }
+  ];
 
-    const initialValues: FormModel = {
-      complianceId: '',
-      complianceCategorization: [],
-      location: [],
-    }
+  // Dummy data for states (10 states)
+  const states: SelectOption[] = [
+    { label: 'Maharashtra', value: 'maharashtra' },
+    { label: 'Gujarat', value: 'gujarat' },
+    { label: 'Rajasthan', value: 'rajasthan' },
+    { label: 'Karnataka', value: 'karnataka' },
+    { label: 'Tamil Nadu', value: 'tamil-nadu' },
+    { label: 'Uttar Pradesh', value: 'uttar-pradesh' },
+    { label: 'West Bengal', value: 'west-bengal' },
+    { label: 'Madhya Pradesh', value: 'madhya-pradesh' },
+    { label: 'Punjab', value: 'punjab' },
+    { label: 'Haryana', value: 'haryana' }
+  ];
 
-    return (
-      <Formik
-        enableReinitialize
-        innerRef={ref}
-        initialValues={initialValues}
-        onSubmit={handleSubmit}
+  // Dummy data for acts
+  const acts: SelectOption[] = [
+    { label: 'Companies Act 2013', value: 'companies-act-2013' },
+    { label: 'Labour Act', value: 'labour-act' },
+    { label: 'Tax Act', value: 'tax-act' },
+    { label: 'Environmental Protection Act', value: 'environmental-protection-act' }
+  ];
+
+  // Dummy data for months
+  const months: SelectOption[] = [
+    { label: 'January', value: '1' },
+    { label: 'February', value: '2' },
+    { label: 'March', value: '3' },
+    { label: 'April', value: '4' },
+    { label: 'May', value: '5' },
+    { label: 'June', value: '6' },
+    { label: 'July', value: '7' },
+    { label: 'August', value: '8' },
+    { label: 'September', value: '9' },
+    { label: 'October', value: '10' },
+    { label: 'November', value: '11' },
+    { label: 'December', value: '12' }
+  ];
+
+  // Dummy data for compliance types
+  const complianceTypes: SelectOption[] = [
+    { label: 'Complied', value: 'complied' },
+    { label: 'Not Complied', value: 'not-complied' },
+    { label: 'Not Applicable', value: 'not-applicable' }
+  ];
+
+  const showNotification = (type: 'success' | 'info' | 'error' | 'warning', message: string) => {
+    toast.push(
+      <Notification
+        title={type.charAt(0).toUpperCase() + type.slice(1)}
+        type={type}
       >
-        {({ values, touched, errors }) => (
-          <Form>
-            <FormContainer>
-              <FormItem
-                invalid={errors.complianceId && touched.complianceId}
-                errorMessage={errors.complianceId}
-              >
-                <h6 className="mb-4">Compliance ID</h6>
-                <Field
-                  type="text"
-                  autoComplete="off"
-                  name="complianceId"
-                  placeholder="Enter Compliance ID"
-                  component={Input}
-                  prefix={<HiOutlineSearch className="text-lg" />}
-                />
-              </FormItem>
-              <FormItem
-                invalid={errors.complianceCategorization && touched.complianceCategorization}
-                errorMessage={errors.complianceCategorization as string}
-              >
-                <h6 className="mb-4">Compliance Categorization</h6>
-                <Field name="complianceCategorization">
-                  {({ field, form }: FieldProps) => (
-                    <Checkbox.Group
-                      vertical
-                      value={values.complianceCategorization}
-                      onChange={(options) =>
-                        form.setFieldValue(field.name, options)
-                      }
-                    >
-                      <Checkbox className="mb-3" name={field.name} value="LICENSE / REGISTRATION">
-                        LICENSE / REGISTRATION
-                      </Checkbox>
-                      {/* Add more categories as needed */}
-                    </Checkbox.Group>
-                  )}
-                </Field>
-              </FormItem>
-              <FormItem
-                invalid={errors.location && touched.location}
-                errorMessage={errors.location as string}
-              >
-                <h6 className="mb-4">Location</h6>
-                <Field name="location">
-                  {({ field, form }: FieldProps) => (
-                    <Checkbox.Group
-                      vertical
-                      value={values.location}
-                      onChange={(options) =>
-                        form.setFieldValue(field.name, options)
-                      }
-                    >
-                      <Checkbox className="mb-3" name={field.name} value="Muzaffarpur">
-                        Muzaffarpur
-                      </Checkbox>
-                      <Checkbox className="mb-3" name={field.name} value="Arrah">
-                        Arrah
-                      </Checkbox>
-                      {/* Add more locations as needed */}
-                    </Checkbox.Group>
-                  )}
-                </Field>
-              </FormItem>
-            </FormContainer>
-          </Form>
-        )}
-      </Formik>
-    )
-  }
-)
+        {message}
+      </Notification>
+    );
+  };
 
-const DrawerFooter = ({ onSaveClick, onCancel }: DrawerFooterProps) => {
+  const handleCompanyChange = (value: SelectOption | null) => {
+    setSelectedCompany(value);
+    onCompanyChange?.(value);
+  };
+
+  const handleStateChange = (value: SelectOption | null) => {
+    setSelectedState(value);
+    onStateChange?.(value);
+  };
+
+  const handleActChange = (value: SelectOption | null) => {
+    setSelectedAct(value);
+    onActChange?.(value);
+  };
+
+  const handleMonthChange = (value: SelectOption | null) => {
+    setSelectedMonth(value);
+    onMonthChange?.(value);
+  };
+
+  const handleComplianceTypeChange = (value: SelectOption | null) => {
+    setSelectedComplianceType(value);
+    onComplianceTypeChange?.(value);
+  };
+
+  const handleDownload = () => {
+    onDownload?.();
+    showNotification('success', 'Filtered data downloaded successfully');
+  };
+
   return (
-    <div className="text-right w-full">
-      <Button size="sm" className="mr-2" onClick={onCancel}>
-        Cancel
-      </Button>
-      <Button size="sm" variant="solid" onClick={onSaveClick}>
-        Apply Filters
-      </Button>
+    <div className="w-full flex flex-col md:flex-row items-start md:items-center gap-3 mb-4">
+      <div className="w-full md:flex-1 min-w-[140px]">
+        <OutlinedSelect
+          label="Company"
+          options={companies}
+          value={selectedCompany}
+          onChange={handleCompanyChange}
+        />
+      </div>
+
+      <div className="w-full md:flex-1 min-w-[140px]">
+        <OutlinedSelect
+          label="State"
+          options={states}
+          value={selectedState}
+          onChange={handleStateChange}
+        />
+      </div>
+
+      <div className="w-full md:flex-1 min-w-[140px]">
+        <OutlinedSelect
+          label="Act Name"
+          options={acts}
+          value={selectedAct}
+          onChange={handleActChange}
+        />
+      </div>
+
+      <div className="w-full md:flex-1 min-w-[140px]">
+        <OutlinedSelect
+          label="Month"
+          options={months}
+          value={selectedMonth}
+          onChange={handleMonthChange}
+        />
+      </div>
+
+      <div className="w-full md:flex-1 min-w-[140px]">
+        <OutlinedSelect
+          label="Compliance Status"
+          options={complianceTypes}
+          value={selectedComplianceType}
+          onChange={handleComplianceTypeChange}
+        />
+      </div>
+
+      <div className="w-full md:w-auto">
+        <Button
+          size="sm"
+          variant="solid"
+          icon={<HiDownload />}
+          onClick={handleDownload}
+          className="w-full md:w-auto"
+        >
+          Download Data
+        </Button>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-const HistoryPageFilter: React.FC = () => {
-  const formikRef = useRef<FormikProps<FormModel>>(null)
-  const [isOpen, setIsOpen] = useState(false)
-
-  const openDrawer = () => setIsOpen(true)
-  const onDrawerClose = () => setIsOpen(false)
-
-  const formSubmit = () => {
-    formikRef.current?.submitForm()
-  }
-
-  return (
-    <>
-      <Button
-        size="sm"
-        className="block md:inline-block ltr:md:ml-2 rtl:md:mr-2 md:mb-0 mb-4"
-        icon={<HiOutlineFilter />}
-        onClick={openDrawer}
-      >
-        Filter
-      </Button>
-      <Drawer
-        title="Recommended Filters"
-        isOpen={isOpen}
-        footer={
-          <DrawerFooter
-            onCancel={onDrawerClose}
-            onSaveClick={formSubmit}
-          />
-        }
-        onClose={onDrawerClose}
-        onRequestClose={onDrawerClose}
-      >
-        {/* <FilterForm ref={formikRef} onSubmitComplete={onDrawerClose} /> */} 
-      </Drawer>
-    </>
-  )
-}
-
-FilterForm.displayName = 'FilterForm'
-
-export default HistoryPageFilter
+export default HistoryPageFilter;
