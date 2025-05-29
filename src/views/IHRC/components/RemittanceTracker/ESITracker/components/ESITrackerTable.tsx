@@ -182,6 +182,18 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
     };
 
 
+   const formatIndianCurrency = (num: number) => {
+  if (isNaN(num)) return '₹0';
+  
+  const numStr = num.toString();
+  const lastThree = numStr.substring(numStr.length - 3);
+  const otherNumbers = numStr.substring(0, numStr.length - 3);
+  
+  if (otherNumbers !== '') {
+    return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+  }
+  return '₹' + lastThree;
+};
 
     const columns: ColumnDef<esiChallanData>[] = useMemo(
         () => [
@@ -253,7 +265,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                 accessorKey: 'gross_wage',
                 cell: (props) => (
                     <div className="w-40 truncate">
-                        ₹{(props.getValue() as number).toLocaleString()}
+                        {formatIndianCurrency(props.getValue() as number)}
                     </div>
                 ),
             },
@@ -263,7 +275,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                 accessorKey: 'employee_esi',
                 cell: (props) => (
                     <div className="w-28 truncate">
-                        ₹{(props.getValue() as number).toLocaleString()}
+                       {formatIndianCurrency(props.getValue() as number)}
                     </div>
                 ),
             },
@@ -273,7 +285,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                 accessorKey: 'employer_esi',
                 cell: (props) => (
                     <div className="w-28 truncate">
-                        ₹{(props.getValue() as number).toLocaleString()}
+                        {formatIndianCurrency(props.getValue() as number)}
                     </div>
                 ),
             },
@@ -283,7 +295,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                 accessorKey: 'total_esi',
                 cell: (props) => (
                     <div className="w-28 truncate">
-                        ₹{(props.getValue() as number).toLocaleString()}
+                        {formatIndianCurrency(props.getValue() as number)}
                     </div>
                 ),
             },
@@ -293,7 +305,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                 accessorKey: 'challan_amt',
                 cell: (props) => (
                     <div className="w-52 truncate">
-                        ₹{(props.getValue() as number).toLocaleString()}
+                        {formatIndianCurrency(props.getValue() as number)}
                     </div>
                 ),
             },
@@ -303,7 +315,7 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                 accessorKey: 'difference_amt',
                 cell: (props) => (
                     <div className="w-40 truncate">
-                        ₹{(props.getValue() as number).toLocaleString()}
+                        {formatIndianCurrency(props.getValue() as number)}
                     </div>
                 ),
                

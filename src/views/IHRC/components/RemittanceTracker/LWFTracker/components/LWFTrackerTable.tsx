@@ -221,6 +221,23 @@ const LWFTrackerTable: React.FC<LWFTrackerTableProps> = ({
     }
   };
 
+
+
+  
+   const formatIndianCurrency = (num: number) => {
+  if (isNaN(num)) return '₹0';
+  
+  const numStr = num.toString();
+  const lastThree = numStr.substring(numStr.length - 3);
+  const otherNumbers = numStr.substring(0, numStr.length - 3);
+  
+  if (otherNumbers !== '') {
+    return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+  }
+  return '₹' + lastThree;
+};
+
+
   const columns: ColumnDef<LWFTrackerData>[] = useMemo(
     () => [
       {
@@ -259,7 +276,7 @@ const LWFTrackerTable: React.FC<LWFTrackerTableProps> = ({
         enableSorting: false,
         accessorKey: 'salary_register_amt',
         cell: (props) => <div className="w-36 truncate">
-          ₹{(props.getValue() as number)?.toLocaleString() || '-'}
+           {formatIndianCurrency(props.getValue() as number)}
         </div>,
       },
       {
@@ -267,7 +284,8 @@ const LWFTrackerTable: React.FC<LWFTrackerTableProps> = ({
         enableSorting: false,
         accessorKey: 'total_paid_amt',
         cell: (props) => <div className="w-36 truncate">
-          ₹{(props.getValue() as number)?.toLocaleString() || '-'}
+          {/* ₹{(props.getValue() as number)?.toLocaleString() || '-'} */}
+           {formatIndianCurrency(props.getValue() as number)}
         </div>,
       },
       {
@@ -275,7 +293,7 @@ const LWFTrackerTable: React.FC<LWFTrackerTableProps> = ({
         enableSorting: false,
         accessorKey: 'difference_amt',
         cell: (props) => <div className="w-36 truncate">
-          ₹{(props.getValue() as number)?.toLocaleString() || '-'}
+           {formatIndianCurrency(props.getValue() as number) || '-'}
         </div>,
       },
       {

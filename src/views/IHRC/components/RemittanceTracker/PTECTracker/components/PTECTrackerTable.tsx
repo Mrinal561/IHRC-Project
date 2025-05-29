@@ -172,6 +172,19 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
     }
   };
 
+    const formatIndianCurrency = (num: number) => {
+  if (isNaN(num)) return '₹0';
+  
+  const numStr = num.toString();
+  const lastThree = numStr.substring(numStr.length - 3);
+  const otherNumbers = numStr.substring(0, numStr.length - 3);
+  
+  if (otherNumbers !== '') {
+    return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+  }
+  return '₹' + lastThree;
+};
+
   const columns: ColumnDef<PTTrackerData>[] = useMemo(
     () => [
       {
@@ -266,7 +279,7 @@ const PTECTrackerTable: React.FC<PTTrackerTableProps> = ({
         accessorKey: 'total_paid_amt',
         cell: (props) => (
           <div className="w-40 truncate">
-            ₹{(props.getValue() as number).toLocaleString()}
+      {formatIndianCurrency(props.getValue() as number)}
           </div>
         ),
       },

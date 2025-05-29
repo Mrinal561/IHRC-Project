@@ -167,6 +167,19 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
     }
   };
 
+    const formatIndianCurrency = (num: number) => {
+  if (isNaN(num)) return '₹0';
+  
+  const numStr = num.toString();
+  const lastThree = numStr.substring(numStr.length - 3);
+  const otherNumbers = numStr.substring(0, numStr.length - 3);
+  
+  if (otherNumbers !== '') {
+    return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+  }
+  return '₹' + lastThree;
+};
+
   const columns: ColumnDef<PfChallanData>[] = useMemo(
     () => [
       {
@@ -210,37 +223,37 @@ const PFTrackerTable: React.FC<PfTrackerTableProps> =({
         header: 'EPF Wages',
         enableSorting: false,
         accessorKey: 'epf_wage',
-        cell: (props) => <div className="w-28 truncate">₹{(props.getValue() as number).toLocaleString()}</div>,
+        cell: (props) => <div className="w-28 truncate"> {formatIndianCurrency(props.getValue() as number)}</div>,
       },
       {
         header: 'EPS Wage',
         enableSorting: false,
         accessorKey: 'eps_wage',
-        cell: (props) => <div className="w-28 truncate">₹{(props.getValue() as number).toLocaleString()}</div>,
+        cell: (props) => <div className="w-28 truncate"> {formatIndianCurrency(props.getValue() as number)}</div>,
       },
       {
         header: 'EDLI Wage',
         enableSorting: false,
         accessorKey: 'edli_wage',
-        cell: (props) => <div className="w-28 truncate">₹{(props.getValue() as number).toLocaleString()}</div>,
+        cell: (props) => <div className="w-28 truncate"> {formatIndianCurrency(props.getValue() as number)}</div>,
       },
       {
         header: 'Total Challan Amount',
         enableSorting: false,
         accessorKey: 'total_challan_amt',
-        cell: (props) => <div className="w-52 truncate">₹{(props.getValue() as number).toLocaleString()}</div>,
+        cell: (props) => <div className="w-52 truncate"> {formatIndianCurrency(props.getValue() as number)}</div>,
       },
       {
         header: 'Total Amount Paid',
         enableSorting: false,
         accessorKey: 'total_paid_amt',
-        cell: (props) => <div className="w-52 truncate">₹{(props.getValue() as number).toLocaleString()}</div>,
+        cell: (props) => <div className="w-52 truncate"> {formatIndianCurrency(props.getValue() as number)}</div>,
       },
       {
         header: 'Difference',
         enableSorting: false,
         accessorKey: 'difference_amt',
-        cell: (props) => <div className="w-28 truncate">{(props.getValue() as number).toLocaleString()}</div>,
+        cell: (props) => <div className="w-28 truncate"> {formatIndianCurrency(props.getValue() as number)}</div>,
       },
       {
         header: 'Difference Reason',
