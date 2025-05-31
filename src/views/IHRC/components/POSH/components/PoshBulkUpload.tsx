@@ -52,18 +52,6 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
                 return
             }
 
-            if (!selectedCompany || !selectedYear) {
-                toast.push(
-                    <Notification
-                        title="Error"
-                        closable={true}
-                        type="error"
-                    >
-                        Please select both company and year
-                    </Notification>,
-                )
-                return
-            }
 
             const formData = new FormData()
             formData.append('document', file)
@@ -71,29 +59,29 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
             formData.append('companyId', selectedCompany)
             formData.append('year', selectedYear)
 
-            // const res = await httpClient.post(
-            //     endpoints.posh.bulkUpload(),
-            //     formData,
-            //     {
-            //         headers: {
-            //             'Content-Type': 'multipart/form-data',
-            //         },
-            //     },
-            // )
+            const res = await httpClient.post(
+                endpoints.poshSetup.bulkCreate(),
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                },
+            )
 
-            // if (res) {
-            //     toast.push(
-            //         <Notification title="Success" type="success">
-            //             {res.data.message}
-            //         </Notification>,
-            //     )
+            if (res) {
+                toast.push(
+                    <Notification title="Success" type="success">
+                        {res.data.message}
+                    </Notification>,
+                )
 
-            //     handleCancel()
+                handleCancel()
 
-            //     if (onUploadSuccess) {
-            //         onUploadSuccess()
-            //     }
-            // }
+                if (onUploadSuccess) {
+                    onUploadSuccess()
+                }
+            }
         } catch (error) {
             console.error('Upload error:', error)
             // toast.push(
@@ -115,45 +103,37 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
         setIsUploading(false)
     }
 
-    // const handleDownload = async (e: React.MouseEvent) => {
-    //     e.preventDefault()
-    //     try {
-    //         if (!selectedCompany || !selectedYear) {
-    //             toast.push(
-    //                 <Notification title="Error" closable={true} type="error">
-    //                     Please select both company and year
-    //                 </Notification>,
-    //             )
-    //             return
-    //         }
+    const handleDownload = async (e: React.MouseEvent) => {
+        e.preventDefault()
+        try {
 
-            // const res = await httpClient.get(
-            //     endpoints.posh.downloadTemplate(selectedCompany, selectedYear), 
-            //     {
-            //         responseType: 'blob',
-            //     }
-            // )
+            const res = await httpClient.get(
+                endpoints.poshSetup.downloadTemplate(), 
+                {
+                    responseType: 'blob',
+                }
+            )
 
-            // const blob = new Blob([res.data], {
-                // type: 'application/vnd.ms-excel',
-            // })
-            // const url = window.URL.createObjectURL(blob)
-        //     const link = document.createElement('a')
-        //     link.href = url
-        //     link.setAttribute('download', `POSH_Template_${selectedCompany}_${selectedYear}.xlsx`)
-        //     document.body.appendChild(link)
-        //     link.click()
-        //     document.body.removeChild(link)
-        //     window.URL.revokeObjectURL(url)
-        // } catch (error) {
-        //     console.error('Download error:', error)
-        //     toast.push(
-        //         <Notification title="Error" closable={true} type="error">
-        //             Failed to download template. Please try again.
-        //         </Notification>,
-        //     )
-        // }
-    // }
+            const blob = new Blob([res.data], {
+                type: 'application/vnd.ms-excel',
+            })
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `POSH_Template.xlsx`)
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(url)
+        } catch (error) {
+            console.error('Download error:', error)
+            toast.push(
+                <Notification title="Error" closable={true} type="error">
+                    Failed to download template. Please try again.
+                </Notification>,
+            )
+        }
+    }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -215,7 +195,7 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
                 <div className="my-4 flex gap-2 items-center">
                     <p>Download Format</p>
                     <a
-                        // onClick={handleDownload}
+                        onClick={handleDownload}
                         className="text-blue-600 hover:underline"
                     >
                         <Button 
@@ -264,7 +244,6 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
                         size="sm"
                         onClick={handleConfirm}
                         loading={isUploading}
-                        disabled={!file || !selectedCompany || !selectedYear}
                     >
                         Confirm
                     </Button>
