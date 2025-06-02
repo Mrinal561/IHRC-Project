@@ -121,22 +121,31 @@ const Posh = () => {
     }
   };
 
-  const fetchBranches = async (companyId: string) => {
-    try {
-      const response = await httpClient.get(endpoints.branch.getAllBranch(), {
-        params: { 'company_id[]': companyId }
-      });
-      
-      const formattedBranches = response.data?.data?.map((branch: any) => ({
+ const fetchBranches = async (companyId: string) => {
+  try {
+    const response = await httpClient.get(endpoints.branch.getAllBranch(), {
+      params: { 'company_id[]': companyId }
+    });
+    
+    const capitalizeAllWords = (str: string) => {
+      return str.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ).join(' ');
+    };
+
+    const formattedBranches = response.data?.data?.map((branch: any) => {
+      const capitalizedBranchName = capitalizeAllWords(branch.name);
+      return {
         value: branch.id.toString(),
-        label: `${branch.name} (${branch.Location?.name}/${branch.District?.name}/${branch.State?.name})`
-      }));
-      
-      setBranches(formattedBranches || []);
-    } catch (error) {
-      console.error('Failed to fetch branches:', error);
-    }
-  };
+        label: `${capitalizedBranchName} (${branch.Location?.name}/${branch.District?.name}/${branch.State?.name})`
+      };
+    });
+    
+    setBranches(formattedBranches || []);
+  } catch (error) {
+    console.error('Failed to fetch branches:', error);
+  }
+};
 
   const fetchPoshReturns = async () => {
     setLoading(true);
@@ -334,6 +343,16 @@ const Posh = () => {
     }
   };
 
+
+  const generateYearOptions = () => {
+  const currentYear = new Date().getFullYear();
+  return Array.from({ length: 5 }, (_, i) => ({
+    value: (currentYear - i).toString(),
+    label: (currentYear - i).toString()
+  }));
+};
+
+
   return (
     <AdaptableCard className="h-full" bodyClass="h-full">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
@@ -409,13 +428,14 @@ const Posh = () => {
 
     <div>
       <label className="block text-sm font-medium mb-2">Select Year</label>
-      <Input
-        type="text"
-        value={bulkDownloadData.year}
-        onChange={(e) => setBulkDownloadData(prev => ({
+      <OutlinedSelect
+        options={generateYearOptions()}
+        value={generateYearOptions().find(option => option.value === bulkDownloadData.year) || null}
+        onChange={(selectedOption) => setBulkDownloadData(prev => ({
           ...prev,
-          year: e.target.value
+          year: selectedOption?.value || currentFinancialYear
         }))}
+        label="Select Year"
       />
     </div>
 

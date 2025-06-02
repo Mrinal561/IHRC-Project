@@ -22,7 +22,16 @@ interface PoshTableProps {
     onDownload: (id: string) => void;  // Uncommented and added this prop
 }
 
+
+
+
+
 const PoshTable = ({ data, loading, onDownload }: PoshTableProps) => {
+
+ 
+
+
+
     const columns = [
         {
             header: 'Company',
@@ -30,12 +39,20 @@ const PoshTable = ({ data, loading, onDownload }: PoshTableProps) => {
             enableSorting: false,
             cell: ({ row }) => <div className="w-40 truncate">{row.original.company}</div>
         },
-        {
-            header: 'Branch',
-            accessorKey: 'branch',
-            enableSorting: false,
-            cell: ({ row }) => <div className="w-40 truncate">{row.original.branch}</div>
-        },
+       {
+    header: 'Branch',
+    accessorKey: 'branch',
+    enableSorting: false,
+    cell: ({ row }) => {
+        const capitalizeAllWords = (str: string) => {
+            return str.split(' ').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ).join(' ');
+        };
+        
+        return <div className="w-40 truncate">{capitalizeAllWords(row.original.branch)}</div>;
+    }
+},
         {
             header: 'Complaints Received',
             accessorKey: 'complaintsReceived',
