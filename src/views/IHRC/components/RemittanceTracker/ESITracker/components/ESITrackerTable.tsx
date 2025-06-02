@@ -182,10 +182,13 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
     };
 
 
-   const formatIndianCurrency = (num: number) => {
+const formatIndianCurrency = (num: number, showDecimal = true) => {
   if (isNaN(num)) return '₹0';
   
-  const numStr = num.toString();
+  // Get the integer part (before decimal)
+  const integerPart = Math.floor(num);
+  const numStr = integerPart.toString();
+  
   const lastThree = numStr.substring(numStr.length - 3);
   const otherNumbers = numStr.substring(0, numStr.length - 3);
   
@@ -260,55 +263,55 @@ const ESITrackerTable: React.FC<EsiTrackerTableProps> =({
                 ),
             },
             {
-                header: 'ESI Gross Wages',
-                enableSorting: false,
-                accessorKey: 'gross_wage',
-                cell: (props) => (
-                    <div className="w-40 truncate">
-                        {formatIndianCurrency(props.getValue() as number)}
-                    </div>
-                ),
-            },
-            {
-                header: 'EE ESI',
-                enableSorting: false,
-                accessorKey: 'employee_esi',
-                cell: (props) => (
-                    <div className="w-28 truncate">
-                       {formatIndianCurrency(props.getValue() as number)}
-                    </div>
-                ),
-            },
-            {
-                header: 'ER ESI',
-                enableSorting: false,
-                accessorKey: 'employer_esi',
-                cell: (props) => (
-                    <div className="w-28 truncate">
-                        {formatIndianCurrency(props.getValue() as number)}
-                    </div>
-                ),
-            },
-            {
-                header: 'Total ESI',
-                enableSorting: false,
-                accessorKey: 'total_esi',
-                cell: (props) => (
-                    <div className="w-28 truncate">
-                        {formatIndianCurrency(props.getValue() as number)}
-                    </div>
-                ),
-            },
-            {
-                header: 'Total Amount As per Challan',
-                enableSorting: false,
-                accessorKey: 'challan_amt',
-                cell: (props) => (
-                    <div className="w-52 truncate">
-                        {formatIndianCurrency(props.getValue() as number)}
-                    </div>
-                ),
-            },
+    header: 'ESI Gross Wages',
+    enableSorting: false,
+    accessorKey: 'gross_wage',
+    cell: (props) => (
+        <div className="w-40 truncate">
+            {formatIndianCurrency(props.getValue() as number, false)}
+        </div>
+    ),
+},
+{
+    header: 'EE ESI',
+    enableSorting: false,
+    accessorKey: 'employee_esi',
+    cell: (props) => (
+        <div className="w-28 truncate">
+           {formatIndianCurrency(props.getValue() as number, false)}
+        </div>
+    ),
+},
+{
+    header: 'ER ESI',
+    enableSorting: false,
+    accessorKey: 'employer_esi',
+    cell: (props) => (
+        <div className="w-28 truncate">
+            {formatIndianCurrency(props.getValue() as number, false)}
+        </div>
+    ),
+},
+{
+    header: 'Total ESI',
+    enableSorting: false,
+    accessorKey: 'total_esi',
+    cell: (props) => (
+        <div className="w-28 truncate">
+            {formatIndianCurrency(props.getValue() as number, false)}
+        </div>
+    ),
+},
+{
+    header: 'Total Amount As per Challan',
+    enableSorting: false,
+    accessorKey: 'challan_amt',
+    cell: (props) => (
+        <div className="w-52 truncate">
+            {formatIndianCurrency(props.getValue() as number, false)}
+        </div>
+    ),
+},
             {
                 header: 'Difference in Amount',
                 enableSorting: false,
