@@ -162,7 +162,7 @@ const Lwf: React.FC<ComplianceStatusProps> = ({
   return new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0
-  }).format(Math.round(num));
+  }).format(Math.floor(num));
 };
 
 
