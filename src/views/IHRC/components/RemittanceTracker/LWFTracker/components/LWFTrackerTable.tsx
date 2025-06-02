@@ -224,10 +224,13 @@ const LWFTrackerTable: React.FC<LWFTrackerTableProps> = ({
 
 
   
-   const formatIndianCurrency = (num: number) => {
+const formatIndianCurrency = (num: number, showDecimal = true) => {
   if (isNaN(num)) return '₹0';
   
-  const numStr = num.toString();
+  // Get the integer part (before decimal)
+  const integerPart = Math.floor(num);
+  const numStr = integerPart.toString();
+  
   const lastThree = numStr.substring(numStr.length - 3);
   const otherNumbers = numStr.substring(0, numStr.length - 3);
   

@@ -628,6 +628,26 @@ const UploadedLWFDetails: React.FC<UploadedLWFDetailsProps> = ({ onBack }) => {
     return tracker.is_requested;
   };
 
+
+  const formatIndianCurrency = (num: number, showDecimal = true) => {
+  if (isNaN(num)) return '₹0';
+  
+  // Get the integer part (before decimal)
+  const integerPart = Math.floor(num);
+  const numStr = integerPart.toString();
+  
+  const lastThree = numStr.substring(numStr.length - 3);
+  const otherNumbers = numStr.substring(0, numStr.length - 3);
+  
+  if (otherNumbers !== '') {
+    return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+  }
+  return '₹' + lastThree;
+};
+
+
+
+
   const columns: ColumnDef<LWFTrackerData>[] = useMemo(
     () => [
       {
@@ -662,27 +682,28 @@ const UploadedLWFDetails: React.FC<UploadedLWFDetailsProps> = ({ onBack }) => {
         },
       },
       {
-        header: 'Salary Register Amt',
+        header: 'Salary Register Amount',
         enableSorting: false,
         accessorKey: 'salary_register_amt',
-        cell: (props) => <div className="w-52 truncate">
-          ₹{(props.getValue() as number)?.toLocaleString() || '-'}
+        cell: (props) => <div className="w-36 truncate">
+           {formatIndianCurrency(props.getValue() as number)}
         </div>,
       },
       {
-        header: 'Total Paid Amt',
+        header: 'Total Paid Amount',
         enableSorting: false,
         accessorKey: 'total_paid_amt',
-        cell: (props) => <div className="w-52 truncate">
-          ₹{(props.getValue() as number)?.toLocaleString() || '-'}
+        cell: (props) => <div className="w-36 truncate">
+          {/* ₹{(props.getValue() as number)?.toLocaleString() || '-'} */}
+           {formatIndianCurrency(props.getValue() as number)}
         </div>,
       },
       {
-        header: 'Difference Amt',
+        header: 'Difference Amount',
         enableSorting: false,
         accessorKey: 'difference_amt',
-        cell: (props) => <div className="w-52 truncate">
-          ₹{(props.getValue() as number)?.toLocaleString() || '-'}
+        cell: (props) => <div className="w-36 truncate">
+           {formatIndianCurrency(props.getValue() as number) || '-'}
         </div>,
       },
       {
