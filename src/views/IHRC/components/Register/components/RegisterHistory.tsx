@@ -54,36 +54,46 @@ import { useNavigate } from "react-router-dom";
     const navigate = useNavigate();
   
     return (
-      <AdaptableCard className="h-full" bodyClass="h-full">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-10">
-          <div className="mb-4 lg:mb-0">
-            <div className="flex gap-2">
-                 <Button
-                                    variant="plain"
-                                    size="sm"
-                                    icon={<HiArrowLeft />}
-                                    onClick={() => navigate(-1)}
-                                    className="mb-4"
-                                />
-            <h3 className="text-2xl font-bold">Register History - {registerData.fileName} <span className="text-2xl font-bold">-{registerData.year}</span></h3>
-            </div>
-           
-          </div>
-        </div>
-        <div className='mb-8'>
-          <DataTable
-            columns={columns}
-            data={registerData.months}
-            loading={false}
-            pagingData={{
-              total: registerData.months.length,
-              pageIndex: 1,
-              pageSize: 10
-            }}
-            stickyHeader={true}
-          />
-        </div>
-      </AdaptableCard>
+     <AdaptableCard className="h-full" bodyClass="h-full">
+  <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-10">
+    <div className="mb-4 lg:mb-0">
+      <div className="flex items-center gap-2">
+        <Button
+          variant="plain"
+          size="sm"
+          icon={<HiArrowLeft />}
+          onClick={() => navigate(-1)}
+        />
+        <h3 className="text-2xl font-bold">
+          Register History - {registerData.fileName} 
+          <span className="text-2xl font-bold">-{registerData.year}</span>
+        </h3>
+      </div>
+    </div>
+    
+    <Button
+      variant="solid"
+      size="sm"
+      icon={<HiDownload />}
+    >
+      Download
+    </Button>
+  </div>
+  
+  <div className='mb-8'>
+    <DataTable
+      columns={columns}
+      data={registerData.months}
+      loading={false}
+      pagingData={{
+        total: registerData.months.length,
+        pageIndex: 1,
+        pageSize: 10
+      }}
+      stickyHeader={true}
+    />
+  </div>
+</AdaptableCard>
     );
   };
 
