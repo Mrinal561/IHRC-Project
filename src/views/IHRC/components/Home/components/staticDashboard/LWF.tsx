@@ -157,6 +157,15 @@ const Lwf: React.FC<ComplianceStatusProps> = ({
     return isNaN(percent) ? '0%' : `${percent.toFixed(1)}%`;
   };
 
+
+  const formatIndianNumber = (num: number): string => {
+  return new Intl.NumberFormat('en-IN', {
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0
+  }).format(Math.round(num));
+};
+
+
   return (
     <div className="flex flex-col items-center">
       <div className="w-full">
