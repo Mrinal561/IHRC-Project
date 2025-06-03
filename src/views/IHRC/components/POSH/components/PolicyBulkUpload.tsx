@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Button, Dialog, Notification, toast } from '@/components/ui';
+import { Button, Dialog, Input, Notification, toast } from '@/components/ui';
 import { HiDownload, HiUpload } from 'react-icons/hi';
+import OutlinedInput from '@/components/ui/OutlinedInput';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
+import useAuth from '@/utils/hooks/useAuth';
 
 interface PolicyBulkUploadProps {
     isOpen: boolean;
@@ -12,59 +14,54 @@ interface PolicyBulkUploadProps {
 
 const PolicyBulkUpload = ({ isOpen, onClose, onSuccess }: PolicyBulkUploadProps) => {
     const [file, setFile] = useState<File | null>(null);
+    const [remark, setRemark] = useState('');
     const [loading, setLoading] = useState(false);
+    const auth = useAuth();
+    const userId = auth?.user?.id || 0;
 
     const handleUpload = async () => {
         if (!file) {
-         
-
-             toast.push(
-                             <Notification 
-                                            title='warning'
-                                            closable={true}
-                                            type='warning'
-                                            >
-                                                Please select a file to upload
-                                            </Notification>
-                        )
+            toast.push(
+                <Notification title="Warning" type="warning" closable>
+                    Please select a file to upload
+                </Notification>
+            );
             return;
         }
 
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('remark', remark);
+        formData.append('created_by', userId.toString());
 
         setLoading(true);
         try {
-            await httpClient.post(endpoints.poshSetup.createPolicy(), formData, {
+            await httpClient.post(endpoints.poshSetup.policyBulkCreate(), formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
 
-         
             toast.push(
-                             <Notification 
-                                            title='success'
-                                            closable={true}
-                                            type='success'
-                                            >
-                                                Policies uploaded successfully
-                                            </Notification>
-                        )
+                <Notification title="Success" type="success" closable>
+                    Policies uploaded successfully
+                </Notification>
+            );
             onSuccess();
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Upload error:', error);
-          
-             toast.push(
-                             <Notification 
-                                            title='error'
-                                            closable={true}
-                                            type='error'
-                                            >
-                                                error.response?.data?.message
-                                            </Notification>
-                        )
+            let errorMessage = 'Failed to upload policies';
+            
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+
+            toast.push(
+                <Notification title="Error" type="error" closable>
+                    {errorMessage}
+                </Notification>
+            );
         } finally {
             setLoading(false);
         }
@@ -86,16 +83,11 @@ const PolicyBulkUpload = ({ isOpen, onClose, onSuccess }: PolicyBulkUploadProps)
             window.URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Download error:', error);
-           
-              toast.push(
-                             <Notification 
-                                            title='error'
-                                            closable={true}
-                                            type='error'
-                                            >
-                                                Failed to download template
-                                            </Notification>
-                        )
+            toast.push(
+                <Notification title="Error" type="error" closable>
+                    Failed to download template
+                </Notification>
+            );
         }
     };
 
@@ -104,8 +96,9 @@ const PolicyBulkUpload = ({ isOpen, onClose, onSuccess }: PolicyBulkUploadProps)
             isOpen={isOpen}
             onClose={onClose}
             width={500}
+            onRequestClose={onClose}
         >
-            <h5 className="mb-4">Bulk Upload POSH Policies</h5>
+            <h5 className="mb-4">Bulk Upload POSH Policy</h5>
             
             <div className="my-4 flex gap-2 items-center">
                 <p>Download Template:</p>
@@ -114,22 +107,26 @@ const PolicyBulkUpload = ({ isOpen, onClose, onSuccess }: PolicyBulkUploadProps)
                     icon={<HiDownload />}
                     onClick={downloadTemplate}
                 >
-                    Download Excel Template
+                    Download Template
                 </Button>
             </div>
 
             <div className="flex flex-col gap-2 mb-4">
                 <p>Upload Policies File:</p>
-                <input
+                <Input
                     type="file"
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
                     accept=".xlsx,.xls,.csv"
-                    className="block w-full text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-md file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-blue-50 file:text-blue-700
-                        hover:file:bg-blue-100"
+                />
+            </div>
+
+            <div className="mb-4 flex flex-col gap-2">
+                <p>Enter Remark</p>
+                <OutlinedInput 
+                    textarea 
+                    label="Enter Remark" 
+                    value={remark} 
+                    onChange={(value) => setRemark(value)} 
                 />
             </div>
 
@@ -144,11 +141,10 @@ const PolicyBulkUpload = ({ isOpen, onClose, onSuccess }: PolicyBulkUploadProps)
                 <Button
                     variant="solid"
                     loading={loading}
-                    icon={<HiUpload />}
                     onClick={handleUpload}
                     disabled={!file || loading}
                 >
-                    Upload
+                   Confirm
                 </Button>
             </div>
         </Dialog>

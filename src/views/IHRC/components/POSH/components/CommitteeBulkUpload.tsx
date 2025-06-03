@@ -6,8 +6,19 @@ import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 import useAuth from '@/utils/hooks/useAuth';
 
-const CommitteeBulkUpload = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+interface CommitteeBulkUploadProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void; // Add this prop
+}
+
+
+const CommitteeBulkUpload: React.FC<CommitteeBulkUploadProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSuccess 
+}) => {  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [remark, setRemark] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -90,6 +101,8 @@ const CommitteeBulkUpload = () => {
           </Notification>
         );
         setIsDialogOpen(false);
+        onSuccess(); // Call the success callback
+        onClose();
         // You might want to add a callback prop here to refresh the table
       }
     } catch (error:any) {

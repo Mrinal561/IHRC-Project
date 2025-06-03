@@ -16,6 +16,7 @@ const Committee = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+    const [tableKey, setTableKey] = useState(Date.now()); 
     
     // Using your existing useAuth hook
     const auth = useAuth();
@@ -24,6 +25,7 @@ const Committee = () => {
 
     const handleBulkUploadSuccess = () => {
         setIsBulkUploadOpen(false);
+        setTableKey(Date.now());
         // You might want to add a way to refresh the table data here
     };
 
@@ -88,7 +90,7 @@ const Committee = () => {
                     </Button>
                 </div>
             </div>
-            <CommitteeTable searchTerm={searchTerm} />
+            <CommitteeTable key={tableKey} searchTerm={searchTerm} />
         </AdaptableCard>
     );
 };

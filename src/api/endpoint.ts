@@ -206,6 +206,8 @@ export const endpoints = {
     downloadPolicy: (id:any) => api(`companyadmin/posh-setup/policy/download/${id}`),
     downloadBulkPolicy: () => api("companyadmin/posh-setup/policy/download"),
     listPolicy: () => api("companyadmin/posh-setup/policy/list"),
+    policyTemplate: () => api("companyadmin/posh-setup/policy/template"),
+    policyBulkCreate: () => api("companyadmin/posh-setup/policy/bulk-upload"),
     },
     
     pfiwtracker: {
