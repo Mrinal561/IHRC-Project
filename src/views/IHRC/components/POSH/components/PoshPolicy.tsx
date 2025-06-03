@@ -95,14 +95,14 @@ const PoshPolicy = () => {
                     >
                         Download All
                     </Button>
-                    <Button
+                    {/* <Button
                         variant="solid"
                         size="sm"
                         icon={<HiUpload />}
                         onClick={() => setIsBulkUploadOpen(true)}
                     >
                         Bulk Upload
-                    </Button>
+                    </Button> */}
                     <Button
                         variant="solid"
                         size="sm"
