@@ -193,13 +193,19 @@ export const endpoints = {
     committeeList: () => api("companyadmin/posh-setup/committees"),
     committeeData: () => api("companyadmin/posh-setup/committee/export"),
     createCommittee: () => api("companyadmin/posh-setup/committee"),
+    createBulkCommittee: () => api("companyadmin/posh-setup/committee/bulk-upload"),
+    committeeTemplate: () => api("companyadmin/posh-setup/committee/template"),
     createPoshReturn: () => api("companyadmin/posh-setup/posh-return"),
     poshReturnList: () => api("companyadmin/posh-setup/posh-return/list"),
     poshReturnExport: () => api("companyadmin/posh-setup/posh-return/export"),
     poshCommitteeExport: () => api("companyadmin/posh-setup/committee/export"),
     poshReturnBulkDocumentDownload: () => api("companyadmin/posh-setup/posh-return/bulk-download"),
     poshReturnIndividualDocumentDownload: (id: any) => api(`companyadmin/posh-setup/posh-return/report/${id}`),
-    poshCommitteeIndividualDocumentDownload: (id: any) => api(`/companyadmin/posh-setup/committee/policy/${id}`)
+    poshCommitteeIndividualDocumentDownload: (id: any) => api(`/companyadmin/posh-setup/committee/policy/${id}`),
+    createPolicy: () => api("companyadmin/posh-setup/policy"),
+    downloadPolicy: (id:any) => api(`companyadmin/posh-setup/policy/download/${id}`),
+    downloadBulkPolicy: () => api("companyadmin/posh-setup/policy/download"),
+    listPolicy: () => api("companyadmin/posh-setup/policy/list"),
     },
     
     pfiwtracker: {

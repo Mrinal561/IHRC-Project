@@ -56,6 +56,17 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+    {
+        key: 'nav.policy',
+        path: '/policy',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/POSH/components/PoshPolicy'
+                ),
+        ),
+        authority: [],
+    },
     // {
     //     key: 'Reset Password',
     //     path: '/reset-password',

@@ -1572,6 +1572,16 @@ const filterNavigation = (
                 authority: [],
                 subMenu: [
                     {
+                        key: 'poshTracker.collapse.item3',
+                        path: '/policy',
+                        title: 'POSH Policy',
+                        translateKey: 'nav.poshTracker.collapse.item3',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
                         key: 'poshTracker.collapse.item1',
                         path: '/posh',
                         title: 'POSH Return',
@@ -1584,7 +1594,7 @@ const filterNavigation = (
                     {
                         key: 'poshTracker.collapse.item2',
                         path: '/committee',
-                        title: 'Committee',
+                        title: 'POSH Committee',
                         translateKey: 'nav.poshTracker.collapse.item2',
                         icon: '',
                         type: NAV_ITEM_TYPE_ITEM,
