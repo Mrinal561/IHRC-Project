@@ -69,7 +69,7 @@ const PolicyBulkUpload = ({ isOpen, onClose, onSuccess }: PolicyBulkUploadProps)
 
     const downloadTemplate = async () => {
         try {
-            const response = await httpClient.get(endpoints.poshSetup.downloadTemplate(), {
+            const response = await httpClient.get(endpoints.poshSetup.policyTemplate(), {
                 responseType: 'blob'
             });
             

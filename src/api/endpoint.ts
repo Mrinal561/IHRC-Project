@@ -194,6 +194,7 @@ export const endpoints = {
     committeeData: () => api("companyadmin/posh-setup/committee/export"),
     createCommittee: () => api("companyadmin/posh-setup/committee"),
     createBulkCommittee: () => api("companyadmin/posh-setup/committee/bulk-upload"),
+    BulkCommitteeRepors: () => api("companyadmin/posh-setup/committee/bulk-download"),
     committeeTemplate: () => api("companyadmin/posh-setup/committee/template"),
     createPoshReturn: () => api("companyadmin/posh-setup/posh-return"),
     poshReturnList: () => api("companyadmin/posh-setup/posh-return/list"),
