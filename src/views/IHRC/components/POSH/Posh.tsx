@@ -11,6 +11,9 @@ import { endpoints } from '@/api/endpoint';
 import { useAppSelector } from '@/store';
 import useAuth from '@/utils/hooks/useAuth';
 
+const FINANCIAL_YEAR_KEY = 'selectedFinancialYear'
+const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged';
+
 interface SelectOption {
   value: string;
   label: string;
@@ -47,7 +50,13 @@ interface PoshReturn {
 const Posh = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const currentFinancialYear = useAppSelector((state: any) => state.common?.currentFinancialYear || '');
+ const [formData, setFormData] = useState(() => {
+  // Safely get the base year
+  const financialYearParts = currentFinancialYear.split('-');
+  const baseYear = financialYearParts.length > 0 ? parseInt(financialYearParts[0]) : new Date().getFullYear();
+  
+  return {
     company_id: '',
     branch_id: '',
     complaints_received: 0,
@@ -55,8 +64,10 @@ const Posh = () => {
     pending_cases: 0,
     workshop_conducted: 1,
     nature_of_action_taken: '',
-    return_level: 'branch'
-  });
+    return_level: 'branch',
+    year: undefined
+  };
+});
   const [poshData, setPoshData] = useState<PoshTableData[]>([]);
   const [loading, setLoading] = useState(false);
   const [companies, setCompanies] = useState<SelectOption[]>([]);
@@ -70,7 +81,7 @@ const Posh = () => {
   const auth = useAuth();
   const userId = auth?.user?.id || 0; // Fallback to 0 if not available
 
-  const currentFinancialYear = useAppSelector((state: any) => state.common?.currentFinancialYear || '');
+   const [financialYear, setFinancialYear] = useState(sessionStorage.getItem(FINANCIAL_YEAR_KEY));
   const [isBulkDownloadOpen, setIsBulkDownloadOpen] = useState(false);
   const [bulkDownloadData, setBulkDownloadData] = useState({
     company_id: '',
@@ -82,11 +93,33 @@ const Posh = () => {
     { value: 'branch', label: 'Branch Level' },
     { value: 'district', label: 'District Level' }
   ];
+  
+  useEffect(() => {
+  const handleFinancialYearChange = (event: CustomEvent) => {
+    const newFinancialYear = event.detail;
+    setFinancialYear(newFinancialYear);
+    sessionStorage.setItem(FINANCIAL_YEAR_KEY, newFinancialYear);
+  };
+
+  window.addEventListener(
+    FINANCIAL_YEAR_CHANGE_EVENT, 
+    handleFinancialYearChange as EventListener
+  );
+
+  return () => {
+    window.removeEventListener(
+      FINANCIAL_YEAR_CHANGE_EVENT, 
+      handleFinancialYearChange as EventListener
+    );
+  };
+}, []);
 
   useEffect(() => {
     fetchCompanyGroups();
     fetchPoshReturns();
   }, []);
+
+  
 
   const fetchCompanyGroups = async () => {
     try {
@@ -147,53 +180,68 @@ const Posh = () => {
   }
 };
 
-  const fetchPoshReturns = async () => {
-    setLoading(true);
-    try {
-      const response = await httpClient.get(endpoints.poshSetup.poshReturnList(), {
-        params: {
-          financial_year: currentFinancialYear,
-          created_by: userId,
-          search: searchTerm
-        }
-      });
-      
-      const transformedData = response.data.data.map((item: any) => ({
-        id: item.id,
-        companyGroup: 'IHRC',
-        company: item.company_name,
-        branch: item.branch_name,
-        complaintsReceived: item.complaints_received,
-        complaintsDisposed: item.complaints_disposed,
-        pendingCases: item.pending_cases,
-        workshops: item.workshop_conducted,
-        actionTaken: item.nature_of_action_taken,
-        returnLevel: item.return_level === 'branch' ? 'Branch Level' : 'District Level'
-      }));
-      
-      setPoshData(transformedData);
-    } catch (error) {
-      console.error('Failed to fetch POSH returns:', error);
-    } finally {
-      setLoading(false);
+ const fetchPoshReturns = async () => {
+  setLoading(true);
+  try {
+    const params: Record<string, any> = {
+      financial_year: financialYear
+    };
+
+    // Only add search if searchTerm exists
+    if (searchTerm) {
+      params.search = searchTerm;
     }
-  };
+
+    const response = await httpClient.get(endpoints.poshSetup.poshReturnList(), {
+      params
+    });
+    
+    const transformedData = response.data.data.map((item: any) => ({
+      id: item.id,
+      companyGroup: 'IHRC',
+      company: item.company_name,
+      branch: item.branch_name,
+      complaintsReceived: item.complaints_received,
+      complaintsDisposed: item.complaints_disposed,
+      pendingCases: item.pending_cases,
+      workshops: item.workshop_conducted,
+      actionTaken: item.nature_of_action_taken,
+      returnLevel: item.return_level === 'branch' ? 'Branch Level' : 'District Level'
+    }));
+    
+    setPoshData(transformedData);
+  } catch (error) {
+    console.error('Failed to fetch POSH returns:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Update your useEffect that calls fetchPoshReturns
+useEffect(() => {
+  fetchPoshReturns();
+}, [financialYear, searchTerm]); 
 
   const handleInputChange = (name: string, value: string | number) => {
-    if (name === 'company_id') {
-      fetchBranches(value as string);
-      setFormData(prev => ({
-        ...prev,
-        company_id: value as string,
-        branch_id: ''
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
+  if (name === 'company_id') {
+    fetchBranches(value as string);
+    setFormData(prev => ({
+      ...prev,
+      company_id: value as string,
+      branch_id: ''
+    }));
+  } else if (name === 'year') {
+    setFormData(prev => ({
+      ...prev,
+      [name]: Number(value) // Ensure year is stored as number
+    }));
+  } else {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+};
 
   const handleSubmit = async () => {
     if (formData.workshop_conducted < 1) {
@@ -206,7 +254,8 @@ const Posh = () => {
         ...formData,
         company_id: Number(formData.company_id),
         branch_id: Number(formData.branch_id),
-        created_by: userId
+        created_by: userId,
+        year: Number(formData.year)
       });
 
       
@@ -219,18 +268,22 @@ const Posh = () => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      company_id: '',
-      branch_id: '',
-      complaints_received: 0,
-      complaints_disposed: 0,
-      pending_cases: 0,
-      workshop_conducted: 1,
-      nature_of_action_taken: '',
-      return_level: 'branch'
-    });
-  };
+const resetForm = () => {
+  const financialYearParts = currentFinancialYear.split('-');
+  const baseYear = financialYearParts.length > 0 ? parseInt(financialYearParts[0]) : new Date().getFullYear();
+  
+  setFormData({
+    company_id: '',
+    branch_id: '',
+    complaints_received: 0,
+    complaints_disposed: 0,
+    pending_cases: 0,
+    workshop_conducted: 1,
+    nature_of_action_taken: '',
+    return_level: 'branch',
+    year: isNaN(baseYear) ? new Date().getFullYear() : baseYear
+  });
+};
 
 //   const handleDownloadReport = async (id: string) => {
 //     try {
@@ -263,8 +316,8 @@ const Posh = () => {
     try {
       const response = await httpClient.get(endpoints.poshSetup.poshReturnExport(), {
         params: {
-          financial_year: currentFinancialYear,
-          created_by: userId
+          financial_year: financialYear,
+          // created_by: userId
         },
         responseType: 'blob'
       });
@@ -342,6 +395,26 @@ const Posh = () => {
      
     }
   };
+
+const generateYearOption = () => {
+  // Safely extract base year from financial year format (e.g., "2025-26")
+  const financialYearParts = currentFinancialYear.split('-');
+  const baseYear = financialYearParts.length > 0 ? parseInt(financialYearParts[0]) : new Date().getFullYear();
+  
+  // Ensure we have a valid number
+  if (isNaN(baseYear)) {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => ({
+      value: currentYear - i,
+      label: (currentYear - i).toString()
+    }));
+  }
+
+  return Array.from({ length: 5 }, (_, i) => ({
+    value: baseYear - i,
+    label: (baseYear - i).toString()
+  }));
+};
 
 
   const generateYearOptions = () => {
@@ -543,6 +616,17 @@ const Posh = () => {
               />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+      <label className="block text-sm font-medium mb-2">Select Year</label>
+     <OutlinedSelect
+  options={generateYearOption()}
+  value={formData.year ? generateYearOption().find(option => option.value === formData.year) : null}
+  onChange={(selectedOption) => handleInputChange('year', selectedOption?.value)}
+  label="Select Year"
+/>
+    </div>
+          </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">Nature of Action Taken</label>
@@ -567,6 +651,6 @@ const Posh = () => {
       </Dialog>
     </AdaptableCard>
   );
-};
+}
 
 export default Posh;
