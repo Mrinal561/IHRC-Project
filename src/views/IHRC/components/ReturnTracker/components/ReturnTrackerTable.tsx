@@ -24,45 +24,62 @@ interface ReturnTrackerData {
     return_copy: string;
 }
 
-const ReturnTrackerTable = () => {
-    const navigate = useNavigate();
+interface ReturnTrackerTableProps {
+    data: ReturnTrackerData[];
+    loading: boolean;
+    pagination: {
+        page: number;
+        limit: number;
+        totalPages: number;
+        totalResults: number;
+    };
+    onPageChange: (page: number, pageSize: number) => void;
+}
 
-    const [loading, setLoading] = useState(false);
+
+const ReturnTrackerTable = ({
+    data: returns,
+    loading,
+    pagination,
+    onPageChange
+}: ReturnTrackerTableProps) => {
+    const navigate = useNavigate();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    // const [loading, setLoading] = useState(false);
     const [tableData, setTableData] = useState({
         total: 0,
         pageIndex: 1,
         pageSize: 10,
     });
-    const [returns, setReturns] = useState<ReturnTrackerData[]>([]);
+    // const [returns, setReturns] = useState<ReturnTrackerData[]>([]);
 
-    useEffect(() => {
-        fetchReturns();
-    }, [tableData.pageIndex, tableData.pageSize]); // Add dependencies for pagination
+    // useEffect(() => {
+    //     fetchReturns();
+    // }, [tableData.pageIndex, tableData.pageSize]); // Add dependencies for pagination
 
-    const fetchReturns = async () => {
-        setLoading(true);
-        try {
-            const response = await httpClient.get(endpoints.return.list(), {
-                params: {
-                    page: tableData.pageIndex,
-                    limit: tableData.pageSize
-                }
-            });
+    // const fetchReturns = async () => {
+    //     // setLoading(true);
+    //     try {
+    //         const response = await httpClient.get(endpoints.return.list(), {
+    //             params: {
+    //                 page: tableData.pageIndex,
+    //                 limit: tableData.pageSize
+    //             }
+    //         });
             
-            // Correctly access the data from the response
-            setReturns(response.data.data || []);
-            setTableData(prev => ({
-                ...prev,
-                total: response.data.meta?.totalResults || 0
-            }));
-        } catch (error) {
-            console.error('Error fetching returns:', error);
-            setReturns([]); // Ensure returns is always an array
-        } finally {
-            setLoading(false);
-        }
-    };
+    //         // Correctly access the data from the response
+    //         // setReturns(response.data.data || []);
+    //         setTableData(prev => ({
+    //             ...prev,
+    //             total: response.data.meta?.totalResults || 0
+    //         }));
+    //     } catch (error) {
+    //         console.error('Error fetching returns:', error);
+    //         // setReturns([]); // Ensure returns is always an array
+    //     } finally {
+    //         // setLoading(false);
+    //     }
+    // };
 
     const formatDate = (dateString: string) => {
         if (!dateString) return '-';
@@ -210,11 +227,7 @@ const ReturnTrackerTable = () => {
     );
 
      const handlePaginationChange = (pageIndex: number, pageSize: number) => {
-        setTableData(prev => ({
-            ...prev,
-            pageIndex,
-            pageSize
-        }));
+        onPageChange(pageIndex, pageSize);
     };
 
     return (
