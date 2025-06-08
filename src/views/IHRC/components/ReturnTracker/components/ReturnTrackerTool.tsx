@@ -126,9 +126,9 @@ const fetchReturns = async () => {
                 >
                     Download Return Data
                 </Button>
-                <div>
-                    <ReturnTrackerBulk onUploadSuccess={fetchReturns} />
-                </div>
+                {/* <div> */}
+                    {/* <ReturnTrackerBulk onUploadSuccess={fetchReturns} /> */}
+                {/* </div> */}
                 <Button
                     variant="solid"
                     size="sm"
