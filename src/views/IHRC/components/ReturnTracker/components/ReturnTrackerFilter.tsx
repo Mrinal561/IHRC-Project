@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
 import { endpoints } from '@/api/endpoint';
 import httpClient from '@/api/http-client';
-import OutlinedInput from '@/components/ui/OutlinedInput';
 
 interface ReturnTrackerFilterProps {
   onFilterChange: (filters: any) => void;
+}
+
+interface SelectOption {
+  value: string; // Changed to string only since IDs are typically strings in APIs
+  label: string;
 }
 
 const ReturnTrackerFilter = ({ onFilterChange }: ReturnTrackerFilterProps) => {
@@ -15,33 +19,26 @@ const ReturnTrackerFilter = ({ onFilterChange }: ReturnTrackerFilterProps) => {
         branch_id: '',
     });
 
-    const [companyOptions, setCompanyOptions] = useState([]);
-    const [stateOptions, setStateOptions] = useState([]);
-    const [branchOptions, setBranchOptions] = useState([]);
+    const [companyOptions, setCompanyOptions] = useState<SelectOption[]>([]);
+    const [stateOptions, setStateOptions] = useState<SelectOption[]>([]);
+    const [branchOptions, setBranchOptions] = useState<SelectOption[]>([]);
+    const [loadingBranches, setLoadingBranches] = useState(false);
 
     useEffect(() => {
-        // Load initial options
         const loadOptions = async () => {
             try {
                 // Load companies
                 const companiesRes = await httpClient.get(endpoints.company.getAll());
                 setCompanyOptions(companiesRes.data.data.map((c: any) => ({
-                    value: c.id,
+                    value: String(c.id), // Ensure value is string
                     label: c.name
                 })));
 
                 // Load states
                 const statesRes = await httpClient.get(endpoints.common.state());
                 setStateOptions(statesRes.data.map((s: any) => ({
-                    value: s.id,
+                    value: String(s.id), // Ensure value is string
                     label: s.name
-                })));
-
-                // Load branches
-                const branchesRes = await httpClient.get(endpoints.branch.getAllBranch());
-                setBranchOptions(branchesRes.data.data.map((b: any) => ({
-                    value: b.id,
-                    label: b.name
                 })));
             } catch (error) {
                 console.error('Failed to load filter options:', error);
@@ -51,11 +48,57 @@ const ReturnTrackerFilter = ({ onFilterChange }: ReturnTrackerFilterProps) => {
         loadOptions();
     }, []);
 
+ // In your ReturnTrackerFilter component
+useEffect(() => {
+    const loadBranches = async () => {
+        if (!filters.state_id) {
+            setBranchOptions([]);
+            return;
+        }
+
+        setLoadingBranches(true);
+        try {
+            // First fetch ALL branches
+            const branchesRes = await httpClient.get(endpoints.branch.getAllBranch());
+            
+            // Then filter locally by state
+            const filteredBranches = branchesRes.data.data
+                .filter((b: any) => b.state_id === Number(filters.state_id))
+                .map((b: any) => ({
+                    value: String(b.id),
+                    label: b.name
+                }));
+            
+            setBranchOptions(filteredBranches);
+            
+            // Clear branch selection if state changes
+            if (filters.branch_id) {
+                handleFilterChange('branch_id', '');
+            }
+        } catch (error) {
+            console.error('Failed to load branches:', error);
+            setBranchOptions([]);
+        } finally {
+            setLoadingBranches(false);
+        }
+    };
+
+    loadBranches();
+}, [filters.state_id]);
+
     const handleFilterChange = (name: string, value: string) => {
         const newFilters = {
             ...filters,
             [name]: value
         };
+        
+        if (name === 'company_id') {
+            newFilters.state_id = '';
+            newFilters.branch_id = '';
+        } else if (name === 'state_id') {
+            newFilters.branch_id = '';
+        }
+        
         setFilters(newFilters);
         onFilterChange(newFilters);
     };
@@ -66,24 +109,28 @@ const ReturnTrackerFilter = ({ onFilterChange }: ReturnTrackerFilterProps) => {
                 <OutlinedSelect
                     label="Company"
                     options={companyOptions}
-                    value={companyOptions.find(opt => opt.value === filters.company_id)}
+                    value={companyOptions.find(opt => opt.value === filters.company_id) || null}
                     onChange={(option) => handleFilterChange('company_id', option?.value || '')}
+                    isClearable
                 />
             </div>
             <div className="min-w-0">
                 <OutlinedSelect
                     label="State"
                     options={stateOptions}
-                    value={stateOptions.find(opt => opt.value === filters.state_id)}
+                    value={stateOptions.find(opt => opt.value === filters.state_id) || null}
                     onChange={(option) => handleFilterChange('state_id', option?.value || '')}
+                    isClearable
                 />
             </div>
             <div className="min-w-0">
                 <OutlinedSelect
                     label="Branch"
                     options={branchOptions}
-                    value={branchOptions.find(opt => opt.value === filters.branch_id)}
+                    value={branchOptions.find(opt => opt.value === filters.branch_id) || null}
                     onChange={(option) => handleFilterChange('branch_id', option?.value || '')}
+                    isLoading={loadingBranches}
+                    isClearable
                 />
             </div>
         </div>

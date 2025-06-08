@@ -8,6 +8,10 @@ import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import { FaEye } from 'react-icons/fa';
+import { Tooltip } from '@/components/ui';
+
+
 
 interface ReturnFormValues {
   company_id: number;
@@ -165,6 +169,9 @@ const ReturnTrackerEditForm = () => {
   const [districts, setDistricts] = useState<SelectOption[]>([]);
   const [locations, setLocations] = useState<SelectOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [viewDocumentModal, setViewDocumentModal] = useState(false);
+const [documentUrl, setDocumentUrl] = useState('');
   const [superadminReturns, setSuperadminReturns] = useState<SuperadminReturn[]>([]);
   const [currentGroupId, setCurrentGroupId] = useState<number>(0);
   const [allIndianStates, setAllIndianStates] = useState<SelectOption[]>([]);
@@ -192,58 +199,203 @@ const ReturnTrackerEditForm = () => {
     );
   };
 
-  
+useEffect(() => {
+   // Update the loadInitialData function in ReturnTrackerEditForm.tsx
+const loadInitialData = async () => {
+  if (!returnTrackerId) {
+    showNotification('error', 'No return ID provided');
+    navigate('/return-tracker');
+    return;
+  }
 
-  useEffect(() => {
-    if (!returnTrackerId) {
-      toast.push(
-        <Notification title="Error" type="error">
-          Return ID is missing
-        </Notification>
+  try {
+    setLoading(true);
+    
+    // 1. First load all the static data needed for options
+    const statesResponse = await httpClient.get(endpoints.common.state());
+    const allStates = statesResponse.data.map((state: any) => ({
+      label: state.name,
+      value: String(state.id),
+    }));
+    setAllIndianStates(allStates);
+
+    // Load superadmin returns for act names and return names
+    const superadminResponse = await httpClient.get(endpoints.return.getList());
+    setSuperadminReturns(superadminResponse.data.data);
+
+    // Prepare act options
+    const uniqueActs = new Map<string, boolean>();
+    const actOptionsList: SelectOption[] = [];
+
+    superadminResponse.data.data.forEach((ret: SuperadminReturn) => {
+      if (ret.applicable === 'CENTRAL') {
+        if (!uniqueActs.has(ret.act_name)) {
+          actOptionsList.push({
+            label: ret.act_name,
+            value: `${ret.act_name}||CENTRAL`,
+          });
+          uniqueActs.set(ret.act_name, true);
+        }
+      } else if (ret.applicable === 'ALL_STATES') {
+        allStates.forEach(state => {
+          actOptionsList.push({
+            label: `${ret.act_name} (${state.label})`,
+            value: `${ret.act_name}||${state.value}`,
+          });
+        });
+      } else if (ret.applicable === 'STATE') {
+        actOptionsList.push({
+          label: `${ret.act_name} (${ret.State.name})`,
+          value: `${ret.act_name}||${ret.state_id}`,
+        });
+      }
+    });
+    actOptionsList.sort((a, b) => a.label.localeCompare(b.label));
+    setActOptions(actOptionsList);
+
+    // 2. Now load the return data
+    const returnResponse = await httpClient.get(endpoints.return.detail(returnTrackerId));
+    const returnData = returnResponse.data.data;
+
+    // Construct the act value correctly
+    const actValue = returnData.state_id 
+      ? `${returnData.act_name}||${returnData.state_id}`
+      : `${returnData.act_name}||CENTRAL`;
+
+    // Find the matching superadmin return to get the applicable type
+    const matchingSuperadminReturn = superadminResponse.data.data.find(
+      ret => ret.act_name === returnData.act_name && 
+             ret.return_name === returnData.return_name
+    );
+
+    // Load return options for the selected act
+    const returnOptions = superadminResponse.data.data
+      .filter(ret => {
+        if (returnData.state_id) {
+          return ret.act_name === returnData.act_name && 
+                 (ret.applicable === 'ALL_STATES' || 
+                  (ret.applicable === 'STATE' && ret.state_id === returnData.state_id));
+        } else {
+          return ret.act_name === returnData.act_name && 
+                 ret.applicable === 'CENTRAL';
+        }
+      })
+      .map(ret => ({
+        label: ret.return_name,
+        value: ret.return_name,
+      }));
+
+    setReturnOptions(returnOptions);
+
+    // Load company groups
+    const groupsResponse = await httpClient.get(endpoints.companyGroup.getAll());
+    setCompanyGroups(
+      groupsResponse.data.data.map((group: any) => ({
+        label: group.name,
+        value: String(group.id),
+      }))
+    );
+
+    // Load companies
+    const companiesResponse = await httpClient.get(endpoints.company.getAll(), {
+      params: { 'group_id[]': returnData.company_group_id }
+    });
+    setCompanies(
+      companiesResponse.data.data.map((company: any) => ({
+        label: company.name,
+        value: String(company.id),
+        group_id: company.group_id,
+      }))
+    );
+    setCurrentGroupId(returnData.company_group_id);
+
+    // Load branches
+    const branchesResponse = await httpClient.get(endpoints.branch.getAllBranch(), {
+      params: { 'company_id[]': returnData.company_id }
+    });
+     const branchesData = branchesResponse.data.data.map((branch: any) => ({
+      label: branch.name
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' '),
+      value: String(branch.id),
+      location_id: branch.location_id,
+    }));
+    setAllBranches(branchesData);
+
+    // Load districts if state exists
+    if (returnData.state_id) {
+      const districtsResponse = await httpClient.get(endpoints.common.district(), {
+        params: { 'state_id[]': returnData.state_id }
+      });
+      setDistricts(
+        districtsResponse.data.map((district: any) => ({
+          label: district.name,
+          value: String(district.id),
+        }))
       );
-      navigate('/return-tracker');
-      return;
     }
 
-    const fetchReturnData = async () => {
-      try {
-        setLoading(true);
-        const response = await httpClient.get(endpoints.return.detail(returnTrackerId));
-        
-        if (response.data) {
-          const returnData = response.data;
-          setInitialValues({
-            company_id: returnData.company_id,
-            act_name: returnData.act_name,
-            return_name: returnData.return_name,
-            state_id: returnData.state_id,
-            district_id: returnData.district_id,
-            location_id: returnData.location_id,
-            branch_id: returnData.branch_id,
-            frequency: returnData.frequency,
-            year: returnData.year,
-            month: returnData.month,
-            return_submission: returnData.return_submission,
-            submission_date: returnData.submission_date,
-            delay_reason: returnData.delay_reason,
-            not_applicable_reason: returnData.not_applicable_reason,
-            existing_file_url: returnData.return_copy
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching return data:', error);
-        toast.push(
-          <Notification title="Error" type="error">
-            Failed to load return data
-          </Notification>
-        );
-        navigate('/return-tracker');
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Load locations if district exists
+    if (returnData.district_id) {
+      const locationsResponse = await httpClient.get(endpoints.common.location(), {
+        params: { 'district_id[]': returnData.district_id }
+      });
+      setLocations(
+        locationsResponse.data.map((location: any) => ({
+          label: location.name,
+          value: String(location.id),
+        }))
+      );
+    }
 
-    fetchReturnData();
+    // Filter branches based on location
+    if (returnData.location_id) {
+      const filteredBranches = branchesData.filter(
+        branch => Number(branch.location_id) === Number(returnData.location_id)
+      );
+      setBranches(filteredBranches);
+    }
+
+    // Format act_name value correctly
+   const initialActValue = returnData.state_id 
+  ? `${returnData.act_name.split('||')[0]}||${returnData.state_id}`
+  : `${returnData.act_name}||CENTRAL`;
+
+    // Set initial values after all options are loaded
+    setInitialValues({
+  company_id: returnData.company_id,
+  act_name: initialActValue,
+  return_name: returnData.return_name,
+  state_id: returnData.state_id || undefined,
+  district_id: returnData.district_id || undefined,
+  location_id: returnData.location_id || undefined,
+  branch_id: returnData.branch_id || undefined,
+  frequency: returnData.frequency,
+  year: returnData.year,
+  month: returnData.month || undefined,
+  return_submission: returnData.return_submission,
+  submission_date: returnData.submission_date || undefined,
+  delay_reason: returnData.delay_reason || undefined,
+  not_applicable_reason: returnData.not_applicable_reason || undefined,
+  return_copy: returnData.return_copy || undefined,
+  existing_file_url: returnData.return_copy,
+});
+
+    // Load return options for the selected act
+    loadReturnOptions(returnData.act_name, returnData.state_id ? String(returnData.state_id) : 'CENTRAL');
+
+  } catch (error) {
+    console.error('Failed to load initial data:', error);
+    showNotification('error', 'Failed to load return data');
+    navigate('/return-tracker');
+  } finally {
+    setLoading(false);
+    setDataLoading(false);
+  }
+};
+
+    loadInitialData();
   }, [returnTrackerId, navigate]);
 
   const loadBranches = async (companyId: string) => {
@@ -298,32 +450,32 @@ const ReturnTrackerEditForm = () => {
   };
 
   const loadReturnOptions = (actName: string, stateId: string) => {
-    try {
-      let filteredReturns: SuperadminReturn[] = [];
-      
-      if (stateId === 'CENTRAL') {
-        filteredReturns = superadminReturns.filter(
-          ret => ret.act_name === actName && ret.applicable === 'CENTRAL'
-        );
-      } else {
-        filteredReturns = superadminReturns.filter(
-          ret => ret.act_name === actName && 
-                 (ret.applicable === 'ALL_STATES' || 
-                  (ret.applicable === 'STATE' && ret.state_id === Number(stateId)))
-        );
-      }
-
-      setReturnOptions(
-        filteredReturns.map(ret => ({
-          label: ret.return_name,
-          value: ret.return_name,
-        }))
+  try {
+    let filteredReturns: SuperadminReturn[] = [];
+    
+    if (stateId === 'CENTRAL') {
+      filteredReturns = superadminReturns.filter(
+        ret => ret.act_name === actName && ret.applicable === 'CENTRAL'
       );
-    } catch (error) {
-      console.error('Failed to load return options:', error);
-      showNotification('error', 'Failed to load return options');
+    } else {
+      filteredReturns = superadminReturns.filter(
+        ret => ret.act_name === actName && 
+               (ret.applicable === 'ALL_STATES' || 
+                (ret.applicable === 'STATE' && ret.state_id === Number(stateId)))
+      );
     }
-  };
+
+    const options = filteredReturns.map(ret => ({
+      label: ret.return_name,
+      value: ret.return_name,
+    }));
+
+    console.log('Return options:', options); // Debug log
+    setReturnOptions(options);
+  } catch (error) {
+    console.error('Failed to load return options:', error);
+  }
+};
 
   const getFrequencyForReturn = (actName: string, returnName: string, stateId: string) => {
     let returnData: SuperadminReturn | undefined;
@@ -346,112 +498,151 @@ const ReturnTrackerEditForm = () => {
     return returnData?.frequency || '';
   };
 
-  // const handleSubmit = async (values: ReturnFormValues) => {
-  //   try {
-  //     setLoading(true);
+// const handleSubmit = async (values: ReturnFormValues) => {
+//     try {
+//       setLoading(true);
+//       console.log('Submitting values:', values); 
 
-  //     // Convert file to base64 if a new file was selected
-  //     let returnCopyBase64 = '';
-  //     if (values.return_copy && typeof values.return_copy !== 'string') {
-  //       returnCopyBase64 = await new Promise<string>((resolve, reject) => {
-  //         const reader = new FileReader();
-  //         reader.onload = () => {
-  //           const result = reader.result as string;
-  //           resolve(result.split(',')[1]);
-  //         };
-  //         reader.onerror = (error) => {
-  //           reject(error);
-  //         };
-  //         reader.readAsDataURL(values.return_copy as Blob);
-  //       });
-  //     } else if (values.return_copy && typeof values.return_copy === 'string') {
-  //       // Keep the existing file URL if no new file was uploaded
-  //       returnCopyBase64 = values.return_copy;
-  //     }
+//       // Convert file to base64 if a new file was selected
+//       let returnCopyBase64 = '';
+//       if (values.return_copy && typeof values.return_copy !== 'string') {
+//         returnCopyBase64 = await new Promise<string>((resolve, reject) => {
+//           const reader = new FileReader();
+//           reader.onload = () => {
+//             const result = reader.result as string;
+//             resolve(result.split(',')[1]);
+//           };
+//           reader.onerror = (error) => {
+//             reject(error);
+//           };
+//           reader.readAsDataURL(values.return_copy as Blob);
+//         });
+//       } else if (values.return_copy && typeof values.return_copy === 'string') {
+//         // Keep the existing file URL if no new file was uploaded
+//         returnCopyBase64 = values.return_copy;
+//       }
 
-  //     // Split act_name to remove state ID
-  //     const [actName] = values.act_name.split('||');
+//       // Split act_name to remove state ID
+//       const [actName] = values.act_name.split('||');
 
-  //     // Prepare the submission data
-  //     const submissionData = {
-  //       ...values,
-  //       act_name: actName, // Use only the act name part
-  //       company_group_id: currentGroupId,
-  //       company_id: Number(values.company_id),
-  //       state_id: values.state_id ? Number(values.state_id) : undefined,
-  //       district_id: values.district_id ? Number(values.district_id) : undefined,
-  //       location_id: values.location_id ? Number(values.location_id) : undefined,
-  //       branch_id: values.branch_id ? Number(values.branch_id) : undefined,
-  //       year: Number(values.year),
-  //       month: values.month ? Number(values.month) : undefined,
-  //       return_copy: returnCopyBase64 || undefined,
-  //     };
+//       // Prepare the submission data
+//       const submissionData = {
+//         ...values,
+//         act_name: actName, // Use only the act name part
+//         company_group_id: currentGroupId,
+//         company_id: Number(values.company_id),
+//         state_id: values.state_id ? Number(values.state_id) : undefined,
+//         district_id: values.district_id ? Number(values.district_id) : undefined,
+//         location_id: values.location_id ? Number(values.location_id) : undefined,
+//         branch_id: values.branch_id ? Number(values.branch_id) : undefined,
+//         year: Number(values.year),
+//         month: values.month ? Number(values.month) : undefined,
+//         return_copy: returnCopyBase64 || undefined,
+//         return_submission: values.return_submission,
+//         submission_date: values.submission_date,
+//         delay_reason: values.delay_reason,
+//         not_applicable_reason: values.not_applicable_reason
+//       };
 
-  //     // Make the API call to update
-  //     const response = await httpClient.put(
-  //       endpoints.return.update(id),
-  //       submissionData
-  //     );
+//       // Make the API call to update
+//       const response = await httpClient.put(
+//         endpoints.return.update(returnTrackerId),
+//         submissionData
+//       );
 
-  //     showNotification('success', 'Return updated successfully');
-  //     navigate('/return-tracker');
-  //   } catch (error: any) {
-  //     console.error('Failed to update return:', error);
-  //     const errorMessage = error.response?.data?.message || 'Failed to update return';
-  //     showNotification('error', errorMessage);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+//       showNotification('success', 'Return updated successfully');
+//       navigate('/return-tracker');
+//     } catch (error: any) {
+//       console.error('Failed to update return:', error);
+//       const errorMessage = error.response?.data?.message || 'Failed to update return';
+//       showNotification('error', errorMessage);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
 
 
-   const handleSubmit = async (values: ReturnFormValues) => {
-    if (!returnTrackerId) {
-      toast.push(
-        <Notification title="Error" type="error">
-          Return ID is missing
-        </Notification>
-      );
-      return;
+const handleSubmit = async (values: ReturnFormValues) => {
+  try {
+    setLoading(true);
+    
+    // Get only the changed values
+    const changedValues = getChangedValues(values, initialValues);
+
+    // Prepare the minimal submission data
+    const submissionData: any = {
+      ...changedValues,
+      updated_at: new Date().toISOString()
+    };
+
+    // Handle file upload if changed
+    if (changedValues.return_copy && typeof changedValues.return_copy !== 'string') {
+      submissionData.return_copy = await convertFileToBase64(changedValues.return_copy as File);
+    } else if (!changedValues.return_copy && values.existing_file_url) {
+      // Keep existing file if no new file was uploaded
+      submissionData.return_copy = values.existing_file_url;
     }
 
-    try {
-      setLoading(true);
-      
-      // Prepare your form data
-      const formData = {
-        ...values,
-        // Add any necessary transformations here
-      };
-
-      const response = await httpClient.put(
-        endpoints.return.update(returnTrackerId),
-        formData
-      );
-
-      if (response.data) {
-        toast.push(
-          <Notification title="Success" type="success">
-            Return updated successfully
-          </Notification>
-        );
-        navigate('/return-tracker');
-      }
-    } catch (error) {
-      console.error('Error updating return:', error);
-      toast.push(
-        <Notification title="Error" type="error">
-          Failed to update return
-        </Notification>
-      );
-    } finally {
-      setLoading(false);
+    // Split act_name if it was changed
+    if (changedValues.act_name) {
+      submissionData.act_name = values.act_name.split('||')[0];
     }
-  };
 
+    // Convert number fields if they were changed
+    if (changedValues.company_id) submissionData.company_id = Number(changedValues.company_id);
+    if (changedValues.state_id) submissionData.state_id = Number(changedValues.state_id);
+    if (changedValues.district_id) submissionData.district_id = Number(changedValues.district_id);
+    if (changedValues.location_id) submissionData.location_id = Number(changedValues.location_id);
+    if (changedValues.branch_id) submissionData.branch_id = Number(changedValues.branch_id);
+    if (changedValues.year) submissionData.year = Number(changedValues.year);
+    if (changedValues.month) submissionData.month = Number(changedValues.month);
 
-  
+    // Make the API call to update
+    const response = await httpClient.put(
+      endpoints.return.update(returnTrackerId),
+      submissionData
+    );
+
+    if(response){
+      showNotification('success', 'Return updated successfully');
+      navigate('/return-tracker');
+    }
+  } catch (error: any) {
+    console.error('Failed to update return:', error);
+    const errorMessage = error.response?.data?.message || 'Failed to update return';
+    showNotification('error', errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Helper function to get only changed values
+const getChangedValues = (values: any, initialValues: any) => {
+  const changes: any = {};
+  Object.keys(values).forEach(key => {
+    if (JSON.stringify(values[key]) !== JSON.stringify(initialValues[key])) {
+      changes[key] = values[key];
+    }
+  });
+  return changes;
+};
+
+// Helper function to convert file to base64
+const convertFileToBase64 = (file: File): Promise<string> => {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(',')[1]);
+    };
+    reader.onerror = (error) => {
+      reject(error);
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
   const formatFrequencyDisplay = (frequency: string) => {
     if (!frequency) return '--';
     
@@ -475,6 +666,26 @@ const ReturnTrackerEditForm = () => {
     };
   });
 
+
+  if (dataLoading) {
+    return (
+      <div className="w-full mx-auto p-2 bg-white rounded-lg">
+        <div className="flex gap-2 items-center mb-3">
+          <Button
+            size="sm"
+            variant="plain"
+            icon={<IoArrowBack className="text-gray-500 hover:text-gray-700" />}
+            onClick={() => navigate(-1)}
+          />
+          <h3 className="text-2xl font-semibold">Edit Return Details</h3>
+        </div>
+        <div>Loading return data...</div>
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="w-full mx-auto p-2 bg-white rounded-lg">
       <div className="flex gap-2 items-center mb-3">
@@ -487,9 +698,6 @@ const ReturnTrackerEditForm = () => {
         <h3 className="text-2xl font-semibold">Edit Return Details</h3>
       </div>
 
-      {loading && !initialValues.act_name ? (
-        <div>Loading return data...</div>
-      ) : (
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -581,71 +789,28 @@ const ReturnTrackerEditForm = () => {
                   {/* 1st Row: Company && Act Name */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Company <span className="text-red-500">*</span>
-                      </label>
-                      <Field name="company_id">
-                        {({ field }: any) => (
-                          <OutlinedSelect
-                            label="Select Company"
-                            options={companies}
-                            value={companies.find(
-                              (option) => Number(option.value) === values.company_id
-                            )}
-                            onChange={(selectedOption: CompanyOption | null) => {
-                              if (selectedOption) {
-                                setFieldValue('company_id', Number(selectedOption.value));
-                                setFieldValue('company_group_id', selectedOption.group_id);
-                                setFieldValue('branch_id', '');
-                                loadBranches(selectedOption.value);
-                              }
-                            }}
-                            isDisabled // Disable company selection in edit mode
-                          />
-                        )}
-                      </Field>
-                      {errors.company_id && touched.company_id && (
-                        <p className="text-red-500 text-xs">{errors.company_id}</p>
-                      )}
-                    </div>
+    <label className="text-sm font-medium">
+      Company <span className="text-red-500">*</span>
+    </label>
+    <OutlinedInput
+      label="Company"
+      value={initialValues.company_id ? 
+        companies.find(c => Number(c.value) === initialValues.company_id)?.label || '--' 
+        : '--'}
+      onChange={() => {}}
+    />
+  </div>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Act Name <span className="text-red-500">*</span>
-                      </label>
-                      <Field name="act_name">
-                        {({ field }: any) => (
-                          <OutlinedSelect
-                            label="Select Act Name"
-                            options={actOptions}
-                            value={actOptions.find(
-                              (option) => option.value === values.act_name
-                            )}
-                            onChange={(selectedOption: SelectOption | null) => {
-                              if (selectedOption) {
-                                const [actName, stateId] = selectedOption.value.split('||');
-                                setFieldValue('act_name', selectedOption.value);
-                                setFieldValue('return_name', '');
-                                setFieldValue('frequency', '');
-                                setFieldValue('state_id', stateId === 'CENTRAL' ? undefined : Number(stateId));
-                                setReturnOptions([]);
-                                loadReturnOptions(actName, stateId);
-                              } else {
-                                setFieldValue('act_name', '');
-                                setFieldValue('return_name', '');
-                                setFieldValue('frequency', '');
-                                setFieldValue('state_id', undefined);
-                                setReturnOptions([]);
-                              }
-                            }}
-                            isDisabled // Disable act name selection in edit mode
-                          />
-                        )}
-                      </Field>
-                      {errors.act_name && touched.act_name && (
-                        <p className="text-red-500 text-xs">{errors.act_name}</p>
-                      )}
-                    </div>
+                     <div className="space-y-2">
+    <label className="text-sm font-medium">
+      Act Name <span className="text-red-500">*</span>
+    </label>
+    <OutlinedInput
+      label="Act Name"
+      value={initialValues.act_name.split('||')[0]} // Extract just the act name part
+      onChange={() => {}}
+    />
+  </div>
                   </div>
 
                   {/* 2nd Row: Return Name && State */}
@@ -662,45 +827,20 @@ const ReturnTrackerEditForm = () => {
                             : allIndianStates.find(s => s.value === selectedStateId)?.label || '--'
                         }
                         onChange={() => {}}
-                        disabled
                       />
                       <Field name="state_id" type="hidden" />
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Return Name <span className="text-red-500">*</span>
-                      </label>
-                      <Field name="return_name">
-                        {({ field }: any) => (
-                          <OutlinedSelect
-                            label="Select Return Name"
-                            options={returnOptions}
-                            value={returnOptions.find(
-                              (option) => option.value === values.return_name
-                            )}
-                            onChange={(selectedOption: SelectOption | null) => {
-                              setFieldValue(
-                                'return_name',
-                                selectedOption ? selectedOption.value : ''
-                              );
-                              if (selectedOption && selectedActName && selectedStateId) {
-                                const frequency = getFrequencyForReturn(
-                                  selectedActName,
-                                  selectedOption.value,
-                                  selectedStateId
-                                );
-                                setFieldValue('frequency', frequency);
-                              }
-                            }}
-                            isDisabled // Disable return name selection in edit mode
-                          />
-                        )}
-                      </Field>
-                      {errors.return_name && touched.return_name && (
-                        <p className="text-red-500 text-xs">{errors.return_name}</p>
-                      )}
-                    </div>
+                   <div className="space-y-2">
+    <label className="text-sm font-medium">
+      Return Name <span className="text-red-500">*</span>
+    </label>
+    <OutlinedInput
+      label="Return Name"
+      value={initialValues.return_name || '--'}
+      onChange={() => {}}
+    />
+  </div>
                   </div>
 
                   {/* 3rd Row: District && Location */}
@@ -983,16 +1123,20 @@ const ReturnTrackerEditForm = () => {
                                 }
                               }}
                             />
-                            {values.existing_file_url && (
-                              <a 
-                                href={values.existing_file_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 text-sm"
-                              >
-                                View Current File
-                              </a>
-                            )}
+                          {values.existing_file_url && (
+  <Tooltip title="View Document">
+    <Button
+      className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(`${import.meta.env.VITE_API_GATEWAY}/${values.existing_file_url}`, '_blank');
+      }}
+      icon={<FaEye />}
+      variant="plain"
+    />
+  </Tooltip>
+)}
                           </div>
                           {errors.return_copy && touched.return_copy && (
                             <p className="text-red-500 text-xs">{errors.return_copy}</p>
@@ -1037,7 +1181,6 @@ const ReturnTrackerEditForm = () => {
                       type="submit"
                       variant="solid"
                       loading={loading || isSubmitting}
-                      disabled={!isValid || isSubmitting}
                     >
                       Update
                     </Button>
@@ -1047,7 +1190,7 @@ const ReturnTrackerEditForm = () => {
             );
           }}
         </Formik>
-      )}
+      
     </div>
   );
 };

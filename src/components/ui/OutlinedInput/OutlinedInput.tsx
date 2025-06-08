@@ -61,7 +61,7 @@ interface OutlinedInputProps {
   value: string;
   onChange: (value: string) => void;
   textarea?: boolean;
-  maxLabelWidth?: string; // Optional prop to control max label width
+  maxLabelWidth?: string;
 }
 
 const OutlinedInput: React.FC<OutlinedInputProps> = ({ 
@@ -117,3 +117,5 @@ const OutlinedInput: React.FC<OutlinedInputProps> = ({
 };
 
 export default OutlinedInput;
+
+

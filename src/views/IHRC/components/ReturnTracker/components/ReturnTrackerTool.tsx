@@ -35,25 +35,34 @@ const ReturnTrackerTool = () => {
         totalResults: 0
     });
 
-    const fetchReturns = async () => {
-        setLoading(true);
-        try {
-            const response = await httpClient.get(endpoints.return.list(), {
-                params: {
-                    ...filters,
-                    created_by: userId,
-                    financial_year: currentFinancialYear
-                }
-            });
+   // In your ReturnTrackerTool component
+const fetchReturns = async () => {
+    setLoading(true);
+    try {
+        const params: any = {
+            page: filters.page,
+            page_size: filters.page_size,
+            sort: filters.sort,
+            sort_by: filters.sort_by,
+            created_by: userId,
+            financial_year: currentFinancialYear
+        };
 
-            setTableData(response.data.data);
-            setPagination(response.data.paginate_data);
-        } catch (error) {
-            console.error('Failed to fetch returns:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        // Only add filters if they have values
+        if (filters.company_id) params.company_id = filters.company_id;
+        if (filters.state_id) params.state_id = filters.state_id;
+        if (filters.branch_id) params.branch_id = filters.branch_id;
+
+        const response = await httpClient.get(endpoints.return.list(), { params });
+
+        setTableData(response.data.data);
+        setPagination(response.data.paginate_data);
+    } catch (error) {
+        console.error('Failed to fetch returns:', error);
+    } finally {
+        setLoading(false);
+    }
+};
 
     useEffect(() => {
         fetchReturns();
@@ -76,12 +85,19 @@ const ReturnTrackerTool = () => {
 
     const handleDownloadAllData = async () => {
         try {
+            const params: any = {
+                ...filters,
+                financial_year: currentFinancialYear,
+                created_by: userId
+            };
+
+            // Only include filters that have values
+            if (!params.company_id) delete params.company_id;
+            if (!params.state_id) delete params.state_id;
+            if (!params.branch_id) delete params.branch_id;
+
             const response = await httpClient.get(endpoints.return.downloadData(), {
-                params: {
-                    ...filters,
-                    financial_year: currentFinancialYear,
-                    created_by: userId
-                },
+                params,
                 responseType: 'blob'
             });
             
