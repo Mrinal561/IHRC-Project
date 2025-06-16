@@ -11,7 +11,7 @@ import {
 } from '@/components/ui'
 import { RiEyeLine } from 'react-icons/ri'
 import { MdEdit } from 'react-icons/md'
-import { HiDocumentDownload } from 'react-icons/hi'
+import { HiDocumentDownload, HiUpload } from 'react-icons/hi'
 import OutlinedSelect from '@/components/ui/Outlined'
 import { updateStatus } from '@/store/slices/dueCompliance/statusUpdateSlice'
 import { useDispatch } from 'react-redux'
@@ -25,7 +25,7 @@ export type DueComplianceDetailData = {
     uuid: string
     ac_compliance_id: number
     proof_document: string | null
-    status: 'pending' | 'completed' | 'due' | 'overdue'
+    status: 'pending' | 'due' | 'overdue'
     compliance_detail: {
         id: number
         uuid: string
@@ -108,9 +108,175 @@ interface ComplianceDetailTableProps {
     onPageSizeChange: (pageSize: number) => void
     canCreate: boolean
 }
-
+const dummyDueComplianceData: DueComplianceDetailData[] = [
+    {
+      id: 1,
+      uuid: 'comp-001',
+      ac_compliance_id: 101,
+      proof_document: 'https://example.com/proof1.pdf',
+      status: 'pending',
+      compliance_detail: {
+        id: 101,
+        uuid: 'detail-001',
+        legislation: 'Environmental Protection Act 2020',
+        category: 'Environmental',
+        penalty_type: 'Monetary Fine',
+        default_due_date: {
+          first_date: '2023-12-31',
+          last_date: '2023-12-31'
+        },
+        scheduled_frequency: 'yearly',
+        proof_mandatory: true,
+        header: 'Annual Environmental Compliance Report',
+        description: 'Submission of annual environmental impact assessment report',
+        penalty_description: 'Fine up to $50,000 for non-compliance',
+        applicability: 'All manufacturing units',
+        bare_act_text: 'Section 12(3) of the Environmental Protection Act',
+        type: 'Annual Filing',
+        clause: '12.3',
+        frequency: 'Annual',
+        statutory_auth: 'Ministry of Environment',
+        approval_required: true,
+        criticality: 'high',
+        created_type: 'system',
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+      },
+      upload_date: '2023-12-15',
+      first_due_date: '2023-12-31',
+      due_date: '2023-12-31',
+      data_status: 'pending',
+      uploaded_by: 201,
+      approved_by: 301,
+      created_by: 1,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-12-15T00:00:00Z',
+      UploadBy: {
+        id: 201,
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john.doe@example.com',
+        mobile: 9876543210
+      },
+      ApprovedBy: {
+        id: 301,
+        name: 'Jane Smith'
+      },
+      AssignedComplianceRemark: [
+        {
+          id: 1,
+          remark: 'Initial submission pending review',
+          created_by: 1,
+          created_at: '2023-12-01T00:00:00Z',
+          updated_at: '2023-12-01T00:00:00Z'
+        }
+      ]
+    },
+    {
+      id: 2,
+      uuid: 'comp-002',
+      ac_compliance_id: 102,
+      proof_document: null,
+      status: 'due',
+      compliance_detail: {
+        id: 102,
+        uuid: 'detail-002',
+        legislation: 'Labor Standards Act',
+        category: 'Employment',
+        penalty_type: 'Administrative Penalty',
+        default_due_date: {
+          first_date: '2023-06-30',
+          last_date: '2023-06-30'
+        },
+        scheduled_frequency: 'quarterly',
+        proof_mandatory: false,
+        header: 'Quarterly Employee Benefits Report',
+        description: 'Submission of quarterly report on employee benefits',
+        penalty_description: 'Warning for first offense, fine thereafter',
+        applicability: 'All full-time employees',
+        bare_act_text: 'Section 8(2) of the Labor Standards Act',
+        type: 'Quarterly Filing',
+        clause: '8.2',
+        frequency: 'Quarterly',
+        statutory_auth: 'Ministry of Labor',
+        approval_required: false,
+        criticality: 'medium',
+        created_type: 'system',
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+      },
+      upload_date: null,
+      first_due_date: '2023-06-30',
+      due_date: '2023-06-30',
+      data_status: 'due',
+      uploaded_by: null,
+      approved_by: null,
+      created_by: 1,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z',
+      UploadBy: null,
+      ApprovedBy: null,
+      AssignedComplianceRemark: []
+    },
+  
+    {
+      id: 3,
+      uuid: 'comp-004',
+      ac_compliance_id: 104,
+      proof_document: null,
+      status: 'overdue',
+      compliance_detail: {
+        id: 104,
+        uuid: 'detail-004',
+        legislation: 'Health and Safety Regulations',
+        category: 'Safety',
+        penalty_type: 'Both Fine and Penalty',
+        default_due_date: {
+          first_date: '2023-01-15',
+          last_date: '2023-01-15'
+        },
+        scheduled_frequency: 'half_yearly',
+        proof_mandatory: false,
+        header: 'Bi-annual Safety Audit',
+        description: 'Submission of workplace safety audit report',
+        penalty_description: 'Fine up to $25,000 and possible shutdown',
+        applicability: 'All work locations',
+        bare_act_text: 'Section 7(4) of the Health and Safety Regulations',
+        type: 'Bi-annual Filing',
+        clause: '7.4',
+        frequency: 'Half-yearly',
+        statutory_auth: 'Department of Workplace Safety',
+        approval_required: false,
+        criticality: 'medium',
+        created_type: 'system',
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+      },
+      upload_date: null,
+      first_due_date: '2023-01-15',
+      due_date: '2023-01-15',
+      data_status: 'overdue',
+      uploaded_by: null,
+      approved_by: null,
+      created_by: 1,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z',
+      UploadBy: null,
+      ApprovedBy: null,
+      AssignedComplianceRemark: [
+        {
+          id: 3,
+          remark: 'Overdue - reminder sent',
+          created_by: 1,
+          created_at: '2023-01-20T00:00:00Z',
+          updated_at: '2023-01-20T00:00:00Z'
+        }
+      ]
+    }
+  ];
+  
 const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
-    data,
+    data = dummyDueComplianceData,
     loading,
     onViewDetail,
     onUpdateStatus,
@@ -250,27 +416,27 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     const columns: ColumnDef<DueComplianceDetailData>[] = useMemo(
         () => [
             {
-                header: 'Compliance ID',
-                accessorKey: 'compliance_detail.record_id',
+                header: 'Compliance ID', enableSorting: false,
+                accessorKey: 'uuid',
                 cell: (props) => (
-                    <div className="w-24 text-start">{props.getValue()}</div>
+                    <div className="w-40 text-start">{props.getValue()}</div>
                 ),
             },
             {
-                header: 'Legislation',
+                header: 'Legislation', enableSorting: false,
                 accessorFn: (row) => row.compliance_detail.legislation,
                 cell: (props) => (
                     <Tooltip title={props.getValue() as string} placement="top">
-                        <div className="w-32 truncate">
-                            {((props.getValue() as string) || '').length > 20
-                                ? `${(props.getValue() as string).substring(0, 20)}...`
+                        <div className="w-64 truncate">
+                            {((props.getValue() as string) || '').length > 40
+                                ? `${(props.getValue() as string).substring(0, 40)}...`
                                 : props.getValue()}
                         </div>
                     </Tooltip>
                 ),
             },
             {
-                header: 'Criticality',
+                header: 'Criticality', enableSorting: false,
                 accessorFn: (row) => row.compliance_detail.criticality,
                 cell: (props) => {
                     const criticality = props.getValue() as string
@@ -288,16 +454,16 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 },
             },
             {
-                header: 'Category',
+                header: 'Category', enableSorting: false,
                 accessorFn: (row) => row.compliance_detail.category,
                 cell: (props) => (
                     <Tooltip title={props.getValue() as string} placement="top">
-                        <div className="w-32 truncate">{props.getValue()}</div>
+                        <div className="w-40 truncate">{props.getValue()}</div>
                     </Tooltip>
                 ),
             },
             {
-                header: 'Due Date',
+                header: 'Due Date', enableSorting: false,
                 accessorKey: 'due_date',
                 cell: (props) => (
                     <div className="w-28">
@@ -308,7 +474,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 ),
             },
             {
-                header: 'Status',
+                header: 'Status', enableSorting: false,
                 accessorKey: 'data_status',
                 cell: (props) => (
                     <div
@@ -320,7 +486,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 ),
             },
             {
-                header: 'Uploaded By',
+                header: 'Uploaded By', enableSorting: false,
                 accessorFn: (row) =>
                     `${row.UploadBy?.first_name || ''} ${row.UploadBy?.last_name || ''}`.trim(),
                 cell: (props) => (
@@ -329,7 +495,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
             },
 
             {
-                header: 'Approved By',
+                header: 'Approved By', enableSorting: false,
                 accessorFn: (row) => row.ApprovedBy?.name,
                 cell: (props) => (
                     <div className="w-32">{props.getValue() || '--'}</div>
@@ -348,19 +514,19 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 className="hover:bg-transparent"
               />
             </Tooltip> */}
-                        {canCreate && (
+                        {/* {canCreate && ( */}
                             <Tooltip title="Update Status" placement="top">
                                 <Button
                                     size="sm"
                                     onClick={() =>
                                         handleStatusUpdate(row.original)
                                     }
-                                    icon={<MdEdit />}
+                                    icon={<HiUpload />}
                                     className="hover:bg-transparent"
                                 />
                             </Tooltip>
-                        )}
-                        {row.original.proof_document && (
+                        {/* )} */}
+                        {/* {row.original.proof_document && (
                             <Tooltip title="Download Proof" placement="top">
                                 <Button
                                     size="sm"
@@ -374,7 +540,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                                     className="hover:bg-transparent"
                                 />
                             </Tooltip>
-                        )}
+                        )} */}
                     </div>
                 ),
             },

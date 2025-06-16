@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { Notification, toast } from '@/components/ui';
 import { fetchAuthUser } from '@/store/slices/login';
 import { Loading } from '@/components/shared';
+import OutlinedSelect from '@/components/ui/Outlined/Outlined';
 
 interface SelectOption {
   label: string;
@@ -61,96 +62,96 @@ const [isInitialized, setIsInitialized] = useState(false)
 const [permissionCheckComplete, setPermissionCheckComplete] = useState(false)
 
 //permission check section 
-useEffect(() => {
-    const initializeAuth = async () => {
-        try {
-            const response = await dispatch(fetchAuthUser())
+// useEffect(() => {
+//     const initializeAuth = async () => {
+//         try {
+//             const response = await dispatch(fetchAuthUser())
 
-            if (!response.payload?.moduleAccess) {
-              toast.push(
-                  <Notification
-                      title="Permission"
-                      type="danger"
-                  >
-                      You don't have access to any modules
-                  </Notification>
-              )
-              navigate('/home')
-              setPermissionCheckComplete(true)
-              setIsInitialized(true)
-              return
-          }
+//             if (!response.payload?.moduleAccess) {
+//               toast.push(
+//                   <Notification
+//                       title="Permission"
+//                       type="danger"
+//                   >
+//                       You don't have access to any modules
+//                   </Notification>
+//               )
+//               navigate('/home')
+//               setPermissionCheckComplete(true)
+//               setIsInitialized(true)
+//               return
+//           }
             
-            // Find Remittance Tracker module
-            const remittanceModule = response.payload.moduleAccess?.find(
-                (module: any) => module.id === 2
-            )
+//             // Find Remittance Tracker module
+//             const remittanceModule = response.payload.moduleAccess?.find(
+//                 (module: any) => module.id === 2
+//             )
             
-            if (!remittanceModule) {
-              toast.push(
-                  <Notification
-                      title="Permission"
-                      type="danger"
-                  >
-                      You don't have access to this module
-                  </Notification>
-              )
-              navigate('/home')
-              setPermissionCheckComplete(true)
-              setIsInitialized(true)
-              return
-          }
+//             if (!remittanceModule) {
+//               toast.push(
+//                   <Notification
+//                       title="Permission"
+//                       type="danger"
+//                   >
+//                       You don't have access to this module
+//                   </Notification>
+//               )
+//               navigate('/home')
+//               setPermissionCheckComplete(true)
+//               setIsInitialized(true)
+//               return
+//           }
 
-            // Find PF Tracker menu item
-            const recommendedMenu = remittanceModule.menus?.find(
-                (menu: any) => menu.id === 13
-            )
+//             // Find PF Tracker menu item
+//             const recommendedMenu = remittanceModule.menus?.find(
+//                 (menu: any) => menu.id === 13
+//             )
 
-            if (!recommendedMenu) {
-              toast.push(
-                  <Notification
-                      title="Permission"
-                      type="danger"
-                  >
-                      You don't have access to this menu
-                  </Notification>
-              )
-              navigate('/home')
-              setPermissionCheckComplete(true)
-              setIsInitialized(true)
-              return
-          }
+//             if (!recommendedMenu) {
+//               toast.push(
+//                   <Notification
+//                       title="Permission"
+//                       type="danger"
+//                   >
+//                       You don't have access to this menu
+//                   </Notification>
+//               )
+//               navigate('/home')
+//               setPermissionCheckComplete(true)
+//               setIsInitialized(true)
+//               return
+//           }
 
-            // Get and set permissions only once
-            const newPermissions = getPermissions(recommendedMenu)
-            setPermissions(newPermissions)
-            setIsInitialized(true)
+//             // Get and set permissions only once
+//             const newPermissions = getPermissions(recommendedMenu)
+//             setPermissions(newPermissions)
+//             setIsInitialized(true)
             
-            // If no list permission, show notification and redirect
-            if (!newPermissions.canList) {
-                toast.push(
-                    <Notification
-                        title="Permission"
-                        type="danger"
-                    >
-                        You don't have permission of Status List
-                    </Notification>
-                )
-                navigate('/home')
-            }
-            setPermissionCheckComplete(true)
+//             // If no list permission, show notification and redirect
+//             if (!newPermissions.canList) {
+//                 toast.push(
+//                     <Notification
+//                         title="Permission"
+//                         type="danger"
+//                     >
+//                         You don't have permission of Status List
+//                     </Notification>
+//                 )
+//                 navigate('/home')
+//             }
+//             setPermissionCheckComplete(true)
 
-        } catch (error) {
-            console.error('Error fetching auth user:', error)
-            setIsInitialized(true)
-            setPermissionCheckComplete(true)
-        }
-    }
+//         } catch (error) {
+//             console.error('Error fetching auth user:', error)
+//             setIsInitialized(true)
+//             setPermissionCheckComplete(true)
+//         }
+//     }
 
-    if (!isInitialized) {
-        initializeAuth()
-    }
-}, [dispatch, isInitialized,navigate])
+//     if (!isInitialized) {
+//         initializeAuth()
+//     }
+// }, [dispatch, isInitialized,navigate])
 
 
 
@@ -188,26 +189,37 @@ useEffect(() => {
     locationId: selectedLocation?.value
   };
 
-  if (!isInitialized || !permissionCheckComplete) {
-    return (
-        <Loading loading={true} type="default">
-            <div className="h-full" />
-        </Loading>
-    )
-}
+//   if (!isInitialized || !permissionCheckComplete) {
+//     return (
+//         <Loading loading={true} type="default">
+//             <div className="h-full" />
+//         </Loading>
+//     )
+// }
 
-// Only render if we have list permission
-if (!permissions.canList) {
-    return null
-}
+// // Only render if we have list permission
+// if (!permissions.canList) {
+//     return null
+// }
 
+const viewOptions = [
+  { label: 'Approver', value: 'approver' },
+  { label: 'Owner', value: 'owner' },
+  { label: 'Auditor', value: 'auditor' },
+]
   return (
     <div className="flex flex-col gap-4 mb-8">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
+      <div className="flex flex-row lg:flex-row lg:items-center justify-between mb-8">
+        <div>
+
                 <div className="mb-4 lg:mb-0">
                     <h3 className="text-2xl font-bold">Status</h3>
                     <p className="text-gray-600">View your company's compliance status</p>
                 </div>
+        </div>
+        <div className='w-52'>
+          <OutlinedSelect label={'Select view'} options={viewOptions} value={undefined} onChange={undefined} />
+        </div>
       </div>
       <div className='mb-4'>
       <Company 

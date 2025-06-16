@@ -90,11 +90,14 @@ export const endpoints = {
         rolePermission:(id:any) => api(`/companyadmin/role/role-permission/${id}`)
     },
     compliance: {
-        getAll: () =>
-            api(`/companyadmin/compliance/data?data_status[]=${status}`),
-        approveReject: () => api('/companyadmin/compliance/data/record-status'),
-        export: () => api('companyadmin/compliance/data/export'),
-        upload: () => api('/companyadmin/compliance/data/bulk-update'),
+        createCustomChecklist: () => api('companyadmin/compliance/checklists'),
+        updateCustomChecklist: (id:any) => api(`companyadmin/compliance/checklists/${id}`),
+        detailCustomChecklist: (id:any) => api(`companyadmin/compliance/checklists/${id}`),
+        deleteCustomChecklist: (id:any) => api(`companyadmin/compliance/checklists/${id}`),
+        exportCustomChecklist: () => api('companyadmin/compliance/checklists/export/data'),
+        downloadCustomChecklistTemplate: () => api('companyadmin/compliance/checklists/export/template'),
+        listCustomChecklist: () => api('companyadmin/compliance/checklists')
+
     },
     esiSetup: {
         getAll: () => api('companyadmin/esisetup'),

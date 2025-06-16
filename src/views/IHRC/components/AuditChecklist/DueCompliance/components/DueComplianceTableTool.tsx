@@ -175,7 +175,7 @@ const BulkUploadButton = ({ canCreate }) => {
 
     return (
         <>
-            {canCreate && (
+            {/* {canCreate && ( */}
                 <Button
                     variant="solid"
                     size="sm"
@@ -184,7 +184,7 @@ const BulkUploadButton = ({ canCreate }) => {
                 >
                     Bulk Upload
                 </Button>
-            )}
+            {/* )} */}
             <Dialog
                 isOpen={isDialogOpen}
                 onClose={handleCancel}
@@ -276,16 +276,16 @@ const DueComplianceTableTool: React.FC<DueComplianceTableToolProps> = ({
             <BulkUploadButton canCreate={canCreate} />
 
             <div className="block lg:inline-block md:mb-0 mb-4">
-                {canCreate && (
-                    <Button
+                {/* {canCreate && ( */}
+                    {/* <Button
                         size="sm"
                         variant="solid"
                         icon={<HiPlusCircle />}
                         onClick={handleCopyFromPreviousMonth}
                     >
                         Copy from Previous Month Data
-                    </Button>
-                )}
+                    </Button> */}
+                {/* )} */}
             </div>
 
             <Dialog

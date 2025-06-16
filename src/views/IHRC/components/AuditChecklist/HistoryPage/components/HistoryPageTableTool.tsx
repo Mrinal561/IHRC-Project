@@ -106,11 +106,9 @@ const HistoryPageTableTool = () => {
     return (
         <>
         <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-            <HistoryPageTableSearch onSearch={undefined} onDateRangeChange={undefined} />
+            {/* <HistoryPageTableSearch onSearch={undefined} onDateRangeChange={undefined} /> */}
            
-                <Button  size="sm" variant='solid' icon={<HiDownload />} onClick={BulkDownload}>
-                    Download
-                </Button>
+               <HistoryPageFilter />
           
         </div>
         </>

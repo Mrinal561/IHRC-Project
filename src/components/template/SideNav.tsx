@@ -1613,10 +1613,82 @@ const filterNavigation = (
             type: NAV_ITEM_TYPE_ITEM,
             authority: [],
             subMenu: []
+        };
+        const auditItem ={
+             key: 'collapseMenu.collapse',
+                path: '',
+                title: 'Audit Checklist',
+                translateKey: 'nav.collapseMenu.collapseMenu.collapse',
+                icon: 'auditCollapse',
+                type: NAV_ITEM_TYPE_COLLAPSE,
+                authority: [],
+                subMenu: [
+                    {
+                        key: 'status.item1',
+                        path: '/status',
+                        title: 'Status',
+                        translateKey: 'nav.collapseMenu.collapse.item6',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                     {
+                        key: 'customChecklist.item2',
+                        path: '/custom-checklist',
+                        title: 'Custom Checklist',
+                        translateKey: 'nav.collapseMenu.collapse.item4',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'recommendedList.item3',
+                        path: '/compliance-checklist',
+                        title: 'Compliance Checklist',
+                        translateKey: 'nav.collapseMenu.collapse.item1',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'dueCompliance.item4',
+                        path: '/due-compliance',
+                        title: 'Due Compliances',
+                        translateKey: 'nav.collapseMenu.collapse.item5',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    
+                    {
+                        key: 'complianceCertificate.item5',
+                        path: '/compliance-certificate',
+                        title: 'Compliance Certificate',
+                        translateKey: 'nav.collapseMenu.collapse.item7',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    {
+                        key: 'history.item6',
+                        path: '/history',
+                        title: 'History',
+                        translateKey: 'nav.collapseMenu.item8',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                ],
         }
 
         // Insert "Return Tracker" after "Notice Tracker"
-        filteredNav.splice(noticeTrackerIndex + 1, 0, poshItem, returnItem);
+        filteredNav.splice(noticeTrackerIndex + 1, 0, poshItem, returnItem, auditItem);
     }
 
     return filteredNav;

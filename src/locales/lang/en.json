@@ -3,14 +3,12 @@
         "home": "Dashboard",
         "collapseMenu": {
             "collapseMenu": "Audit Checklist",
-            "item1": "Recommended Checklist",
-            "item2": "Compliance Details",
-            "item3": "Assigned Checklist",
-            "item4": "Custom Checklist",
-            "item5": "Due Compliance",
-            "item6": "Status",
-            "item7": "Compliance Certificate",
-            "item8": "History"
+            "item1": "Status",
+            "item2": "Custom Checklist",
+            "item3": "Compliance Checklist",
+            "item4": "Due Compliance",
+            "item5": "Compliance Certificate",
+            "item6": "History"
 
         },
         "globalMenu": {
