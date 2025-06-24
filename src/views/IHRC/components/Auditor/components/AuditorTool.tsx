@@ -34,7 +34,7 @@ const AuditorTool: React.FC<{ onUploadSuccess?: () => void }> = ({ onUploadSucce
             params.append('group_id[]', companyDetails.group_id.toString())
 
             const response = await httpClient.get(
-                endpoints.auditor.exportAuditors(), 
+                endpoints.auditor.auditorExport(), 
                 {
                     params,
                     responseType: 'blob'

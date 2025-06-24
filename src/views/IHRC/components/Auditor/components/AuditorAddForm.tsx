@@ -15,10 +15,10 @@ import { AppDispatch } from '@/store'
 import * as yup from 'yup'
 import { Formik, Field, Form } from 'formik'
 import OutlinedPasswordInput from '@/components/ui/OutlinedInput/OutlinedPasswordInput'
-import { createAuditor } from '@/store/slices/auditorEntity/auditorEntitySlice'
 import { MultiValue } from 'react-select'
 import httpClient from '@/api/http-client'
 import { endpoints } from '@/api/endpoint'
+import { createAuditor } from '@/store/slices/auditorEntity/AuditorEntitySlice'
 
 interface LocationState {
     companyName?: string
@@ -98,33 +98,38 @@ const AuditorAddForm = () => {
     ]
 
     const handleAddAuditor = async (values: AuditorFormData) => {
-        try {
-            setIsSubmitting(true)
-            const resultAction = await dispatch(createAuditor({
+    try {
+        setIsSubmitting(true);
+        
+        // Replace the Redux dispatch with direct HTTP call
+        const response = await httpClient.post(
+            endpoints.auditor.auditorCreate(), // Make sure you have this endpoint defined
+            {
                 ...values,
                 group_id: Number(groupId),
                 company_id: Number(values.company_id)
-            })).unwrap()
-            
-            if (resultAction) {
-                navigate('/auditor-entity')
-                toast.push(
-                    <Notification title="Success" type="success">
-                        Auditor created successfully
-                    </Notification>
-                )
             }
-        } catch (error: any) {
-            const errorMessage = error?.message || 'Failed to create auditor'
+        );
+
+        if (response.data) {
+            navigate('/auditor-entity');
             toast.push(
-                <Notification title="Error" type="error">
-                    {errorMessage}
+                <Notification title="Success" type="success">
+                    Auditor created successfully
                 </Notification>
-            )
-        } finally {
-            setIsSubmitting(false)
+            );
         }
+    } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || 'Failed to create auditor';
+        toast.push(
+            <Notification title="Error" type="error">
+                {errorMessage}
+            </Notification>
+        );
+    } finally {
+        setIsSubmitting(false);
     }
+};
 
     const loadCompanies = async (groupId: string) => {
         try {

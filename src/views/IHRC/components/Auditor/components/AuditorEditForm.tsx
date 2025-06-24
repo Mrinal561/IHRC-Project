@@ -14,6 +14,8 @@ import * as yup from 'yup'
 import { Formik, Field, Form } from 'formik'
 import { updateAuditor, fetchAuditorById } from '@/store/slices/auditorEntity/auditorEntitySlice'
 import { MultiValue } from 'react-select'
+import httpClient from '@/api/http-client'
+import { endpoints } from '@/api/endpoint'
 
 interface LocationState {
     auditorId?: string
@@ -118,68 +120,72 @@ const AuditorEditForm = () => {
     }
 
     const fetchAuditorData = async () => {
-        try {
-            setLoading(true)
-            const response = await dispatch(fetchAuditorById(auditorId)).unwrap()
-            
-            setEditedData({
-                group_id: response.group_id || 0,
-                company_id: response.company_id || 0,
-                firm_name: response.firm_name || '',
-                name: response.name || '',
-                email: response.email || '',
-                mobile: response.mobile || '',
-                audit_frequency: response.audit_frequency || 'monthly'
-            })
-            
-            // Load companies for the group
-            if (response.group_id) {
-                await loadCompanies(String(response.group_id))
-            }
-        } catch (error) {
-            console.error('Error fetching auditor data:', error)
-            toast.push(
-                <Notification title="Error" type="error">
-                    Failed to load auditor details
-                </Notification>
-            )
-        } finally {
-            setLoading(false)
+    try {
+        setLoading(true);
+        // Replace Redux dispatch with direct HTTP call
+        const response = await httpClient.get(
+            endpoints.auditor.auditorDetail(auditorId)
+        );
+
+        setEditedData({
+            group_id: response.data.group_id || 0,
+            company_id: response.data.company_id || 0,
+            firm_name: response.data.firm_name || '',
+            name: response.data.name || '',
+            email: response.data.email || '',
+            mobile: response.data.mobile || '',
+            audit_frequency: response.data.audit_frequency || 'monthly'
+        });
+
+        // Load companies for the group
+        if (response.data.group_id) {
+            await loadCompanies(String(response.data.group_id));
         }
+    } catch (error) {
+        console.error('Error fetching auditor data:', error);
+        // const errorMessage = error?.response?.data?.message || 'Failed to load auditor details';
+        // toast.push(
+            // <Notification title="Error" type="error">
+                // {errorMessage}
+            // </Notification>
+        // );
+    } finally {
+        setLoading(false);
     }
+};
 
     const handleUpdateAuditor = async (values: AuditorFormData) => {
-        try {
-            setIsSubmitting(true)
-            const resultAction = await dispatch(updateAuditor({
-                id: auditorId,
-                data: {
-                    ...values,
-                    group_id: Number(groupId),
-                    company_id: Number(values.company_id)
-                }
-            })).unwrap()
-            
-            if (resultAction) {
-                navigate('/auditor-entity')
-                toast.push(
-                    <Notification title="Success" type="success">
-                        Auditor updated successfully
-                    </Notification>
-                )
+    try {
+        setIsSubmitting(true);
+        // Replace Redux dispatch with direct HTTP call
+        const response = await httpClient.put(
+            endpoints.auditor.auditorUpdate(auditorId),
+            {
+                ...values,
+                group_id: Number(groupId),
+                company_id: Number(values.company_id)
             }
-        } catch (error: any) {
-            const errorMessage = error?.message || 'Failed to update auditor'
-            toast.push(
-                <Notification title="Error" type="error">
-                    {errorMessage}
-                </Notification>
-            )
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
+        );
 
+        if (response.data) {
+            navigate('/auditor-entity');
+            toast.push(
+                <Notification title="Success" type="success">
+                    Auditor updated successfully
+                </Notification>
+            );
+        }
+    } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || 'Failed to update auditor';
+        toast.push(
+            <Notification title="Error" type="error">
+                {errorMessage}
+            </Notification>
+        );
+    } finally {
+        setIsSubmitting(false);
+    }
+};
     useEffect(() => {
         if (auditorId) {
             fetchAuditorData()

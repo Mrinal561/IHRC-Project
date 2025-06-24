@@ -25,7 +25,8 @@ import {
     AuditorData
 } from '@/store/slices/auditorEntity/auditorEntitySlice'
 import store from '@/store'
-import { selectCurrentUser } from '@/store/slices/login'
+import httpClient from '@/api/http-client'
+import { endpoints } from '@/api/endpoint'
 
 interface TableData {
     total: number
@@ -161,28 +162,34 @@ const AuditorTable: React.FC<{
         setDialogIsOpen(true)
     }
 
-    const handleDeleteConfirm = async () => {
-        if (itemToDelete) {
-            try {
-                const response = await dispatch(deleteAuditor(itemToDelete)).unwrap()
-                if (response) {
-                    handleDialogClose()
-                    fetchAuditorData(tableData.pageIndex, tableData.pageSize)
-                    toast.push(
-                        <Notification title="Success" type="success">
-                            Auditor deleted successfully
-                        </Notification>
-                    )
-                }
-            } catch (error) {
+   const handleDeleteConfirm = async () => {
+    if (itemToDelete) {
+        try {
+            // Replace Redux dispatch with direct HTTP call
+            const response = await httpClient.delete(
+                endpoints.auditor.auditorDelete(itemToDelete)
+            );
+
+            if (response.data) {
+                handleDialogClose();
+                // Fetch updated data after deletion
+                fetchAuditorData(tableData.pageIndex, tableData.pageSize);
                 toast.push(
-                    <Notification title="Error" type="error">
-                        Failed to delete auditor
+                    <Notification title="Success" type="success">
+                        Auditor deleted successfully
                     </Notification>
-                )
+                );
             }
+        } catch (error) {
+            // const errorMessage = error?.response?.data?.message || 'Failed to delete auditor';
+            // toast.push(
+            //     <Notification title="Error" type="error">
+            //         {errorMessage}
+            //     </Notification>
+            // );
         }
     }
+};
 
     const handleDialogClose = () => {
         setDialogIsOpen(false)
@@ -193,41 +200,46 @@ const AuditorTable: React.FC<{
         fetchAuditorData(1, 10, search)
     }, [search, refreshTrigger])
 
-    const fetchAuditorData = async (
-        page: number,
-        size: number,
-        searchQuery?: string,
-    ) => {
-        setIsLoading(true)
-        try {
-            await dispatch(
-                fetchAuditors({
+   const fetchAuditorData = async (
+    page: number,
+    size: number,
+    searchQuery?: string,
+) => {
+    setIsLoading(true);
+    try {
+        // Replace Redux dispatch with direct HTTP call
+        const response = await httpClient.get(
+            endpoints.auditor.listAuditor(),
+            {
+                params: {
                     page,
                     page_size: size,
-                    search: searchQuery,
-                })
-            )
-            
-            const auditors = useSelector(selectAuditors)
-            if (auditors) {
-                setAuditorTableData(auditors)
-                setTableData((prev) => ({
-                    ...prev,
-                    total: auditors.length,
-                    pageIndex: page,
-                }))
+                    search: searchQuery || '',
+                }
             }
-        } catch (error) {
-            console.error('Failed to fetch auditors:', error)
-            toast.push(
-                <Notification title="Error" type="error">
-                    Failed to fetch auditors
-                </Notification>
-            )
-        } finally {
-            setIsLoading(false)
+        );
+
+        if (response.data?.data) {
+            const auditors = response.data.data;
+            setAuditorTableData(auditors);
+            setTableData(prev => ({
+                ...prev,
+                total: response.data.total || auditors.length,
+                pageIndex: page,
+            }));
         }
+    } catch (error) {
+        console.error('Failed to fetch auditors:', error);
+        // const errorMessage = error?.response?.data?.message || 'Failed to fetch auditors';
+        // toast.push(
+        //     <Notification title="Error" type="error">
+        //         {errorMessage}
+        //     </Notification>
+        // );
+    } finally {
+        setIsLoading(false);
     }
+};
 
     const [tableData, setTableData] = useState<TableData>({
         total: 0,
