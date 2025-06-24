@@ -8,6 +8,8 @@ import { useLocation } from 'react-router-dom'
 import OutlinedInput from '../ui/OutlinedInput'
 import httpClient from '@/api/http-client'
 import { endpoints } from '@/api/endpoint'
+import store, { useAppDispatch } from '@/store'
+import { fetchAuthUser } from '@/store/slices/login'
 
 interface OptionType {
     value: string;
@@ -67,35 +69,45 @@ const Header = (props: HeaderProps) => {
     const [selectedCompanyGroup, setSelectedCompanyGroup] = useState<SelectOption | null>(null);
     const [companyGroupName, setCompanyGroupName] = useState('');
     const [companyGroupId, setCompanyGroupId] = useState('');
+    const dispatch = useAppDispatch()
+    const { login } = store.getState();
+    const userType = login.user.type;
 
     const location = useLocation();
 
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                setIsLoading(true);
+                
+                if (userType === 'auditor') {
+                    const response = await dispatch(fetchAuthUser());
+                    const groupData = response.payload?.CompanyGroup;
+                    if (groupData) {
+                        setCompanyGroupName(groupData.name);
+                        setCompanyGroupId(String(groupData.id));
+                    }
+                } else {
+                    const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
+                        params: { ignorePlatform: true },
+                    });
+                    
+                    if (data.data && data.data.length > 0) {
+                        const defaultGroup = data.data[0];
+                        setCompanyGroupName(defaultGroup.name);
+                        setCompanyGroupId(String(defaultGroup.id));
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    const loadCompanyGroups = async () => {
+        loadData();
+    }, [dispatch, userType]);
 
-        try {
-          const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
-            params: { ignorePlatform: true },
-          });
-          
-          if (data.data && data.data.length > 0) {
-            const defaultGroup = data.data[0];
-            setCompanyGroupName(defaultGroup.name);
-            setCompanyGroupId(String(defaultGroup.id));
-            
-            
-            // Notify parent component if needed
-          } else {
-          }
-        } catch (error) {
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-       useEffect(() => {
-          loadCompanyGroups();
-        }, []);
 
     const handleSelectChange = (
         setValue: React.Dispatch<React.SetStateAction<OptionType | null>>
@@ -168,6 +180,7 @@ const Header = (props: HeaderProps) => {
                         label="Company Group"
                         value={companyGroupName} 
                         onChange={() => {}}
+                        
                     />
                 </div>
                 {/* {renderMiddleSection()} */}

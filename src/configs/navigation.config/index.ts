@@ -195,6 +195,27 @@ const adminnav: NavigationTree[] = [
                     },
                 ],
             },
+             {
+                key: 'auditorSetup.collapse',
+                path: '',
+                title: 'Auditor Setup',
+                translateKey: 'nav.auditorSetup.collapse',
+                icon: '',
+                type: NAV_ITEM_TYPE_COLLAPSE,
+                authority: [],
+                subMenu: [
+                    {
+                        key: 'auditorSetup.collapse.auditor',
+                        path: '/auditor-entity',
+                        title: 'Auditor',
+                        translateKey: 'nav.auditorSetup.collapse.auditor',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                ],
+            },
         ],
     },
 

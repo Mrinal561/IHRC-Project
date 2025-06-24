@@ -1,681 +1,610 @@
-import React, { useCallback, useMemo, useState } from 'react'
-import { ColumnDef } from '@/components/shared/DataTable'
-import DataTable from '@/components/shared/DataTable'
+import React, { useCallback, useMemo, useState } from 'react';
+import { ColumnDef } from '@/components/shared/DataTable';
+import DataTable from '@/components/shared/DataTable';
 import {
-    Button,
-    Tooltip,
-    Dialog,
-    Input,
-    toast,
-    Notification,
-} from '@/components/ui'
-import { RiEyeLine } from 'react-icons/ri'
-import { MdEdit } from 'react-icons/md'
-import { HiDocumentDownload, HiUpload } from 'react-icons/hi'
-import OutlinedSelect from '@/components/ui/Outlined'
-import { updateStatus } from '@/store/slices/dueCompliance/statusUpdateSlice'
-import { useDispatch } from 'react-redux'
-import { StatusRequest } from '@/@types/status'
-import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json'
-import Lottie from 'lottie-react'
-import { HiOutlineViewGrid } from 'react-icons/hi'
+  Button,
+  Tooltip,
+  Dialog,
+  Input,
+  toast,
+  Notification,
+  Badge,
+} from '@/components/ui';
+import { RiEyeLine } from 'react-icons/ri';
+import { HiUpload, HiCheck, HiX } from 'react-icons/hi';
+import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json';
+import Lottie from 'lottie-react';
+import { HiOutlineViewGrid } from 'react-icons/hi';
+import httpClient from '@/api/http-client';
+import { endpoints } from '@/api/endpoint';
+
+interface DetailRowProps {
+  label: string;
+  value?: React.ReactNode;
+  children?: React.ReactNode;
+}
 
 export type DueComplianceDetailData = {
-    id: number
-    uuid: string
-    ac_compliance_id: number
-    proof_document: string | null
-    status: 'pending' | 'due' | 'overdue'
-    compliance_detail: {
-        id: number
-        uuid: string
-        legislation: string
-        category: string
-        penalty_type: string
-        default_due_date: {
-            first_date: string
-            last_date: string
-        }
-        scheduled_frequency: string
-        proof_mandatory: boolean
-        header: string
-        description: string
-        penalty_description: string
-        applicability: string
-        bare_act_text: string
-        type: string
-        clause: string
-        frequency: string
-        statutory_auth: string
-        approval_required: boolean
-        criticality: string
-        created_type: string
-        created_at: string
-        updated_at: string
-    }
-    upload_date: string | null
-    first_due_date: string | null
-    due_date: string
-    data_status: string
-    uploaded_by: number | null
-    approved_by: number | null
-    created_by: number
-    created_at: string
-    updated_at: string
-    UploadBy: {
-        id: number
-        first_name: string
-        last_name: string
-        email: string
-        mobile: number
-    } | null
-    ApprovedBy: {
-        id: number
-        name: string
-    } | null
-    AssignedComplianceRemark: Array<{
-        id: number
-        remark: string
-        created_by: number
-        created_at: string
-        updated_at: string
-    }>
-}
-const StatusOption = {
-    statusOption: [
-        { value: 'complied', label: 'Complied' },
-        { value: 'not_complied', label: 'Not Complied' },
-        { value: 'not_applicable', label: 'Not Applicable' },
-    ],
-}
+  id: number;
+  uuid: string;
+  compliance_id: number;
+  group_id: number;
+  company_id: number;
+  branch_id: number;
+  state_id: number;
+  status: 'pending' | 'submitted' | 'approved_by_approver' | 'rejected_by_approver' | 'approved_by_auditor' | 'rejected_by_auditor';
+  compliance_header: string;
+  compliance_description: string;
+  applicable: string;
+  legislation_act: string;
+  compliance_categorization: string;
+  penalty_type: string;
+  penalty_description: string;
+  compliance_applicability: string;
+  compliance_reference: string;
+  compliance_type: string;
+  compliance_frequency: string;
+  criticality: string;
+  due_date_frequency: string;
+  due_dates: {
+    first_due_date: string | null;
+    second_due_date: string | null;
+    third_due_date: string | null;
+    last_due_date: string | null;
+  };
+  owner_id: number;
+  approver_id: number;
+  rejection_reason: string | null;
+  document: string | null;
+  month: string;
+  created_by: number;
+  created_at: string;
+  updated_at: string;
+  original_filename: string | null;
+  mime_type: string | null;
+  uploaded_at: string | null;
+  uploaded_by: number | null;
+  proof_mandatory: boolean;
+  ComplianceChecklist: {
+    id: number;
+    compliance_header: string;
+    compliance_description: string;
+    legislation_act: string;
+    is_active: boolean;
+  };
+  CompanyGroup: {
+    id: number;
+    name: string;
+  };
+  Company: {
+    id: number;
+    name: string;
+  };
+  Branch: {
+    id: number;
+    name: string;
+  };
+  State: {
+    id: number;
+    name: string;
+  };
+  owner: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  approver: {
+    id: number;
+    name: string;
+    email: string;
+  };
+};
 
 interface ComplianceDetailTableProps {
-    data: DueComplianceDetailData[]
-    loading?: boolean
-    onViewDetail?: (compliance: DueComplianceDetailData) => void
-    onUpdateStatus?: (
-        id: number,
-        status: DueComplianceDetailData['status'],
-    ) => void
-    onDownloadProof?: (documentUrl: string) => void
-    onDataUpdate?: () => void
-    pagination: {
-        total: number
-        pageIndex: number
-        pageSize: number
-    }
-    onPaginationChange: (page: number) => void
-    onPageSizeChange: (pageSize: number) => void
-    canCreate: boolean
+  data: DueComplianceDetailData[];
+  loading?: boolean;
+  selectedRole: 'owner' | 'approver' | 'auditor';
+  onUploadSingle?: (complianceId: number, file: File, remark: string) => void;
+  onApprove?: (complianceId: number) => void;
+  onReject?: (complianceId: number, reason: string) => void;
+  onViewDetails?: (complianceId: number) => Promise<any>;
+  pagination: {
+    total: number;
+    pageIndex: number;
+    pageSize: number;
+  };
+  onPaginationChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
+  canCreate: boolean;
 }
-const dummyDueComplianceData: DueComplianceDetailData[] = [
-    {
-      id: 1,
-      uuid: 'comp-001',
-      ac_compliance_id: 101,
-      proof_document: 'https://example.com/proof1.pdf',
-      status: 'pending',
-      compliance_detail: {
-        id: 101,
-        uuid: 'detail-001',
-        legislation: 'Environmental Protection Act 2020',
-        category: 'Environmental',
-        penalty_type: 'Monetary Fine',
-        default_due_date: {
-          first_date: '2023-12-31',
-          last_date: '2023-12-31'
-        },
-        scheduled_frequency: 'yearly',
-        proof_mandatory: true,
-        header: 'Annual Environmental Compliance Report',
-        description: 'Submission of annual environmental impact assessment report',
-        penalty_description: 'Fine up to $50,000 for non-compliance',
-        applicability: 'All manufacturing units',
-        bare_act_text: 'Section 12(3) of the Environmental Protection Act',
-        type: 'Annual Filing',
-        clause: '12.3',
-        frequency: 'Annual',
-        statutory_auth: 'Ministry of Environment',
-        approval_required: true,
-        criticality: 'high',
-        created_type: 'system',
-        created_at: '2023-01-01T00:00:00Z',
-        updated_at: '2023-01-01T00:00:00Z',
-      },
-      upload_date: '2023-12-15',
-      first_due_date: '2023-12-31',
-      due_date: '2023-12-31',
-      data_status: 'pending',
-      uploaded_by: 201,
-      approved_by: 301,
-      created_by: 1,
-      created_at: '2023-01-01T00:00:00Z',
-      updated_at: '2023-12-15T00:00:00Z',
-      UploadBy: {
-        id: 201,
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john.doe@example.com',
-        mobile: 9876543210
-      },
-      ApprovedBy: {
-        id: 301,
-        name: 'Jane Smith'
-      },
-      AssignedComplianceRemark: [
-        {
-          id: 1,
-          remark: 'Initial submission pending review',
-          created_by: 1,
-          created_at: '2023-12-01T00:00:00Z',
-          updated_at: '2023-12-01T00:00:00Z'
-        }
-      ]
-    },
-    {
-      id: 2,
-      uuid: 'comp-002',
-      ac_compliance_id: 102,
-      proof_document: null,
-      status: 'due',
-      compliance_detail: {
-        id: 102,
-        uuid: 'detail-002',
-        legislation: 'Labor Standards Act',
-        category: 'Employment',
-        penalty_type: 'Administrative Penalty',
-        default_due_date: {
-          first_date: '2023-06-30',
-          last_date: '2023-06-30'
-        },
-        scheduled_frequency: 'quarterly',
-        proof_mandatory: false,
-        header: 'Quarterly Employee Benefits Report',
-        description: 'Submission of quarterly report on employee benefits',
-        penalty_description: 'Warning for first offense, fine thereafter',
-        applicability: 'All full-time employees',
-        bare_act_text: 'Section 8(2) of the Labor Standards Act',
-        type: 'Quarterly Filing',
-        clause: '8.2',
-        frequency: 'Quarterly',
-        statutory_auth: 'Ministry of Labor',
-        approval_required: false,
-        criticality: 'medium',
-        created_type: 'system',
-        created_at: '2023-01-01T00:00:00Z',
-        updated_at: '2023-01-01T00:00:00Z',
-      },
-      upload_date: null,
-      first_due_date: '2023-06-30',
-      due_date: '2023-06-30',
-      data_status: 'due',
-      uploaded_by: null,
-      approved_by: null,
-      created_by: 1,
-      created_at: '2023-01-01T00:00:00Z',
-      updated_at: '2023-01-01T00:00:00Z',
-      UploadBy: null,
-      ApprovedBy: null,
-      AssignedComplianceRemark: []
-    },
-  
-    {
-      id: 3,
-      uuid: 'comp-004',
-      ac_compliance_id: 104,
-      proof_document: null,
-      status: 'overdue',
-      compliance_detail: {
-        id: 104,
-        uuid: 'detail-004',
-        legislation: 'Health and Safety Regulations',
-        category: 'Safety',
-        penalty_type: 'Both Fine and Penalty',
-        default_due_date: {
-          first_date: '2023-01-15',
-          last_date: '2023-01-15'
-        },
-        scheduled_frequency: 'half_yearly',
-        proof_mandatory: false,
-        header: 'Bi-annual Safety Audit',
-        description: 'Submission of workplace safety audit report',
-        penalty_description: 'Fine up to $25,000 and possible shutdown',
-        applicability: 'All work locations',
-        bare_act_text: 'Section 7(4) of the Health and Safety Regulations',
-        type: 'Bi-annual Filing',
-        clause: '7.4',
-        frequency: 'Half-yearly',
-        statutory_auth: 'Department of Workplace Safety',
-        approval_required: false,
-        criticality: 'medium',
-        created_type: 'system',
-        created_at: '2023-01-01T00:00:00Z',
-        updated_at: '2023-01-01T00:00:00Z',
-      },
-      upload_date: null,
-      first_due_date: '2023-01-15',
-      due_date: '2023-01-15',
-      data_status: 'overdue',
-      uploaded_by: null,
-      approved_by: null,
-      created_by: 1,
-      created_at: '2023-01-01T00:00:00Z',
-      updated_at: '2023-01-01T00:00:00Z',
-      UploadBy: null,
-      ApprovedBy: null,
-      AssignedComplianceRemark: [
-        {
-          id: 3,
-          remark: 'Overdue - reminder sent',
-          created_by: 1,
-          created_at: '2023-01-20T00:00:00Z',
-          updated_at: '2023-01-20T00:00:00Z'
-        }
-      ]
-    }
-  ];
-  
+
+
+
+const DetailRow: React.FC<DetailRowProps> = ({ label, value, children }) => (
+  <div className="grid grid-cols-3 gap-2">
+    <span className="text-gray-600 font-medium">{label}:</span>
+    <span className="col-span-2">
+      {value || children || <span className="text-gray-400">Not available</span>}
+    </span>
+  </div>
+);
+
+const capitalizeFirstLetter = (str?: string) => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
 const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
-    data = dummyDueComplianceData,
-    loading,
-    onViewDetail,
-    onUpdateStatus,
-    onDownloadProof,
-    onDataUpdate,
-    pagination,
-    onPaginationChange,
-    onPageSizeChange,
-    canCreate,
+  data = [],
+  loading,
+  selectedRole,
+  onUploadSingle,
+  onApprove,
+  onReject,
+  onViewDetails,
+  pagination,
+  onPaginationChange,
+  onPageSizeChange,
+  canCreate,
 }) => {
-    const [tableData, setTableData] = useState({
-        total: data.length,
-        pageIndex: 1,
-        pageSize: 10,
-        query: '',
-        sort: { order: '', key: '' },
-    })
+  const [selectedCompliance, setSelectedCompliance] = useState<DueComplianceDetailData | null>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [complianceDetails, setComplianceDetails] = useState<any>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [remark, setRemark] = useState('');
+  const [rejectReason, setRejectReason] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-    const [selectedCompliance, setSelectedCompliance] =
-        useState<DueComplianceDetailData | null>(null)
-    const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
-    const [selectedStatus, setSelectedStatus] = useState<StatusOption | null>(
-        null,
-    )
-    const [selectedFile, setSelectedFile] = useState<File | null>(null)
-    const [remark, setRemark] = useState('')
-    const [dialogIsOpen, setDialogIsOpen] = useState(false)
-    const dispatch = useDispatch()
-    const [isLoading, setIsLoading] = useState(false)
-
-    const onDialogClose = useCallback(() => {
-        setDialogIsOpen(false)
-        setSelectedFile(null)
-        setSelectedCompliance(null)
-        setSelectedStatus(null)
-        setRemark('')
-    }, [])
-
-    const handleStatusUpdate = (compliance: DueComplianceDetailData) => {
-        setSelectedCompliance(compliance)
-        setIsStatusDialogOpen(true)
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+      case 'submitted':
+        return <Badge className="bg-blue-100 text-blue-800">Submitted</Badge>;
+      case 'approved_by_approver':
+        return <Badge className="bg-green-100 text-green-800">Approved (Approver)</Badge>;
+      case 'rejected_by_approver':
+        return <Badge className="bg-red-100 text-red-800">Rejected (Approver)</Badge>;
+      case 'approved_by_auditor':
+        return <Badge className="bg-green-100 text-green-800">Approved (Auditor)</Badge>;
+      case 'rejected_by_auditor':
+        return <Badge className="bg-red-100 text-red-800">Rejected (Auditor)</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
     }
-    const onStatusChange = useCallback((value: StatusOption) => {
-        console.log('Status changed to:', value)
-        setSelectedStatus(value)
-    }, [])
+  };
 
-    const handleUpdateStatus = async () => {
-        // if (!selectedCompliance || !selectedStatus) {
-        //   toast.push(
-        //     <Notification title="Error" closable={true} type="danger">
-        //       Please select a status and provide a remark.
-        //     </Notification>
-        //   );
-        //   return;
-        // }
+  const handleViewDetails = async (compliance: DueComplianceDetailData) => {
+    if (!compliance?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const details = await onViewDetails?.(compliance.id);
+      if (details) {
+        setComplianceDetails(details);
+        setIsViewDialogOpen(true);
+      }
+    } catch (error) {
+      toast.push(
+        <Notification title="Error" type="danger">
+          Failed to fetch compliance details
+        </Notification>
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        const formData = new FormData()
-        formData.append('status', selectedStatus.value)
-        formData.append('remark', remark)
-
-        if (selectedCompliance?.compliance_detail.proof_mandatory) {
-            if (!selectedFile) {
-                toast.push(
-                    <Notification title="Error" closable={true} type="danger">
-                        Please upload the proof of compliance.
-                    </Notification>,
-                )
-                return
-            }
-            formData.append('document', selectedFile)
-        } else if (selectedFile) {
-            formData.append('document', selectedFile)
-        }
-
-        try {
-            console.log(selectedFile)
-            const res = await dispatch(
-                updateStatus({
-                    id: selectedCompliance.id.toString(),
-                    data: formData,
-                }),
-            )
-                .unwrap()
-                .catch((error: any) => {
-                    error.map((v: string) =>
-                        toast.push(
-                            <Notification
-                                title="Error"
-                                closable={true}
-                                type="danger"
-                            >
-                                {v}
-                            </Notification>,
-                        ),
-                    )
-                })
-            if (res) {
-                setIsStatusDialogOpen(false)
-                onDialogClose()
-                toast.push(
-                    <Notification title="Success" type="success">
-                        Status updated successfully.
-                    </Notification>,
-                )
-            }
-
-            if (onDataUpdate) {
-                onDataUpdate()
-            }
-        } catch (error) {
-            console.error('Error updating status:', error)
-            setIsStatusDialogOpen(false)
-            toast.push(
-                <Notification title="Error" closable={true} type="danger">
-                    Error updating status.
-                </Notification>,
-            )
-        }
+  const handleUploadConfirm = async () => {
+    if (!selectedFile) {
+      toast.push(<Notification title="Error" type="error">Please select a file</Notification>);
+      return;
     }
 
-    const getStatusBadgeColor = (status: DueComplianceDetailData['status']) => {
-        switch (status) {
-            case 'completed':
-                return 'text-green-500'
-            case 'pending':
-                return 'text-yellow-500'
-            case 'due':
-                return 'text-blue-500'
-            case 'overdue':
-                return 'text-red-500'
-            default:
-                return 'text-gray-500'
-        }
+    if (!selectedCompliance?.id) return;
+
+    setIsLoading(true);
+
+    try {
+      const base64String = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(selectedFile);
+      });
+
+      const payload = {
+        document: base64String,
+        company_id: selectedCompliance.company_id,
+        filename: selectedFile.name,
+        mimetype: selectedFile.type
+      };
+
+      const response = await httpClient.post(
+        endpoints.compliance.dueComplianceDocumentUpload(selectedCompliance.id),
+        payload
+      );
+
+      toast.push(<Notification title="Success" type="success">Document uploaded</Notification>);
+      setIsUploadDialogOpen(false);
+      setSelectedFile(null);
+      setRemark('');
+
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.push(
+        <Notification title="Error" type="error">
+          {error.response?.data?.message || 'Upload failed'}
+        </Notification>
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectReason) {
+      toast.push(
+        <Notification title="Error" type="danger">
+          Please enter a rejection reason
+        </Notification>
+      );
+      return;
     }
 
-    const columns: ColumnDef<DueComplianceDetailData>[] = useMemo(
-        () => [
-            {
-                header: 'Compliance ID', enableSorting: false,
-                accessorKey: 'uuid',
-                cell: (props) => (
-                    <div className="w-40 text-start">{props.getValue()}</div>
-                ),
-            },
-            {
-                header: 'Legislation', enableSorting: false,
-                accessorFn: (row) => row.compliance_detail.legislation,
-                cell: (props) => (
-                    <Tooltip title={props.getValue() as string} placement="top">
-                        <div className="w-64 truncate">
-                            {((props.getValue() as string) || '').length > 40
-                                ? `${(props.getValue() as string).substring(0, 40)}...`
-                                : props.getValue()}
-                        </div>
-                    </Tooltip>
-                ),
-            },
-            {
-                header: 'Criticality', enableSorting: false,
-                accessorFn: (row) => row.compliance_detail.criticality,
-                cell: (props) => {
-                    const criticality = props.getValue() as string
-                    return (
-                        <div className="w-24 font-semibold truncate">
-                            {criticality.toLowerCase() === 'high' ? (
-                                <span className="text-red-500">High</span>
-                            ) : criticality.toLowerCase() === 'medium' ? (
-                                <span className="text-yellow-500">Medium</span>
-                            ) : (
-                                <span className="text-green-500">Low</span>
-                            )}
-                        </div>
-                    )
-                },
-            },
-            {
-                header: 'Category', enableSorting: false,
-                accessorFn: (row) => row.compliance_detail.category,
-                cell: (props) => (
-                    <Tooltip title={props.getValue() as string} placement="top">
-                        <div className="w-40 truncate">{props.getValue()}</div>
-                    </Tooltip>
-                ),
-            },
-            {
-                header: 'Due Date', enableSorting: false,
-                accessorKey: 'due_date',
-                cell: (props) => (
-                    <div className="w-28">
-                        {new Date(
-                            props.getValue() as string,
-                        ).toLocaleDateString()}
-                    </div>
-                ),
-            },
-            {
-                header: 'Status', enableSorting: false,
-                accessorKey: 'data_status',
-                cell: (props) => (
-                    <div
-                        className={`w-24 font-semibold ${getStatusBadgeColor(props.getValue() as DueComplianceDetailData['status'])}`}
-                    >
-                        {(props.getValue() as string).charAt(0).toUpperCase() +
-                            (props.getValue() as string).slice(1)}
-                    </div>
-                ),
-            },
-            {
-                header: 'Uploaded By', enableSorting: false,
-                accessorFn: (row) =>
-                    `${row.UploadBy?.first_name || ''} ${row.UploadBy?.last_name || ''}`.trim(),
-                cell: (props) => (
-                    <div className="w-32">{props.getValue() || '--'}</div>
-                ),
-            },
+    if (!selectedCompliance?.id) return;
 
-            {
-                header: 'Approved By', enableSorting: false,
-                accessorFn: (row) => row.ApprovedBy?.name,
-                cell: (props) => (
-                    <div className="w-32">{props.getValue() || '--'}</div>
-                ),
-            },
-            {
-                header: 'Actions',
-                id: 'actions',
-                cell: ({ row }) => (
-                    <div className="flex space-x-2">
-                        {/* <Tooltip title="View Details" placement="top">
-              <Button
-                size="sm"
-                onClick={() => onViewDetail?.(row.original)}
-                icon={<RiEyeLine />}
-                className="hover:bg-transparent"
-              />
-            </Tooltip> */}
-                        {/* {canCreate && ( */}
-                            <Tooltip title="Update Status" placement="top">
-                                <Button
-                                    size="sm"
-                                    onClick={() =>
-                                        handleStatusUpdate(row.original)
-                                    }
-                                    icon={<HiUpload />}
-                                    className="hover:bg-transparent"
-                                />
-                            </Tooltip>
-                        {/* )} */}
-                        {/* {row.original.proof_document && (
-                            <Tooltip title="Download Proof" placement="top">
-                                <Button
-                                    size="sm"
-                                    onClick={() =>
-                                        onDownloadProof?.(
-                                            row.original
-                                                .proof_document as string,
-                                        )
-                                    }
-                                    icon={<HiDocumentDownload />}
-                                    className="hover:bg-transparent"
-                                />
-                            </Tooltip>
-                        )} */}
-                    </div>
-                ),
-            },
-        ],
-        [onViewDetail, onDownloadProof],
-    )
-
-    const handlePageChange = (page: number) => {
-        setTableData((prev) => ({ ...prev, pageIndex: page }))
+    try {
+      await onReject?.(selectedCompliance.id, rejectReason);
+      setIsRejectDialogOpen(false);
+      setRejectReason('');
+    } catch (error) {
+      console.error('Reject error:', error);
     }
+  };
 
-    const handlePageSizeChange = (pageSize: number) => {
-        setTableData((prev) => ({
-            ...prev,
-            pageSize: Number(pageSize),
-            pageIndex: 1,
-        }))
-    }
+  const columns: ColumnDef<DueComplianceDetailData>[] = useMemo(
+    () => [
+      {
+        header: 'Compliance ID',
+        enableSorting: false,
+        accessorKey: 'uuid',
+        cell: (props) => (
+          <div className="w-40 text-start">{props.getValue() as string}</div>
+        ),
+      },
+      {
+        header: 'Header',
+        enableSorting: false,
+        accessorKey: 'compliance_header',
+        cell: (props) => (
+          <Tooltip title={props.getValue() as string}>
+            <div className="w-48 truncate">{capitalizeFirstLetter(props.getValue() as string)}</div>
+          </Tooltip>
+        ),
+      },
+      {
+        header: 'Legislation',
+        enableSorting: false,
+        accessorKey: 'legislation_act',
+        cell: (props) => (
+          <Tooltip title={props.getValue() as string}>
+            <div className="w-48 truncate">{capitalizeFirstLetter(props.getValue() as string)}</div>
+          </Tooltip>
+        ),
+      },
+      {
+        header: 'Category',
+        enableSorting: false,
+        accessorKey: 'compliance_categorization',
+        cell: (props) => (
+          <Tooltip title={props.getValue() as string} placement="top">
+            <div className="w-40 truncate">{capitalizeFirstLetter(props.getValue() as string)}</div>
+          </Tooltip>
+        ),
+      },
+      {
+        header: 'Company',
+        enableSorting: false,
+        accessorFn: (row) => row.Company?.name || '--',
+        cell: (props) => (
+          <div className="w-40">{capitalizeFirstLetter(props.getValue() as string)}</div>
+        ),
+      },
+      {
+        header: 'Branch',
+        enableSorting: false,
+        accessorFn: (row) => row.Branch?.name || '--',
+        cell: (props) => (
+          <div className="w-40">{capitalizeFirstLetter(props.getValue() as string)}</div>
+        ),
+      },
+      {
+        header: 'State',
+        enableSorting: false,
+        accessorFn: (row) => row.State?.name || '--',
+        cell: (props) => (
+          <div className="w-32">{capitalizeFirstLetter(props.getValue() as string)}</div>
+        ),
+      },
+      {
+        header: 'Frequency',
+        enableSorting: false,
+        accessorKey: 'compliance_frequency',
+        cell: (props) => (
+          <div className="w-24">{capitalizeFirstLetter(props.getValue() as string)}</div>
+        ),
+      },
+      {
+        header: 'Actions',
+        id: 'actions',
+        cell: ({ row }) => {
+          const status = row.original.status;
+          
+          return (
+            <div className="flex space-x-2">
+              <Tooltip title="View Details" placement="top">
+                <Button
+                  size="sm"
+                  onClick={() => handleViewDetails(row.original)}
+                  icon={<RiEyeLine />}
+                  className="hover:bg-transparent"
+                />
+              </Tooltip>
 
-    if (loading) {
-        console.log('Loading....................')
-
-        return (
-            <div className="flex flex-col items-center justify-center h-96 text-gray-500  rounded-xl">
-                <div className="w-28 h-28">
-                    <Lottie
-                        animationData={loadingAnimation}
-                        loop
-                        className="w-24 h-24"
-                    />
-                </div>
-                <p className="text-lg font-semibold">Loading Data...</p>
-            </div>
-        )
-    }
-
-    return (
-        <div className="relative">
-            {data.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
-                    <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
-                    <p className="text-center">No Data Available</p>
-                </div>
-            ) : (
-                <DataTable
-                    columns={columns}
-                    data={data}
-                    skeletonAvatarColumns={[0]}
-                    skeletonAvatarProps={{ className: 'rounded-md' }}
-                    loading={loading}
-                    pagingData={{
-                        total: pagination.total,
-                        pageIndex: pagination.pageIndex,
-                        pageSize: pagination.pageSize,
+              {selectedRole === 'owner' && status === 'pending' && (
+                <Tooltip title="Upload Document" placement="top">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCompliance(row.original);
+                      setIsUploadDialogOpen(true);
                     }}
-                    // Pass the pagination handlers
-                    onPaginationChange={onPaginationChange}
-                    onSelectChange={onPageSizeChange}
-                    stickyHeader={true}
-                    stickyFirstColumn={true}
-                    stickyLastColumn={true}
-                />
-            )}
-            <Dialog
-                isOpen={isStatusDialogOpen}
-                onClose={() => setIsStatusDialogOpen(false)}
-                shouldCloseOnOverlayClick={false}
-            >
-                <h5 className="mb-4">Change Compliance Status</h5>
-                <div className="flex items-center gap-3 mb-4">
-                    <p className="font-semibold">
-                        Select the Compliance status
-                    </p>
-                    <div className="w-40">
-                        <OutlinedSelect
-                            label="Set Status"
-                            options={StatusOption.statusOption.map(
-                                (option) => ({
-                                    value: option.value,
-                                    label: option.label,
-                                }),
-                            )}
-                            value={selectedStatus}
-                            onChange={onStatusChange}
-                        />
-                    </div>
-                </div>
+                    icon={<HiUpload />}
+                    className="hover:bg-transparent"
+                  />
+                </Tooltip>
+              )}
 
+              {selectedRole === 'approver' && status === 'submitted' && (
                 <>
-                    {selectedCompliance?.compliance_detail.proof_mandatory ? (
-                        <label className="text-red-500">
-                            *Please Upload The Proof Of Compliance:
-                        </label>
-                    ) : (
-                        <label>Please Upload The Proof Of Compliance:</label>
-                    )}
-                    <Input
-                        type="file"
-                        onChange={(e) => {
-                            const file = e.target.files?.[0] || null
-                            console.log('File selected:', file?.name)
-                            setSelectedFile(file)
-                        }}
-                        className="mb-4 mt-4"
-                    />
-                </>
-                <label className="mb-2">Please Enter the Remark:</label>
-                <Input
-                    placeholder="Remarks"
-                    textArea
-                    value={remark}
-                    onChange={(e) => setRemark(e.target.value)}
-                    className="mb-4"
-                />
-
-                <div className="text-right mt-6">
+                  <Tooltip title="Approve" placement="top">
                     <Button
-                        className="ltr:mr-2 rtl:ml-2"
-                        variant="plain"
-                        onClick={() => {
-                            setIsStatusDialogOpen(false)
-                            onDialogClose()
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button variant="solid" onClick={handleUpdateStatus}>
-                        {' '}
-                        {/*  onClick={onSubmit} */}
-                        Confirm
-                    </Button>
-                </div>
-            </Dialog>
-        </div>
-    )
-}
+                      size="sm"
+                      onClick={() => onApprove?.(row.original.id)}
+                      icon={<HiCheck />}
+                      className="hover:bg-transparent text-green-500"
+                    />
+                  </Tooltip>
+                  <Tooltip title="Reject" placement="top">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSelectedCompliance(row.original);
+                        setIsRejectDialogOpen(true);
+                      }}
+                      icon={<HiX />}
+                      className="hover:bg-transparent text-red-500"
+                    />
+                  </Tooltip>
+                </>
+              )}
 
-export default ComplianceDetailTable
+              {selectedRole === 'auditor' && status === 'approved_by_approver' && (
+                <>
+                  <Tooltip title="Approve" placement="top">
+                    <Button
+                      size="sm"
+                      onClick={() => onApprove?.(row.original.id)}
+                      icon={<HiCheck />}
+                      className="hover:bg-transparent text-green-500"
+                    />
+                  </Tooltip>
+                  <Tooltip title="Reject" placement="top">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSelectedCompliance(row.original);
+                        setIsRejectDialogOpen(true);
+                      }}
+                      icon={<HiX />}
+                      className="hover:bg-transparent text-red-500"
+                    />
+                  </Tooltip>
+                </>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [selectedRole, onApprove, onReject]
+  );
+
+  if (loading || isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 text-gray-500 rounded-xl">
+        <div className="w-28 h-28">
+          <Lottie
+            animationData={loadingAnimation}
+            loop
+            className="w-24 h-24"
+          />
+        </div>
+        <p className="text-lg font-semibold">Loading Data...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      {data.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+          <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+          <p className="text-center">No Data Available</p>
+        </div>
+      ) : (
+        <>
+          <DataTable
+            columns={columns}
+            data={data}
+            skeletonAvatarColumns={[0]}
+            skeletonAvatarProps={{ className: 'rounded-md' }}
+            loading={loading}
+            pagingData={{
+              total: pagination.total,
+              pageIndex: pagination.pageIndex,
+              pageSize: pagination.pageSize,
+            }}
+            onPaginationChange={onPaginationChange}
+            onSelectChange={onPageSizeChange}
+            stickyHeader={true}
+            stickyFirstColumn={true}
+            stickyLastColumn={true}
+          />
+
+          <Dialog
+            isOpen={isUploadDialogOpen}
+            onClose={() => setIsUploadDialogOpen(false)}
+            width={500}
+          >
+            <h5 className="mb-4">Upload Compliance Document</h5>
+            <div className="mb-4">
+              <p className="font-semibold">Compliance:</p>
+              <p>{selectedCompliance?.compliance_header || 'N/A'}</p>
+            </div>
+            <Input
+              type="file"
+              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              className="mb-4"
+            />
+            <Input
+              textArea
+              rows={3}
+              placeholder="Enter remark"
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              className="mb-4"
+            />
+            <div className="text-right mt-6">
+              <Button
+                className="mr-2"
+                variant="plain"
+                onClick={() => setIsUploadDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="solid"
+                onClick={handleUploadConfirm}
+              >
+                Upload
+              </Button>
+            </div>
+          </Dialog>
+
+          <Dialog
+            isOpen={isRejectDialogOpen}
+            onClose={() => setIsRejectDialogOpen(false)}
+            width={500}
+          >
+            <h5 className="mb-4">Reject Compliance</h5>
+            <div className="mb-4">
+              <p className="font-semibold">Compliance:</p>
+              <p>{selectedCompliance?.compliance_header || 'N/A'}</p>
+            </div>
+            <Input
+              textArea
+              rows={3}
+              placeholder="Enter rejection reason"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              className="mb-4"
+            />
+            <div className="text-right mt-6">
+              <Button
+                className="mr-2"
+                variant="plain"
+                onClick={() => {
+                  setIsRejectDialogOpen(false);
+                  setRejectReason('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="solid"
+                onClick={handleRejectConfirm}
+                disabled={!rejectReason.trim()}
+              >
+                Confirm Rejection
+              </Button>
+            </div>
+          </Dialog>
+
+          <Dialog
+            isOpen={isViewDialogOpen}
+            onClose={() => setIsViewDialogOpen(false)}
+            width={1000}
+          >
+            <h5 className="mb-4">Compliance Details</h5>
+            {complianceDetails && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h6 className="font-semibold text-gray-700">Basic Information</h6>
+                  <DetailRow label="Compliance ID" value={complianceDetails.uuid} />
+                  <DetailRow label="Compliance Header" value={capitalizeFirstLetter(complianceDetails.compliance_header)} />
+                  <DetailRow label="Description" value={capitalizeFirstLetter(complianceDetails.compliance_description)} />
+                  <DetailRow label="Status" value={capitalizeFirstLetter(complianceDetails.status)} />
+                  <DetailRow 
+                    label="Due Date" 
+                    value={complianceDetails.due_dates?.first_due_date 
+                      ? new Date(complianceDetails.due_dates.first_due_date).toLocaleDateString() 
+                      : 'N/A'} 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <h6 className="font-semibold text-gray-700">Legislation & Category</h6>
+                  <DetailRow label="Legislation Act" value={capitalizeFirstLetter(complianceDetails.legislation_act)} />
+                  <DetailRow label="Category" value={capitalizeFirstLetter(complianceDetails.compliance_categorization)} />
+                  <DetailRow label="Applicable" value={capitalizeFirstLetter(complianceDetails.applicable)} />
+                  <DetailRow label="Frequency" value={capitalizeFirstLetter(complianceDetails.compliance_frequency)} />
+                  <DetailRow label="Criticality" value={capitalizeFirstLetter(complianceDetails.criticality)} />
+                </div>
+
+                <div className="space-y-2">
+                  <h6 className="font-semibold text-gray-700">Company Information</h6>
+                  <DetailRow label="Company Group" value={capitalizeFirstLetter(complianceDetails.CompanyGroup?.name)} />
+                  <DetailRow label="Company" value={capitalizeFirstLetter(complianceDetails.Company?.name)} />
+                  <DetailRow label="Branch" value={capitalizeFirstLetter(complianceDetails.Branch?.name)} />
+                  <DetailRow label="State" value={capitalizeFirstLetter(complianceDetails.State?.name)} />
+                  <DetailRow label="Created By" value={capitalizeFirstLetter(complianceDetails.CompanyAdmin?.name)} />
+                </div>
+
+                <div className="space-y-2">
+                  <h6 className="font-semibold text-gray-700">Compliance Details</h6>
+                  <DetailRow label="Penalty Type" value={capitalizeFirstLetter(complianceDetails.penalty_type)} />
+                  <DetailRow label="Penalty Description" value={capitalizeFirstLetter(complianceDetails.penalty_description)} />
+                  <DetailRow label="Applicability" value={capitalizeFirstLetter(complianceDetails.compliance_applicability)} />
+                  <DetailRow label="Reference" value={capitalizeFirstLetter(complianceDetails.compliance_reference)} />
+                  <DetailRow label="Type" value={capitalizeFirstLetter(complianceDetails.compliance_type)} />
+                </div>
+              </div>
+            )}
+            <div className="mt-6 text-right">
+              <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+            </div>
+          </Dialog>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default ComplianceDetailTable;

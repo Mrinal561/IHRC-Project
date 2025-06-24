@@ -142,7 +142,7 @@ import React, { useState } from 'react'
 import { Button, Notification, toast, Tooltip } from '@/components/ui'
 import DataTable from '@/components/shared/DataTable'
 import { ColumnDef } from '@/components/shared/DataTable'
-import { HiDownload } from 'react-icons/hi'
+import { HiDownload, HiOutlineViewGrid } from 'react-icons/hi'
 
 interface CertificateData {
     id: number
@@ -271,13 +271,24 @@ const ComplianceCertificateDetails = () => {
     ]
 
     return (
-        <DataTable
-            columns={columns}
+
+        <div className="relative">
+                    {data.length > 0 ? (
+                        <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+                            <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+                            <p className="text-center">No Data Available</p>
+                        </div>
+                    ) : (
+                        <DataTable
+                            columns={columns}
             data={data}
             skeletonAvatarColumns={[0]}
             skeletonAvatarProps={{ className: 'rounded-md' }}
             loading={loading}
-        />
+                        />
+                    )}
+                    </div>
+      
     )
 }
 

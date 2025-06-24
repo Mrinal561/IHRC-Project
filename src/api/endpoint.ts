@@ -50,6 +50,16 @@ export const endpoints = {
         downloadData: () => api('companyadmin/user/user-data/export')
 
     },
+    auditor: {
+        listAuditor: () => api('companyadmin/auditor'),
+        auditorDetail: (id:any) => api(`companyadmin/auditor/${id}`),
+        auditorUpdate: (id:any) => api(`companyadmin/auditor/${id}`),
+        auditorCreate: () => api('companyadmin/auditor'),
+        auditorDelete: (id:any) => api(`companyadmin/auditor/${id}`),
+        downloadFormat: () => api('companyadmin/auditor/template/download'),
+        auditorExport: () => api('companyadmin/auditor/export/data')
+
+    },
     complianceSuperadmin: {
         getAll: () => api('/companyadmin/compliance/recommend'),
         // getAll: () => api('/companyadmin/compliance/recommend'),
@@ -96,7 +106,25 @@ export const endpoints = {
         deleteCustomChecklist: (id:any) => api(`companyadmin/compliance/checklists/${id}`),
         exportCustomChecklist: () => api('companyadmin/compliance/checklists/export/data'),
         downloadCustomChecklistTemplate: () => api('companyadmin/compliance/checklists/export/template'),
-        listCustomChecklist: () => api('companyadmin/compliance/checklists')
+        listCustomChecklist: () => api('companyadmin/compliance/checklists'),
+        downloadComplianceTemplate: () => api('companyadmin/compliance/checklists/checklist/template'),
+        bulkUploadCompliance: () => api('companyadmin/compliance/checklists/bulk-upload'),
+        listComplianceChecklist: () => api('companyadmin/compliance/checklists/checklist'),
+        downloadComplianceChecklist: () => api('companyadmin/compliance/checklists/download'),
+        detailComplianceChecklist: (id:any) => api(`companyadmin/compliance/checklists/checklist/${id}`),
+        editComplianceChecklist: (id:any) => api(`companyadmin/compliance/checklists/checklist/${id}`),
+        dueComplianceList: () => api('companyadmin/compliance/checklists/due-compliance'),
+        dueComplianceOwnerList: () => api('companyadmin/compliance/checklists/owner'),
+        dueComplianceApproverList: () => api('companyadmin/compliance/checklists/approver'),
+        dueComplianceAuditorList: () => api('companyadmin/compliance/checklists/auditor'),
+        dueComplianceDocumentUpload: (id:any) => api(`companyadmin/compliance/checklists/upload-base64/${id}`),
+        rejectOwnerCompliance: (id:any) => api(`companyadmin/compliance/checklists/reject/${id}`),
+        approveOwnerCompliance: (id:any) => api(`companyadmin/compliance/checklists/approve/${id}`),
+        approveApproverCompliance: (id:any) => api(`companyadmin/compliance/checklists/auditor/approve/${id}`),
+        rejectApproverCompliance: (id:any) => api(`companyadmin/compliance/checklists/auditor/reject/${id}`),
+        detailDueCompliance: (id:any) => api(`companyadmin/compliance/checklists/due-compliance/${id}`),
+        complianceHistoryList: () => api('companyadmin/compliance/checklists/history'),
+        downloadComplianceHistory: () => api('companyadmin/compliance/checklists/history-checklist')
 
     },
     esiSetup: {

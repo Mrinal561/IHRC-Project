@@ -109,6 +109,8 @@ const OutlinedSelect = ({
               ...provided,
               color: '#000',
               marginTop: isFloating ? '8px' : '0',
+              opacity: 1,
+              transform: 'none'
             }),
             multiValue: (provided) => ({
               ...provided,

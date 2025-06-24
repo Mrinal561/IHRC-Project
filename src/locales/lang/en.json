@@ -42,6 +42,12 @@
                     }
                 },
                 "userSetup": "User Setup",
+                "auditorSetup": {
+                    "collapse": {
+                        "collapse": "Auditor Setup",
+                        "item1": "Auditor"
+                    }
+                },
                 "userAccess": "User Access Permission"
 
             }

@@ -7,6 +7,8 @@ import { FiTrash } from 'react-icons/fi';
 import { RiEyeLine } from 'react-icons/ri';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
+import { APP_PREFIX_PATH } from '@/constants/route.constant';
+import { HiOutlineViewGrid } from 'react-icons/hi';
 
 interface CustomChecklist {
     id: number;
@@ -52,32 +54,51 @@ interface CustomChecklist {
     };
 }
 
+
+interface PaginationState {
+    pageIndex: number;
+    pageSize: number;
+}
+
+
 const CustomChecklistTable = () => {
     const [data, setData] = useState<CustomChecklist[]>([]);
     const [loading, setLoading] = useState(true);
     const [dialogIsOpen, setDialogIsOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<CustomChecklist | null>(null);
+    const [totalItems, setTotalItems] = useState(0);
+    const [pageIndex, setPageIndex] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [sort, setSort] = useState<{id: string; desc: boolean} | null>(null);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await httpClient.get(endpoints.compliance.listCustomChecklist());
-                setData(response.data.data);
-            } catch (error) {
-                console.error('Error fetching custom checklists:', error);
-                toast.push(
-                    <Notification title="Error" type="error">
-                        Failed to load custom checklists
-                    </Notification>
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const params = {
+                page: pageIndex,
+                limit: pageSize,
+                sort: sort ? `${sort.id}:${sort.desc ? 'desc' : 'asc'}` : undefined
+            };
 
+            const response = await httpClient.get(endpoints.compliance.listCustomChecklist(), { params });
+            setData(response.data.data);
+            setTotalItems(response.data.total);
+        } catch (error) {
+            console.error('Error fetching custom checklists:', error);
+            toast.push(
+                <Notification title="Error" type="error">
+                    Failed to load custom checklists
+                </Notification>
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
-    }, []);
+    }, [pageIndex, pageSize, sort]);
 
     const handleDeleteClick = (item: CustomChecklist) => {
         setItemToDelete(item);
@@ -90,12 +111,13 @@ const CustomChecklistTable = () => {
                 await httpClient.delete(
                     endpoints.compliance.deleteCustomChecklist(itemToDelete.id)
                 );
-                setData(prev => prev.filter(item => item.id !== itemToDelete.id));
                 toast.push(
                     <Notification title="Success" type="success">
                         Checklist deleted successfully
                     </Notification>
                 );
+                // Refresh data after deletion
+                fetchData();
             } catch (error) {
                 console.error('Error deleting checklist:', error);
                 toast.push(
@@ -115,35 +137,36 @@ const CustomChecklistTable = () => {
     };
 
     const handleEditClick = (item: CustomChecklist) => {
-        navigate(`/app/companyadmin/compliance/checklists/edit/${item.id}`, {
-            state: item
-        });
+        navigate(`${APP_PREFIX_PATH}/companyadmin/compliance/checklists/edit/${item.id}`);
     };
 
     const handleViewDetails = (item: CustomChecklist) => {
-        navigate(`/app/companyadmin/compliance/checklists/view/${item.id}`, {
-            state: item
-        });
+        navigate(`/app/companyadmin/compliance/checklists/view/${item.id}`);
     };
+
+    const handleCreateNew = () => {
+        navigate('/app/companyadmin/compliance/checklists/create');
+    };
+
 
     const columns = useMemo(
         () => [
-            {
-                header: 'ID',
-                enableSorting: false,
-                accessorKey: 'id',
-                cell: (props) => <div className="w-10">{props.getValue()}</div>,
-            },
-            {
-                header: 'Company Group',
-                enableSorting: false,
-                accessorKey: 'CompanyGroup.name',
-                cell: (props) => (
-                    <div className="w-24 truncate">
-                        {props.row.original.CompanyGroup.name}
-                    </div>
-                ),
-            },
+            // {
+            //     header: 'ID',
+            //     enableSorting: false,
+            //     accessorKey: 'id',
+            //     cell: (props) => <div className="w-10">{props.getValue()}</div>,
+            // },
+            // {
+            //     header: 'Company Group',
+            //     enableSorting: false,
+            //     accessorKey: 'CompanyGroup.name',
+            //     cell: (props) => (
+            //         <div className="w-24 truncate">
+            //             {props.row.original.CompanyGroup.name}
+            //         </div>
+            //     ),
+            // },
             {
                 header: 'Country',
                 enableSorting: false,
@@ -232,22 +255,22 @@ const CustomChecklistTable = () => {
                 id: 'actions',
                 cell: ({ row }) => (
                     <div className='flex space-x-2'>
-                        <Tooltip title="View Details" placement="top">
+                        {/* <Tooltip title="View Details" placement="top">
                             <Button
                                 size="sm"
                                 onClick={() => handleViewDetails(row.original)}
                                 icon={<RiEyeLine />}
                                 className='hover:bg-transparent'
                             />
-                        </Tooltip>
-                        <Tooltip title="Edit" placement="top">
+                        </Tooltip> */}
+                        {/* <Tooltip title="Edit" placement="top">
                             <Button
                                 size="sm"
                                 onClick={() => handleEditClick(row.original)}
                                 icon={<MdEdit />}
                                 className='hover:bg-transparent'
                             />
-                        </Tooltip>
+                        </Tooltip> */}
                         <Tooltip title="Delete" placement="top">
                             <Button
                                 size="sm"
@@ -263,16 +286,76 @@ const CustomChecklistTable = () => {
         []
     );
 
+    const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 1,
+    pageSize: 10
+});
+
+const handlePaginationChange = (newPagination: PaginationState) => {
+    setPagination(newPagination);
+    // Or if your DataTable expects separate parameters:
+    // setPageIndex(newPagination.pageIndex);
+    // setPageSize(newPagination.pageSize);
+};
+
+
+
     return (
-        <div className="w-full overflow-x-auto">
-            <DataTable
-                columns={columns}
-                data={data}
-                loading={loading}
-                stickyHeader={true}
-                stickyFirstColumn={true}
-                stickyLastColumn={true}
-            />
+        <div className="relative">
+             {data.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+                                <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+                                <p className="text-center">No Data Available</p>
+                            </div>
+                        ) : (
+                            <>
+                   <DataTable
+    columns={columns}
+    data={data}
+    loading={loading}
+    paging
+    pageIndex={pagination.pageIndex}
+    pageSize={pagination.pageSize}
+    total={totalItems}
+    onPaginationChange={handlePaginationChange}
+    onSortingChange={(sorting) => {
+        if (sorting.length > 0) {
+            setSort({ id: sorting[0].id, desc: sorting[0].desc });
+        } else {
+            setSort(null);
+        }
+    }}
+    stickyHeader
+    stickyFirstColumn
+    stickyLastColumn
+/>
+                    </>
+                )
+            }
+            
+            {/* <div className="overflow-x-auto bg-white">
+                <DataTable
+    columns={columns}
+    data={data}
+    loading={loading}
+    paging
+    pageIndex={pagination.pageIndex}
+    pageSize={pagination.pageSize}
+    total={totalItems}
+    onPaginationChange={handlePaginationChange}
+    onSortingChange={(sorting) => {
+        if (sorting.length > 0) {
+            setSort({ id: sorting[0].id, desc: sorting[0].desc });
+        } else {
+            setSort(null);
+        }
+    }}
+    stickyHeader
+    stickyFirstColumn
+    stickyLastColumn
+/>
+            </div> */}
+
             <Dialog
                 isOpen={dialogIsOpen}
                 onClose={handleCancelDelete}

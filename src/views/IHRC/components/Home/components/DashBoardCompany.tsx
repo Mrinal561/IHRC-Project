@@ -9,6 +9,8 @@ import { Notification, toast } from '@/components/ui';
 import OutlinedInput from '@/components/ui/OutlinedInput';
 import Lottie from 'lottie-react';
 import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json';
+import store, { useAppDispatch } from '@/store';
+import { fetchAuthUser } from '@/store/slices/login';
 
 interface SelectOption {
   value: string;
@@ -61,12 +63,17 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+      const dispatch = useAppDispatch()
+  
+  const { login } = store.getState();
+  const userType = login?.user?.type;
 
-  const showNotification = (type: 'success' | 'info' | 'danger' | 'warning', message: string) => {
+  const showNotification = (type: 'success' | 'info' | 'error' | 'warning', message: string) => {
     toast.push(
       <Notification
         title={type.charAt(0).toUpperCase() + type.slice(1)}
         type={type}
+        closable={true}
       >
         {message}
       </Notification>
@@ -76,25 +83,57 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
   // Load Company Groups
   const loadCompanyGroups = async () => {
     try {
-      const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
-        params: { ignorePlatform: true },
-      });
-      
-      if (data.data && data.data.length > 0) {
-        const defaultGroup = data.data[0];
-        setCompanyGroupName(defaultGroup.name);
-        setCompanyGroupId(String(defaultGroup.id));
-        // Trigger loading companies with the default group
-        loadCompanies(String(defaultGroup.id));
+      setIsLoading(true);
+
+      if (userType === 'auditor') {
+        // For auditor, use data from their profile
+        const response = await dispatch(fetchAuthUser());
+        const groupData = response.payload?.CompanyGroup;
         
-        // Notify parent component if needed
-        onCompanyGroupChange?.({ value: String(defaultGroup.id), label: defaultGroup.name });
+        if (groupData) {
+          const auditorGroup = {
+            label: groupData.name,
+            value: String(groupData.id)
+          };
+          
+          setCompanyGroups([auditorGroup]);
+          setSelectedCompanyGroup(auditorGroup);
+          setCompanyGroupName(groupData.name);
+          setCompanyGroupId(String(groupData.id));
+          onCompanyGroupChange?.(auditorGroup);
+          loadCompanies(String(groupData.id));
+        } else {
+          showNotification('warning', 'No company group assigned to auditor');
+        }
       } else {
-        showNotification('warning', 'No company group found');
+        // For admin/user, use the existing API call
+        const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
+          params: { ignorePlatform: true },
+        });
+        
+        if (data.data && data.data.length > 0) {
+          const formattedGroups = data.data.map((group: any) => ({
+            label: group.name,
+            value: String(group.id),
+          }));
+
+          setCompanyGroups(formattedGroups);
+          
+          if (formattedGroups.length > 0) {
+            const defaultGroup = formattedGroups[0];
+            setSelectedCompanyGroup(defaultGroup);
+            setCompanyGroupName(defaultGroup.label);
+            setCompanyGroupId(defaultGroup.value);
+            onCompanyGroupChange?.(defaultGroup);
+            loadCompanies(defaultGroup.value);
+          }
+        } else {
+          showNotification('warning', 'No company group found');
+        }
       }
     } catch (error) {
       console.error('Failed to load company group:', error);
-      showNotification('danger', 'Failed to load company group');
+      showNotification('error', 'Failed to load company group');
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +174,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
         }
     } catch (error: any) {
       console.error('Failed to load companies:', error);
-      showNotification('danger', error.response?.data?.message || 'Failed to load companies');
+      // showNotification('error', error.response?.data?.message || 'Failed to load companies');
       setCompanies([]);
     }
   };
@@ -155,7 +194,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
       console.log('state  id ' + response.data.id);
     } catch (error) {
       console.error('Failed to load states:', error);
-      showNotification('danger', 'Failed to load states');
+      showNotification('error', 'Failed to load states');
     }
   };
 
@@ -177,7 +216,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
       console.log('district  id ' + response.data.id);
     } catch (error) {
       console.error('Failed to load districts:', error);
-      showNotification('danger', 'Failed to load districts');
+      showNotification('error', 'Failed to load districts');
       setDistricts([]);
     }
   };
@@ -260,7 +299,7 @@ const DashBoardCompany: React.FC<CompanyProps> = ({
       console.log(data.data);
     } catch (error) {
       console.error('Failed to load branches:', error);
-      showNotification('danger', 'Failed to load branches');
+      showNotification('error', 'Failed to load branches');
       setBranches([]);
       setSelectedBranch(null);
       onBranchChange?.(null);

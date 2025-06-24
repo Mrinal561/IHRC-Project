@@ -28,7 +28,7 @@ import role,{ RoleState } from './slices/role/roleSlice'
 import notice,{ NoticeTrackerState } from './slices/noticeTracker/noticeTrackerSlice'
 import notification,{ NotificationState } from './slices/notification/notificationSlice'
 import password,{ PasswordRecoveryState } from './slices/password/passwordSlice'
-
+import auditor, {AuditorState} from './slices/auditorEntity/AuditorEntitySlice'
 
 
 
@@ -67,6 +67,7 @@ export type RootState = CombinedState<{
     noticeTracker: NoticeTrackerState
     notification : NotificationState
     password: PasswordRecoveryState
+    auditor: AuditorState
     /* eslint-disable @typescript-eslint/no-explicit-any */
     [RtkQueryService.reducerPath]: any
 }>
@@ -104,6 +105,7 @@ const staticReducers = {
     notice,
     notification,
     password,
+    auditor,
     [RtkQueryService.reducerPath]: RtkQueryService.reducer,
 }
  

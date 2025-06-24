@@ -1,210 +1,55 @@
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/components/ui';
 import { Notification } from '@/components/ui';
 import AdaptableCard from '@/components/shared/AdaptableCard';
 import DueComplianceTableTool from './components/DueComplianceTableTool';
-import DueComplianceTable, { DueComplianceDetailData } from './components/DueComplianceTable';
+import DueComplianceTable from './components/DueComplianceTable';
 import { endpoints } from '@/api/endpoint';
 import httpClient from '@/api/http-client';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { fetchAuthUser } from '@/store/slices/login';
 import { Loading } from '@/components/shared';
+import store from '@/store';
 
 interface Permissions {
-    canList: boolean;
-    canCreate: boolean;
-    canEdit: boolean;
-    canDelete: boolean;
-  }
-  
-  const getPermissions = (menuItem: any): Permissions => {
-    const permissionsObject = menuItem?.permissions || menuItem?.access || {}
-    return {
-        canList: !!permissionsObject.can_list,
-        canCreate: !!permissionsObject.can_create,
-        canEdit: !!permissionsObject.can_edit,
-        canDelete: !!permissionsObject.can_delete,
-    }
-  }
+  canList: boolean;
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+}
 
+const getPermissions = (menuItem: any): Permissions => {
+  const permissionsObject = menuItem?.permissions || menuItem?.access || {};
+  return {
+    canList: !!permissionsObject.can_list,
+    canCreate: !!permissionsObject.can_create,
+    canEdit: !!permissionsObject.can_edit,
+    canDelete: !!permissionsObject.can_delete,
+  };
+};
 
-  const dummyDueComplianceData: DueComplianceDetailData[] = [
-      {
-        id: 1,
-        uuid: 'comp-001',
-        ac_compliance_id: 101,
-        proof_document: 'https://example.com/proof1.pdf',
-        status: 'pending',
-        compliance_detail: {
-          id: 101,
-          uuid: 'detail-001',
-          legislation: 'Environmental Protection Act 2020',
-          category: 'Environmental',
-          penalty_type: 'Monetary Fine',
-          default_due_date: {
-            first_date: '2023-12-31',
-            last_date: '2023-12-31'
-          },
-          scheduled_frequency: 'yearly',
-          proof_mandatory: true,
-          header: 'Annual Environmental Compliance Report',
-          description: 'Submission of annual environmental impact assessment report',
-          penalty_description: 'Fine up to $50,000 for non-compliance',
-          applicability: 'All manufacturing units',
-          bare_act_text: 'Section 12(3) of the Environmental Protection Act',
-          type: 'Annual Filing',
-          clause: '12.3',
-          frequency: 'Annual',
-          statutory_auth: 'Ministry of Environment',
-          approval_required: true,
-          criticality: 'high',
-          created_type: 'system',
-          created_at: '2023-01-01T00:00:00Z',
-          updated_at: '2023-01-01T00:00:00Z',
-        },
-        upload_date: '2023-12-15',
-        first_due_date: '2023-12-31',
-        due_date: '2023-12-31',
-        data_status: 'pending',
-        uploaded_by: 201,
-        approved_by: 301,
-        created_by: 1,
-        created_at: '2023-01-01T00:00:00Z',
-        updated_at: '2023-12-15T00:00:00Z',
-        UploadBy: {
-          id: 201,
-          first_name: 'John',
-          last_name: 'Doe',
-          email: 'john.doe@example.com',
-          mobile: 9876543210
-        },
-        ApprovedBy: {
-          id: 301,
-          name: 'Jane Smith'
-        },
-        AssignedComplianceRemark: [
-          {
-            id: 1,
-            remark: 'Initial submission pending review',
-            created_by: 1,
-            created_at: '2023-12-01T00:00:00Z',
-            updated_at: '2023-12-01T00:00:00Z'
-          }
-        ]
-      },
-      {
-        id: 2,
-        uuid: 'comp-002',
-        ac_compliance_id: 102,
-        proof_document: null,
-        status: 'due',
-        compliance_detail: {
-          id: 102,
-          uuid: 'detail-002',
-          legislation: 'Labor Standards Act',
-          category: 'Employment',
-          penalty_type: 'Administrative Penalty',
-          default_due_date: {
-            first_date: '2023-06-30',
-            last_date: '2023-06-30'
-          },
-          scheduled_frequency: 'quarterly',
-          proof_mandatory: false,
-          header: 'Quarterly Employee Benefits Report',
-          description: 'Submission of quarterly report on employee benefits',
-          penalty_description: 'Warning for first offense, fine thereafter',
-          applicability: 'All full-time employees',
-          bare_act_text: 'Section 8(2) of the Labor Standards Act',
-          type: 'Quarterly Filing',
-          clause: '8.2',
-          frequency: 'Quarterly',
-          statutory_auth: 'Ministry of Labor',
-          approval_required: false,
-          criticality: 'medium',
-          created_type: 'system',
-          created_at: '2023-01-01T00:00:00Z',
-          updated_at: '2023-01-01T00:00:00Z',
-        },
-        upload_date: null,
-        first_due_date: '2023-06-30',
-        due_date: '2023-06-30',
-        data_status: 'due',
-        uploaded_by: null,
-        approved_by: null,
-        created_by: 1,
-        created_at: '2023-01-01T00:00:00Z',
-        updated_at: '2023-01-01T00:00:00Z',
-        UploadBy: null,
-        ApprovedBy: null,
-        AssignedComplianceRemark: []
-      },
-      {
-        id: 3,
-        uuid: 'comp-004',
-        ac_compliance_id: 104,
-        proof_document: null,
-        status: 'overdue',
-        compliance_detail: {
-          id: 104,
-          uuid: 'detail-004',
-          legislation: 'Health and Safety Regulations',
-          category: 'Safety',
-          penalty_type: 'Both Fine and Penalty',
-          default_due_date: {
-            first_date: '2023-01-15',
-            last_date: '2023-01-15'
-          },
-          scheduled_frequency: 'half_yearly',
-          proof_mandatory: false,
-          header: 'Bi-annual Safety Audit',
-          description: 'Submission of workplace safety audit report',
-          penalty_description: 'Fine up to $25,000 and possible shutdown',
-          applicability: 'All work locations',
-          bare_act_text: 'Section 7(4) of the Health and Safety Regulations',
-          type: 'Bi-annual Filing',
-          clause: '7.4',
-          frequency: 'Half-yearly',
-          statutory_auth: 'Department of Workplace Safety',
-          approval_required: false,
-          criticality: 'medium',
-          created_type: 'system',
-          created_at: '2023-01-01T00:00:00Z',
-          updated_at: '2023-01-01T00:00:00Z',
-        },
-        upload_date: null,
-        first_due_date: '2023-01-15',
-        due_date: '2023-01-15',
-        data_status: 'overdue',
-        uploaded_by: null,
-        approved_by: null,
-        created_by: 1,
-        created_at: '2023-01-01T00:00:00Z',
-        updated_at: '2023-01-01T00:00:00Z',
-        UploadBy: null,
-        ApprovedBy: null,
-        AssignedComplianceRemark: [
-          {
-            id: 3,
-            remark: 'Overdue - reminder sent',
-            created_by: 1,
-            created_at: '2023-01-20T00:00:00Z',
-            updated_at: '2023-01-20T00:00:00Z'
-          }
-        ]
-      }
-    ];
+const validatePage = (page: number): number => {
+  const validatedPage = Math.max(1, Math.floor(Number(page)));
+  return isNaN(validatedPage) ? 1 : validatedPage;
+};
 
+const validatePageSize = (size: number): number => {
+  const validatedSize = Math.max(1, Math.min(100, Math.floor(Number(size))));
+  return isNaN(validatedSize) ? 10 : validatedSize;
+};
 
-    
 const DueCompliance = () => {
-    const navigate = useNavigate()
-    const dispatch = useDispatch();
-    const [isLoading, setIsLoading] = useState(false);
-    const [data, setData] = useState([]);
-      const [pagination, setPagination] = useState({
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { login } = store.getState();
+  const userType = login?.user?.type;
+  const [searchTerm, setSearchTerm] = useState('');
+
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const [pagination, setPagination] = useState({
     total: 0,
     pageIndex: 1,
     pageSize: 10,
@@ -214,205 +59,391 @@ const DueCompliance = () => {
     canCreate: false,
     canEdit: false,
     canDelete: false,
-})
-const [isInitialized, setIsInitialized] = useState(false)
-const [permissionCheckComplete, setPermissionCheckComplete] = useState(false)
+  });
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [permissionCheckComplete, setPermissionCheckComplete] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<'owner' | 'approver' | 'auditor'>('owner');
 
-// useEffect(() => {
-//     const initializeAuth = async () => {
-//         try {
-//             const response = await dispatch(fetchAuthUser())
+  // Initialize auth and permissions
+ // Initialize auth and permissions
+useEffect(() => {
+  const initializeAuth = async () => {
+    try {
+      setIsLoading(true); // Add loading state
+      const response = await dispatch(fetchAuthUser());
 
-//             if (!response.payload?.moduleAccess) {
-//                 toast.push(
-//                     <Notification
-//                         title="Permission"
-//                         type="danger"
-//                     >
-//                         You don't have access to any modules
-//                     </Notification>
-//                 )
-//                 navigate('/home')
-//                 setPermissionCheckComplete(true)
-//                 setIsInitialized(true)
-//                 return
-//             }
-            
-//             // Find Remittance Tracker module
-//             const remittanceModule = response.payload.moduleAccess?.find(
-//                 (module: any) => module.id === 2
-//             )
-            
-//             if (!remittanceModule) {
-//                 toast.push(
-//                     <Notification
-//                         title="Permission"
-//                         type="danger"
-//                     >
-//                         You don't have access to this module
-//                     </Notification>
-//                 )
-//                 navigate('/home')
-//                 setPermissionCheckComplete(true)
-//                 setIsInitialized(true)
-//                 return
-//             }
+      if (!response.payload?.moduleAccess) {
+        toast.push(
+          <Notification title="Permission" type="danger">
+            You don't have access to any modules
+          </Notification>
+        );
+        navigate('/home');
+        return;
+      }
 
-//             // Find PF Tracker menu item
-//             const recommendedMenu = remittanceModule.menus?.find(
-//                 (menu: any) => menu.id === 12
-//             )
+      // Find Due Compliance module
+      const dueComplianceModule = response.payload.moduleAccess?.find(
+        (module: any) => module.id === 5
+      );
 
-//             if (!recommendedMenu) {
-//                 toast.push(
-//                     <Notification
-//                         title="Permission"
-//                         type="danger"
-//                     >
-//                         You don't have access to this menu
-//                     </Notification>
-//                 )
-//                 navigate('/home')
-//                 setPermissionCheckComplete(true)
-//                 setIsInitialized(true)
-//                 return
-//             }
+      if (!dueComplianceModule) {
+        toast.push(
+          <Notification title="Permission" type="danger">
+            You don't have access to the Due Compliance module
+          </Notification>
+        );
+        navigate('/home');
+        return;
+      }
 
-//             // Get and set permissions only once
-//             const newPermissions = getPermissions(recommendedMenu)
-//             setPermissions(newPermissions)
-//             setIsInitialized(true)
-            
-//             // If no list permission, show notification and redirect
-//             if (!newPermissions.canList) {
-//                 toast.push(
-//                     <Notification
-//                         title="Permission"
-//                         type="danger"
-//                     >
-//                         You don't have permission of Due List
-//                     </Notification>
-//                 )
-//                 navigate('/home')
-//             }
-//             setPermissionCheckComplete(true)
+      // Find Due Compliance menu item
+      const dueComplianceMenu = dueComplianceModule.menus?.find(
+        (menu: any) => menu.id === 19
+      );
 
-//         } catch (error) {
-//             console.error('Error fetching auth user:', error)
-//             setIsInitialized(true)
-//             setPermissionCheckComplete(true)
-//         }
-//     }
+      if (!dueComplianceMenu) {
+        toast.push(
+          <Notification title="Permission" type="danger">
+            You don't have access to Due Compliance
+          </Notification>
+        );
+        navigate('/home');
+        return;
+      }
 
-//     if (!isInitialized) {
-//         initializeAuth()
-//     }
-// }, [dispatch, isInitialized, navigate])
+      // Get and set permissions
+      const newPermissions = getPermissions(dueComplianceMenu);
+      setPermissions(newPermissions);
+
+      if (!newPermissions.canList) {
+        toast.push(
+          <Notification title="Permission" type="danger">
+            You don't have permission to view Due Compliance
+          </Notification>
+        );
+        navigate('/home');
+      }
+
+    } catch (error) {
+      console.error('Error fetching auth user:', error);
+      toast.push(
+        <Notification title="Error" type="danger">
+          Failed to initialize application
+        </Notification>
+      );
+    } finally {
+      setIsLoading(false);
+      setIsInitialized(true);
+      setPermissionCheckComplete(true);
+    }
+  };
+
+  if (!isInitialized) {
+    initializeAuth();
+  }
+}, [dispatch, isInitialized, navigate]);
+
+  // Set default role based on user type - only run once after permissions are checked
+  useEffect(() => {
+    if (permissionCheckComplete && permissions.canList) {
+      let defaultRole: 'owner' | 'approver' | 'auditor' = 'owner';
+      
+      if (userType === 'auditor') {
+        defaultRole = 'auditor';
+      } else {
+        defaultRole = 'owner'; // Default to owner for other user types
+      }
+      
+      console.log('Setting default role:', defaultRole, 'for user type:', userType);
+      setSelectedRole(defaultRole);
+    }
+  }, [permissionCheckComplete, permissions.canList, userType]);
+
+  // Fetch data based on selected role
+  const fetchData = useCallback(async () => {
+    // Ensure selectedRole is a string and not an object
+    const currentRole = typeof selectedRole === 'string' ? selectedRole : (selectedRole as any)?.value || 'owner';
+    
+    if (!currentRole || !permissionCheckComplete || !permissions.canList) {
+      console.log('Fetch data conditions not met:', { currentRole, permissionCheckComplete, canList: permissions.canList });
+      return;
+    }
+
+    console.log('Fetching data for role:', currentRole);
+    setIsLoading(true);
+    
+    try {
+      let endpoint = '';
+      
+      switch (currentRole) {
+        case 'owner':
+          endpoint = endpoints.compliance.dueComplianceOwnerList();
+          console.log('Calling owner endpoint:', endpoint);
+          break;
+        case 'approver':
+          endpoint = endpoints.compliance.dueComplianceApproverList();
+          console.log('Calling approver endpoint:', endpoint);
+          break;
+        case 'auditor':
+          endpoint = endpoints.compliance.dueComplianceAuditorList();
+          console.log('Calling auditor endpoint:', endpoint);
+          break;
+        default:
+          console.error('Invalid role:', currentRole);
+          setIsLoading(false);
+          return;
+      }
+
+      const page = validatePage(pagination.pageIndex);
+      const page_size = validatePageSize(pagination.pageSize);
+
+      console.log('Making API call to:', endpoint, 'with params:', { page, page_size });
+
+      const response = await httpClient.get(endpoint, {
+        params: {
+          page: page.toString(),
+          page_size: page_size.toString() ,
+          search: searchTerm,
+        },
+      });
+
+      console.log('API Response:', response?.data);
+
+      if (response?.data?.data) {
+        setData(response.data.data);
+        setPagination(prev => ({
+          ...prev,
+          total: response.data.paginate_data?.totalResults || 0,
+          pageIndex: page,
+          pageSize: page_size
+        }));
+        console.log('Data updated successfully for role:', currentRole);
+      }
+    } catch (error: any) {
+      console.error('Error fetching compliance data:', error);
+      toast.push(
+        <Notification type="danger" title="Error" closable={true}>
+          Failed to fetch compliance data
+        </Notification>
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedRole, pagination.pageIndex, pagination.pageSize, permissionCheckComplete, permissions.canList, searchTerm,]);
 
 
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    setPagination(prev => ({ ...prev, pageIndex: 1 })); // Reset to first page when searching
+  };
 
+  useEffect(() => {
+    console.log('Effect triggered - selectedRole:', selectedRole, 'permissionCheckComplete:', permissionCheckComplete, 'canList:', permissions.canList);
+    if (permissionCheckComplete && permissions.canList && selectedRole) {
+      fetchData();
+    }
+  }, [selectedRole, pagination.pageIndex, pagination.pageSize, fetchData]);
 
-    // const fetchDueComplianceData = useCallback(async (page: number = 1, pageSize: number = 10) => {
-    //     console.log('Fetching due compliance data...');
-        
-    //     setIsLoading(true);
-    //     try {
-    //         const response = await httpClient.get(endpoints.due.getAll(), {
-    //             params: {
-    //                 page,
-    //                 pageSize:pageSize,
-    //                 'data_status[]': ['due']
-    //             }
-    //         });
+  // FIXED: Handle role change properly
+  const handleRoleChange = (role: 'owner' | 'approver' | 'auditor') => {
+    console.log('Role changed from', selectedRole, 'to', role);
+    
+    // Ensure we're setting a string value
+    const newRole = typeof role === 'string' ? role : (role as any)?.value || 'owner';
+    
+    setSelectedRole(newRole as 'owner' | 'approver' | 'auditor');
+    
+    // Reset pagination when role changes
+    setPagination(prev => ({
+      ...prev, 
+      pageIndex: 1
+    }));
+  };
 
-    //         if (response?.data?.data) {
-    //             console.log('API Response:', response.data);
-    //             console.log('Due compliance data received:', response.data.data);
-    //             setData(response.data.data);
-    //              setPagination((prev) => ({...prev, total: response.data.paginate_data.totalResults }));
-    //         } else {
-    //             console.log('No data in API response or unexpected response structure');
-    //         }
-    //     } catch (error: any) {
-    //         console.error('Error fetching due compliance data:', error);
-    //         console.error('Error details:', {
-    //             message: error.message,
-    //             stack: error.stack
-    //         });
-    //         toast.push(
-    //             <Notification type="danger" title="Error">
-    //                 Failed to fetch due compliance data
-    //             </Notification>
-    //         );
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // }, []);
+  const handleUploadAll = (selectedComplianceIds: number[], remark: string) => {
+    console.log(`Uploading ${selectedComplianceIds.length} compliances with remark: ${remark}`);
+    // Implement API call for bulk upload if needed
+  };
 
-    useEffect(() => {
-        console.log('Initial component mount - Fetching data...');
-        // fetchDueComplianceData(pagination.pageIndex, pagination.pageSize);
-    }, [, pagination.pageIndex, pagination.pageSize]);
+  const handleUploadSingle = async (complianceId: number, file: File, remark: string) => {
+    try {
+      setIsLoading(true);
+      const formData = new FormData();
+      formData.append('document', file);
+      formData.append('remark', remark);
 
-    const handleUploadAll = (selectedComplianceIds, remark) => {
-        console.log(`Uploading ${selectedComplianceIds.length} compliances with remark: ${remark}`);
-        // Implement API call for bulk upload
-    };
+      await httpClient.post(
+        endpoints.compliance.dueComplianceDocumentUpload(complianceId),
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
-    const handleUploadSingle = (complianceId, isProofMandatory, file, remark) => {
-        console.log(`Uploading compliance ${complianceId}. Proof mandatory: ${isProofMandatory}. File: ${file?.name}. Remark: ${remark}`);
-        // Implement API call for single upload
-    };
+      toast.push(
+        <Notification title="Success" type="success">
+          Document uploaded successfully
+        </Notification>
+      );
+      fetchData();
+    } catch (error) {
+      toast.push(
+        <Notification title="Error" type="danger">
+          Failed to upload document
+        </Notification>
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const handleUpdateStatus = (complianceId, newStatus) => {
-        console.log(`Updating status for compliance ${complianceId} to ${newStatus}`);
-        // Implement API call for status update
-    };
-      const handlePaginationChange = (page: number) => {
-    setPagination((prev) => ({...prev, pageIndex: page }));
+  const handleApprove = async (complianceId: number) => {
+    try {
+      setIsLoading(true);
+      const currentRole = typeof selectedRole === 'string' ? selectedRole : (selectedRole as any)?.value || 'owner';
+      let endpoint = '';
+      
+      if (currentRole === 'approver') {
+        endpoint = endpoints.compliance.approveOwnerCompliance(complianceId);
+      } else if (currentRole === 'auditor') {
+        endpoint = endpoints.compliance.approveApproverCompliance(complianceId);
+      }
+      
+      await httpClient.post(endpoint);
+      toast.push(
+        <Notification title="Success" type="success">
+          Compliance approved successfully
+        </Notification>
+      );
+      fetchData();
+    } catch (error) {
+      toast.push(
+        <Notification title="Error" type="danger">
+          Failed to approve compliance
+        </Notification>
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReject = async (complianceId: number, reason: string) => {
+    try {
+      setIsLoading(true);
+     
+      const currentRole = typeof selectedRole === 'string' ? selectedRole : (selectedRole as any)?.value || 'owner';
+
+      let endpoint = '';
+      
+      if (currentRole === 'approver') {
+        endpoint = endpoints.compliance.rejectOwnerCompliance(complianceId);
+      } else if (currentRole === 'auditor') {
+        endpoint = endpoints.compliance.rejectApproverCompliance(complianceId);
+      }
+      
+      await httpClient.post(endpoint, { reason });
+      toast.push(
+        <Notification title="Success" type="success">
+          Compliance rejected successfully
+        </Notification>
+      );
+      fetchData();
+    } catch (error) {
+      toast.push(
+        <Notification title="Error" type="danger">
+          Failed to reject compliance
+        </Notification>
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleViewDetails = async (complianceId: number) => {
+    try {
+      setIsLoading(true);
+      const response = await httpClient.get(
+        endpoints.compliance.detailDueCompliance(complianceId)
+      );
+      return response.data;
+    } catch (error) {
+      toast.push(
+        <Notification title="Error" type="danger">
+          Failed to fetch compliance details
+        </Notification>
+      );
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePaginationChange = (page: number) => {
+    const validPage = validatePage(page);
+    setPagination((prev) => ({
+      ...prev, 
+      pageIndex: validPage
+    }));
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
-    setPagination((prev) => ({...prev, pageSize: newPageSize, pageIndex: 1 }));
+    const validPageSize = validatePageSize(newPageSize);
+    setPagination((prev) => ({
+      ...prev, 
+      pageSize: validPageSize,
+      pageIndex: 1  // Reset to first page when page size changes
+    }));
   };
 
-//   if (!isInitialized || !permissionCheckComplete) {
-//     return (
-//         <Loading loading={true} type="default">
-//             <div className="h-full" />
-//         </Loading>
-//     )
-// }
-
-// // Only render if we have list permission
-// if (!permissions.canList) {
-//     return null
-// }
-
+  if (!isInitialized || !permissionCheckComplete) {
     return (
-        <AdaptableCard className="h-full" bodyClass="h-full">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-10">
-                <div className="mb-4 lg:mb-0">
-                    <h3 className="text-2xl font-bold">Due Compliance</h3>
-                    <p className="text-gray-600">View your company's due compliance</p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <DueComplianceTableTool data={data} onUploadAll={handleUploadAll} canCreate={permissions.canCreate}/>
-                </div>
-            </div>
-            <DueComplianceTable 
-                data={dummyDueComplianceData} 
-                loading={isLoading}
-                onUploadSingle={handleUploadSingle} 
-                onUpdateStatus={handleUpdateStatus} 
-                // onDataUpdate={fetchDueComplianceData}
-                 pagination={pagination}
+      <Loading loading={true} type="default">
+        <div className="h-full" />
+      </Loading>
+    );
+  }
+
+  if (!permissions.canList) {
+    return null;
+  }
+
+  return (
+    <AdaptableCard className="h-full" bodyClass="h-full">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-10">
+        <div className="mb-4 lg:mb-0">
+          <h3 className="text-2xl font-bold">Due Compliance</h3>
+          <p className="text-gray-600">View your company's due compliance</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <DueComplianceTableTool 
+            data={data} 
+            onUploadAll={handleUploadAll} 
+            canCreate={permissions.canCreate}
+            selectedRole={selectedRole}
+            onRoleChange={handleRoleChange}
+            userType={userType}
+            onSearch={handleSearch}
+          />
+        </div>
+      </div>
+      <DueComplianceTable 
+        data={data} 
+        loading={isLoading}
+        selectedRole={selectedRole}
+        onUploadSingle={handleUploadSingle}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onViewDetails={handleViewDetails}
+        pagination={pagination}
         onPaginationChange={handlePaginationChange}
         onPageSizeChange={handlePageSizeChange}
         canCreate={permissions.canCreate}
-            />
-        </AdaptableCard>
-    );
+      />
+    </AdaptableCard>
+  );
 };
 
 export default DueCompliance;

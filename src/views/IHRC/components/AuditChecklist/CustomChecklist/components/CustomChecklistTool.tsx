@@ -59,7 +59,7 @@ const CustomChecklistTool = () => {
       >
         Download 
       </Button>
-      {/* <BulkUpload /> */}
+      <BulkUpload />
       <div className="block lg:inline-block md:mb-0 mb-4">
         <CustomChecklistButton />
       </div>

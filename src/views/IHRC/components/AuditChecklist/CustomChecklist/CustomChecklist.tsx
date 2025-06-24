@@ -13,9 +13,9 @@ const CustomChecklist = () => {
                 </div>
                 <CustomChecklistTool />
       </div>
-      <div className='mb-8'>
-      <Company />
-      </div>
+      {/* <div className='mb-8'> */}
+      {/* <Company /> */}
+      {/* </div> */}
     <CustomChecklistTable/>
  </AdaptableCard>
   )

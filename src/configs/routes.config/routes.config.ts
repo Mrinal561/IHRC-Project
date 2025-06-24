@@ -210,6 +210,17 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'auditorEntity.add',
+        path: `/add-auditor`,
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Auditor/components/AuditorAddForm'
+                ),
+        ),
+        authority: [],
+    },
+    {
         key: 'pfSetup.edit',
         path: `/pfsetup-edit`,
         component: lazy(
@@ -223,11 +234,11 @@ export const protectedRoutes = [
 
     {
         key: 'assignChecklist.item3',
-        path: '/assigned-checklist',
+        path: '/compliance-checklist',
         component: lazy(
             () =>
                 import(
-                    '@/views/IHRC/components/AuditChecklist/AssignChecklist/AssignChecklist'
+                    '@/views/IHRC/components/AuditChecklist/AuditChecklistPage/AuditChecklistPage'
                 ),
         ),
         authority: [],
@@ -539,6 +550,14 @@ export const protectedRoutes = [
         path: '/user-entity',
         component: lazy(
             () => import('@/views/IHRC/components/UserEntity/UserEntity'),
+        ),
+        authority: [],
+    },
+    {
+        key: 'companySetup.collapse.auditorSetup',
+        path: '/auditor-entity',
+        component: lazy(
+            () => import('@/views/IHRC/components/Auditor/AuditorEntity'),
         ),
         authority: [],
     },

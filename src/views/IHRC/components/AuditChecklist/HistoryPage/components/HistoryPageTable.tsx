@@ -347,224 +347,216 @@
 // export default HistoryPageTable
 
 
-
-import React, { useState } from 'react'
-import { ColumnDef } from '@/components/shared/DataTable'
-import DataTable from '@/components/shared/DataTable'
-import {
-    Button,
-    Tooltip,
-    Dialog,
-    Input,
-    toast,
-    Notification,
-    Badge,
-} from '@/components/ui'
-import { FaDownload } from 'react-icons/fa6'
-import { HiDownload, HiOutlineEye } from 'react-icons/hi'
-import { RiEyeLine } from 'react-icons/ri'
-import { Navigate, useNavigate } from 'react-router-dom'
-import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json'
-import Lottie from 'lottie-react'
-import { HiOutlineViewGrid } from 'react-icons/hi'
+import React, { useState, useEffect } from 'react';
+import { ColumnDef } from '@/components/shared/DataTable';
+import DataTable from '@/components/shared/DataTable';
+import { Button, Tooltip, toast, Notification } from '@/components/ui';
+import { HiDownload, HiOutlineEye } from 'react-icons/hi';
+import { RiEyeLine } from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
+import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json';
+import Lottie from 'lottie-react';
+import { HiOutlineViewGrid } from 'react-icons/hi';
+import { endpoints } from '@/api/endpoint';
+import httpClient from '@/api/http-client';
+import store from '@/store';
 
 interface ComplianceData {
-    id: number
-    uuid: string
-    record_id: string
-    company: string
-    proof_document: string | null
-    status: string
-    data_status: string
+    id: number;
+    uuid: string;
+    record_id: string;
+    company: string;
+    proof_document: string | null;
+    status: string;
+    data_status: string;
     compliance_detail: {
-        id: number
-        legislation: string
-        header: string
-        description: string
-        category: string
-        criticality: string
-    }
+        id: number;
+        legislation: string;
+        header: string;
+        description: string;
+        category: string;
+        criticality: string;
+    };
     AssignedComplianceRemark: Array<{
-        id: number
-        remark: string
-        created_at: string
-    }>
+        id: number;
+        remark: string;
+        created_at: string;
+    }>;
 }
 
-const HistoryPageTable: React.FC = () => {
-    const navigate = useNavigate()
-    
-    // Dummy data for compliance history
-    const dummyData: ComplianceData[] = [
-        {
-            id: 1,
-            uuid: '550e8400-e29b-41d4-a716-446655440000',
-            record_id: 'COMP-2023-001',
-            proof_document: 'document1.pdf',
-            company: "Adani Solutions",
-            status: 'completed',
-            data_status: 'Complied',
-            compliance_detail: {
-                id: 101,
-                legislation: 'Labour Act 2021',
-                header: 'Monthly Safety Inspection',
-                description: 'Monthly inspection of workplace safety equipment',
-                category: 'Safety',
-                criticality: 'High'
-            },
-            AssignedComplianceRemark: [
-                {
-                    id: 1001,
-                    remark: 'All safety checks completed successfully',
-                    created_at: '2023-06-15T10:30:00Z'
-                }
-            ]
-        },
-        {
-            id: 2,
-            uuid: '550e8400-e29b-41d4-a716-446655440001',
-            record_id: 'COMP-2023-002',
-            proof_document: 'document2.pdf',
-            company: "Adani Tech",
-            status: 'completed',
-            data_status: 'Complied',
-            compliance_detail: {
-                id: 102,
-                legislation: 'Environmental Protection Act',
-                header: 'Quarterly Emissions Report',
-                description: 'Report on factory emissions for Q2 2023',
-                category: 'Environmental',
-                criticality: 'Medium'
-            },
-            AssignedComplianceRemark: [
-                {
-                    id: 1002,
-                    remark: 'Emissions within acceptable limits',
-                    created_at: '2023-06-20T14:15:00Z'
-                }
-            ]
-        },
-        {
-            id: 3,
-            uuid: '550e8400-e29b-41d4-a716-446655440002',
-            record_id: 'COMP-2023-003',
-            proof_document: 'document3.pdf',
-            status: 'completed',
-            company: "Adani Solutions",
-            data_status: 'Complied',
-            compliance_detail: {
-                id: 103,
-                legislation: 'Tax Compliance Regulation',
-                header: 'Monthly Tax Filing',
-                description: 'Monthly tax filing for June 2023',
-                category: 'Financial',
-                criticality: 'High'
-            },
-            AssignedComplianceRemark: [
-                {
-                    id: 1003,
-                    remark: 'Filed with tax department on time',
-                    created_at: '2023-06-30T16:45:00Z'
-                }
-            ]
-        }
-    ]
+const validatePage = (page: number): number => {
+  const validatedPage = Math.max(1, Math.floor(Number(page)));
+  return isNaN(validatedPage) ? 1 : validatedPage;
+};
 
-    const [data] = useState<ComplianceData[]>(dummyData)
-    const [isLoading] = useState(false) // Set to false since we're using dummy data
+const validatePageSize = (size: number): number => {
+  const validatedSize = Math.max(1, Math.min(100, Math.floor(Number(size))));
+  return isNaN(validatedSize) ? 10 : validatedSize;
+};
+
+const HistoryPageTable: React.FC = () => {
+    const navigate = useNavigate();
+    const [data, setData] = useState<ComplianceData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [tableData, setTableData] = useState({
+        total: 0,
+        pageIndex: 1,
+        pageSize: 10,
+        query: '',
+        sort: { order: '', key: '' },
+    });
+    const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+    const [selectedState, setSelectedState] = useState<string | null>(null);
+
+    // Get user info from store
+    const { login } = store.getState();
+    const userType = login?.user?.type;
+
+    // Fetch compliance history data
+    const fetchComplianceHistory = async () => {
+        try {
+            setIsLoading(true);
+            const params = {
+                page: tableData.pageIndex.toString(),
+                page_size: tableData.pageSize.toString(),
+                search: tableData.query,
+                sort_by: tableData.sort.key || 'id',
+                sort: tableData.sort.order || 'desc',
+                company_id: selectedCompany,
+                state_id: selectedState,
+                status: 'approved_by_auditor' // Always filter by approved status for history
+            };
+
+            const { data: response } = await httpClient.get(
+                endpoints.compliance.complianceHistoryList(),
+                { params }
+            );
+
+            // Transform API response to match your table structure
+            const transformedData = response.data.map((item: any) => ({
+                id: item.id,
+                uuid: item.uuid,
+                record_id: item.record_id || `COMP-${item.id}`,
+                company: item.Company?.name || 'N/A',
+                proof_document: item.proof_document,
+                status: item.status,
+                data_status: 'Complied', // You may need to adjust this based on actual data
+                compliance_detail: {
+                    id: item.ComplianceChecklist?.id || 0,
+                    legislation: item.legislation_act || 'N/A',
+                    header: item.compliance_header || 'N/A',
+                    description: item.ComplianceChecklist?.compliance_description || 'N/A',
+                    category: item.category || 'General',
+                    criticality: item.criticality || 'Medium'
+                },
+                AssignedComplianceRemark: item.remarks || []
+            }));
+
+            setData(transformedData);
+            setTableData(prev => ({
+                ...prev,
+                total: response.paginate_data?.totalResults || 0
+            }));
+        } catch (error) {
+            console.error('Error fetching compliance history:', error);
+            toast.push(
+                <Notification
+                    title="Error"
+                    type="danger"
+                    duration={2500}
+                >
+                    Failed to load compliance history
+                </Notification>
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Handle download compliance history
+  
+    // Fetch data on component mount and when filters change
+    useEffect(() => {
+        fetchComplianceHistory();
+    }, [tableData.pageIndex, tableData.pageSize, tableData.query, tableData.sort, selectedCompany, selectedState]);
 
     const columns: ColumnDef<ComplianceData>[] = [
         {
-            header: 'Instance ID',                enableSorting: false,
-
+            header: 'Instance ID',
+            enableSorting: false,
             accessorKey: 'record_id',
             cell: (props) => (
-                <div className="w-40 text-start">{props.getValue()}</div>
+                <div className="w-40 text-start">{props.getValue() as string}</div>
             ),
         },
         {
-            header: 'Company',                
+            header: 'Company',
             enableSorting: false,
-
             accessorKey: 'company',
-            cell: (props) => {
-                             const value = props.getValue() as string
-return(
-    <div className="w-40 text-start">{value}</div>
-)
-            },
+            cell: (props) => (
+                <div className="w-40 text-start">{props.getValue() as string}</div>
+            ),
         },
         {
-            header: 'Legislation(Act Name)',                
+            header: 'Legislation(Act Name)',
             enableSorting: false,
-
             accessorKey: 'compliance_detail.legislation',
             cell: (props) => {
-                const value = props.getValue() as string
+                const value = props.getValue() as string;
                 return (
                     <Tooltip title={value} placement="top">
                         <div className="w-64 truncate">{value}</div>
                     </Tooltip>
-                )
+                );
             },
         },
         {
-            header: 'Header',                enableSorting: false,
-
+            header: 'Header',
+            enableSorting: false,
             accessorKey: 'compliance_detail.header',
             cell: (props) => {
-                const value = props.getValue() as string
+                const value = props.getValue() as string;
                 return (
                     <Tooltip title={value} placement="top">
                         <div className="w-64 truncate">{value}</div>
                     </Tooltip>
-                )
+                );
             },
         },
         {
             header: 'Actions',
             id: 'actions',
-            cell: ({ row }) => {
-                return(
+            cell: ({ row }) => (
                 <div className='flex gap-2 items-center'>
-                <Tooltip title="View Compliance Detail">
-                    <Button
-                        size="sm"
-                        onClick={() => {
-                            navigate(
-                                `/app/IHRC/history-list-detail/${row.original.uuid}`,
-                                {
-                                    state: {
-                                        ...row.original,
-                                        complianceDetail: row.original.compliance_detail,
-                                        remarks: row.original.AssignedComplianceRemark,
-                                    },
-                                }
-                            )
-                        }}
-                        icon={<RiEyeLine />}
+                    <Tooltip title="View Compliance Detail">
+                        <Button
+                            size="sm"
+                            onClick={() => {
+                                navigate(
+                                    `/app/IHRC/history-list-detail/${row.original.uuid}`,
+                                    {
+                                        state: {
+                                            ...row.original,
+                                            complianceDetail: row.original.compliance_detail,
+                                            remarks: row.original.AssignedComplianceRemark,
+                                        },
+                                    }
+                                );
+                            }}
+                            icon={<RiEyeLine />}
                         />
-                </Tooltip>
-                <Tooltip title="Download History">
-                     <Button
-                        size="sm"
-                        icon={<HiDownload />}
+                    </Tooltip>
+                    {/* <Tooltip title="Download History">
+                        <Button
+                            size="sm"
+                            icon={<HiDownload />}
+                            onClick={() => handleDownload()}
                         />
-                </Tooltip>
-                        </div>
-            )
+                    </Tooltip> */}
+                </div>
+            ),
         },
-        },
-    ]
-
-    // State for table pagination and sorting
-    const [tableData] = useState({
-        total: dummyData.length,
-        pageIndex: 1,
-        pageSize: 10,
-        query: '',
-        sort: { order: '', key: '' },
-    })
+    ];
 
     if (isLoading) {
         return (
@@ -578,7 +570,7 @@ return(
                 </div>
                 <p className="text-lg font-semibold">Loading Data...</p>
             </div>
-        )
+        );
     }
 
     return (
@@ -600,13 +592,22 @@ return(
                         pageIndex: tableData.pageIndex,
                         pageSize: tableData.pageSize,
                     }}
+                    onPaginationChange={(page) => {
+                        setTableData(prev => ({ ...prev, pageIndex: page }));
+                    }}
+                    onPageSizeChange={(size) => {
+                        setTableData(prev => ({ ...prev, pageSize: size, pageIndex: 1 }));
+                    }}
+                    onSort={(sort) => {
+                        setTableData(prev => ({ ...prev, sort }));
+                    }}
                     stickyHeader={true}
                     stickyLastColumn={true}
                     stickyFirstColumn={true}
                 />
             )}
         </div>
-    )
-}
+    );
+};
 
-export default HistoryPageTable
+export default HistoryPageTable;

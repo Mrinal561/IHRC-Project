@@ -6,6 +6,8 @@ import { endpoints } from '@/api/endpoint';
 import httpClient from '@/api/http-client';
 import { Notification, toast } from '@/components/ui';
 import OutlinedInput from '@/components/ui/OutlinedInput';
+import store, { useAppDispatch } from '@/store';
+import { fetchAuthUser } from '@/store/slices/login';
 
 interface SelectOption {
   value: string;
@@ -56,6 +58,9 @@ const Company: React.FC<CompanyProps> = ({
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+  const dispatch = useAppDispatch()
+  const { login } = store.getState();
+   const userType = login.user.type;
 
   const showNotification = (type: 'success' | 'info' | 'error' | 'warning', message: string) => {
     toast.push(
@@ -70,24 +75,54 @@ const Company: React.FC<CompanyProps> = ({
 
   // Load Company Groups
   const loadCompanyGroups = async () => {
-
     try {
-      const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
-        params: { ignorePlatform: true },
-      });
-      
-      if (data.data && data.data.length > 0) {
-        const defaultGroup = data.data[0];
-        setCompanyGroupName(defaultGroup.name);
-        setCompanyGroupId(String(defaultGroup.id));
+      setIsLoading(true);
+
+      if (userType === 'auditor') {
+        // For auditor, use data from their profile
+        const response = await dispatch(fetchAuthUser());
+        const groupData = response.payload?.CompanyGroup;
         
-        // Trigger loading companies with the default group
-        loadCompanies(String(defaultGroup.id));
-        
-        // Notify parent component if needed
-        onCompanyGroupChange?.({ value: String(defaultGroup.id), label: defaultGroup.name });
+        if (groupData) {
+          const auditorGroup = {
+            label: groupData.name,
+            value: String(groupData.id)
+          };
+          
+          setCompanyGroups([auditorGroup]);
+          setSelectedCompanyGroup(auditorGroup);
+          setCompanyGroupName(groupData.name);
+          setCompanyGroupId(String(groupData.id));
+          onCompanyGroupChange?.(auditorGroup);
+          loadCompanies(String(groupData.id));
+        } else {
+          showNotification('warning', 'No company group assigned to auditor');
+        }
       } else {
-        showNotification('warning', 'No company group found');
+        // For admin/user, use the existing API call
+        const { data } = await httpClient.get(endpoints.companyGroup.getAll(), {
+          params: { ignorePlatform: true },
+        });
+        
+        if (data.data && data.data.length > 0) {
+          const formattedGroups = data.data.map((group: any) => ({
+            label: group.name,
+            value: String(group.id),
+          }));
+
+          setCompanyGroups(formattedGroups);
+          
+          if (formattedGroups.length > 0) {
+            const defaultGroup = formattedGroups[0];
+            setSelectedCompanyGroup(defaultGroup);
+            setCompanyGroupName(defaultGroup.label);
+            setCompanyGroupId(defaultGroup.value);
+            onCompanyGroupChange?.(defaultGroup);
+            loadCompanies(defaultGroup.value);
+          }
+        } else {
+          showNotification('warning', 'No company group found');
+        }
       }
     } catch (error) {
       console.error('Failed to load company group:', error);
