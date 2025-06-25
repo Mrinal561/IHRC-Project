@@ -1111,7 +1111,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
                           <div className="flex items-center gap-2">
                             <Input
                               type="file"
-                              size="sm"
+                              size="md"
                               className="w-full"
                               accept=".pdf,.jpg,.zip,.jpeg,.png"
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

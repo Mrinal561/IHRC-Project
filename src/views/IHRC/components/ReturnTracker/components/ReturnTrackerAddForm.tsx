@@ -971,7 +971,7 @@ const handleSubmit = async (values: ReturnFormValues) => {
                         </label>
                         <Input
                           type="file"
-                          size="sm"
+                          size="md"
                           className="w-full"
                           accept=".pdf,.jpg,.zip,.jpeg,.png"
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
