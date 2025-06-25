@@ -256,8 +256,6 @@
 
 
 
-
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Button, toast, Notification } from '@/components/ui';
 import { HiArrowLeft, HiEye } from 'react-icons/hi';
@@ -339,7 +337,9 @@ const PoshSetup = () => {
 
   const handleViewDocument = () => {
     if (!currentConfig?.document) return;
-    window.open(currentConfig.document, '_blank');
+    // Construct the full URL with your API gateway prefix
+    const fullPath = `${import.meta.env.VITE_API_GATEWAY}/${currentConfig.document}`;
+    window.open(fullPath, '_blank');
   };
 
   const handleSubmit = async () => {
@@ -439,57 +439,54 @@ const PoshSetup = () => {
           />
         </div>
 
-        {isEditMode ? (
-          <div>
-            <label className="text-gray-600 mb-2 block">
-              POSH Document {!hasExistingConfig && <span className="text-red-500">*</span>}
-            </label>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept=".pdf,.doc,.docx,image/*"
-              className="block w-full text-sm text-gray-500 mb-2
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
-            />
-            {selectedFile ? (
-              <div className="p-2 text-sm text-gray-600">
-                New file selected: {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
-              </div>
-            ) : currentConfig?.document ? (
-              <div className="flex items-center mt-2">
-                <span className="text-gray-600 mr-2">
-                  Current document: {currentConfig.original_filename || 'document'}
-                </span>
-                <Button
-                  icon={<HiEye />}
-                  size="xs"
-                  variant="plain"
-                  onClick={handleViewDocument}
-                />
-              </div>
-            ) : null}
-          </div>
-        ) : currentConfig?.document ? (
-          <div>
-            <label className="text-gray-600 mb-2 block">POSH Document</label>
-            <div className="flex items-center">
-              <span className="text-gray-600 mr-2">
-                {currentConfig.original_filename || 'View document'}
-              </span>
-              <Button
-                icon={<HiEye />}
-                size="xs"
-                variant="plain"
-                onClick={handleViewDocument}
+        <div>
+          <label className="text-gray-600 mb-2 block">
+            POSH Document {!hasExistingConfig && <span className="text-red-500">*</span>}
+          </label>
+          
+          {isEditMode ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".pdf,.doc,.docx,image/*"
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100"
               />
+              {/* {currentConfig?.document && (
+                <button
+                  onClick={handleViewDocument}
+                  className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
+                  title="View Document"
+                >
+                  <HiEye size={20} />
+                </button>
+              )} */}
             </div>
-          </div>
-        ) : null}
+          ) : (
+            <p className="text-gray-400">Click on edit button if you want to upload the document or changing the return level</p>
+        //   : currentConfig?.document ? (
+        //     <div className="flex items-center">
+        //       <span className="text-gray-600 mr-2">
+        //         {currentConfig.original_filename || 'View document'}
+        //       </span>
+        //       <button
+        //         onClick={handleViewDocument}
+        //         className="p-2 hover:bg-gray-100 rounded-full"
+        //         title="View Document"
+        //       >
+        //         <HiEye size={20} />
+        //       </button>
+        //     </div>
+        //   ) 
+           
+          )}
+        </div>
       </div>
 
       <div className="flex justify-end gap-2 mt-8">
@@ -510,7 +507,7 @@ const PoshSetup = () => {
               onClick={handleSubmit}
               loading={isLoading}
             >
-              Save Configuration
+              Save
             </Button>
           </>
         ) : (
@@ -519,7 +516,7 @@ const PoshSetup = () => {
             onClick={() => setIsEditMode(true)}
             disabled={!hasExistingConfig}
           >
-            Edit Configuration
+            Edit
           </Button>
         )}
         
@@ -528,7 +525,7 @@ const PoshSetup = () => {
             variant="solid" 
             onClick={() => setIsEditMode(true)}
           >
-            Create Configuration
+            Create
           </Button>
         )}
       </div>
