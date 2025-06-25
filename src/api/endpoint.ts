@@ -240,6 +240,7 @@ export const endpoints = {
     listPolicy: () => api("companyadmin/posh-setup/policy/list"),
     policyTemplate: () => api("companyadmin/posh-setup/policy/template"),
     policyBulkCreate: () => api("companyadmin/posh-setup/policy/bulk-upload"),
+    policyDelete: (id:any) => api(`companyadmin/posh-setup/policy/${id}`)
     },
     
     pfiwtracker: {

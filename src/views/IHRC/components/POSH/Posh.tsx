@@ -3,7 +3,7 @@ import { Button, Dialog, Input, Notification } from '@/components/ui';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
 import PoshBulkUpload from './components/PoshBulkUpload';
 import PoshTable from './components/PoshTable';
-import { HiPlusCircle, HiDownload } from 'react-icons/hi';
+import { HiPlusCircle, HiDownload, HiTrash } from 'react-icons/hi';
 import { AdaptableCard } from '@/components/shared';
 import OutlinedInput from '@/components/ui/OutlinedInput';
 import httpClient from '@/api/http-client';

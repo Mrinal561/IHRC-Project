@@ -129,7 +129,7 @@ const CommitteeTable = () => {
                 header: 'Company',
                 enableSorting: false,
                 accessorKey: 'company_name',
-                cell: ({ row }) => <div className="w-40 truncate">{toTitleCase(row.original.company_name)}</div>
+                cell: ({ row }) => <div className="w-40 truncate">{row.original.company_name}</div>
             },
             {
                 header: 'Committee Type',

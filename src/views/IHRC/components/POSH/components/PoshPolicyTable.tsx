@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { DataTable } from '@/components/shared';
-import { Button, Tooltip, Notification } from '@/components/ui';
-import { HiDownload, HiOutlineViewGrid } from 'react-icons/hi';
+import { Button, Tooltip, Notification, toast, Dialog } from '@/components/ui';
+import { HiDownload, HiOutlineViewGrid, HiTrash } from 'react-icons/hi';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 import useAuth from '@/utils/hooks/useAuth';
+import { FiTrash } from 'react-icons/fi';
 
 interface PoshPolicy {
     id: number;
@@ -27,6 +28,12 @@ interface PoshPolicyTableProps {
 const PoshPolicyTable = ({ refreshKey }: PoshPolicyTableProps) => {
     const [data, setData] = useState<PoshPolicy[]>([]);
     const [loading, setLoading] = useState(false);
+        const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+            const [selectedPolicy, setSelectedPolicy] = useState<PoshPolicy | null>(null);
+                const [isDeleting, setIsDeleting] = useState(false);
+
+
+
     const [pagingData, setPagingData] = useState({
         total: 0,
         page: 1,
@@ -82,6 +89,58 @@ const PoshPolicyTable = ({ refreshKey }: PoshPolicyTableProps) => {
         }
     };
 
+    const handleDeleteClick = (policyId: number) => {
+    const policy = data.find(p => p.id === policyId);
+    
+    if (!policy) {
+        toast.push(
+            <Notification title="Error" type="danger">
+                Policy not found
+            </Notification>
+        );
+        return;
+    }
+
+    console.log('Deleting policy with ID:', policy.id);
+    setSelectedPolicy(policy);
+    setDeleteDialogOpen(true);
+};
+    const confirmDelete = async () => {
+        if (!selectedPolicy) return;
+        
+        setIsDeleting(true);
+        try {
+            await httpClient.delete(endpoints.poshSetup.policyDelete(selectedPolicy.id));
+               toast.push(
+                    <Notification
+                        title="Success"
+                        closable={true}
+                        type="success"
+                    >
+                        Policy deleted successfully
+                    </Notification>,
+                )  
+
+            // Refresh the table
+            fetchPolicies(pagingData.page, pagingData.limit);
+        } catch (error) {
+            console.error('Delete error:', error);
+            toast.push(
+                    <Notification
+                        title="Error"
+                        closable={true}
+                        type="error"
+                    >
+                        Failed to delete policy
+                    </Notification>,
+                )  
+           
+        } finally {
+            setIsDeleting(false);
+            setDeleteDialogOpen(false);
+        }
+    };
+
     useEffect(() => {
         fetchPolicies();
     }, [refreshKey]);
@@ -100,29 +159,39 @@ const PoshPolicyTable = ({ refreshKey }: PoshPolicyTableProps) => {
 
             accessorKey: 'is_active',
             cell: ({ row }) => (
-                <span className={`px-2 py-1 rounded-full text-xs ${row.original.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                <div className={`w-20 font-semibold px-2 py-1 rounded-md text-sm text-center h-8 ${row.original.is_active ? 'text-green-600' : 'text-red-600'}`}>
                     {row.original.is_active ? 'Active' : 'Inactive'}
-                </span>
+                </div>
             )
         },
-        {
-            header: 'Created By',
-                                    enableSorting: false,
+        // {
+        //     header: 'Created By',
+        //                             enableSorting: false,
 
-            accessorKey: 'created_by_name',
-            cell: ({ row }) => row.original.created_by_name
-        },
+        //     accessorKey: 'created_by_name',
+        //     cell: ({ row }) => row.original.created_by_name
+        // },
         {
             header: 'Actions',
             id: 'actions',
             cell: ({ row }) => (
-                <Tooltip title="Download Policy">
-                    <Button
-                        size="sm"
-                        icon={<HiDownload />}
-                        onClick={() => handleDownload(row.original.id)}
-                    />
-                </Tooltip>
+                <div className="flex space-x-1">
+                    <Tooltip title="Download Policy">
+                        <Button
+                            size="sm"
+                            icon={<HiDownload />}
+                            onClick={() => handleDownload(row.original.id)}
+                        />
+                    </Tooltip>
+                    <Tooltip title="Delete Policy">
+                        <Button
+                            size="sm"
+                            icon={<FiTrash />}
+                            onClick={() => handleDeleteClick(row.original.id)}
+                            className='hover:bg-transparent text-red-500'
+                        />
+                    </Tooltip>
+                </div>
             )
         }
     ], []);
@@ -135,16 +204,47 @@ const PoshPolicyTable = ({ refreshKey }: PoshPolicyTableProps) => {
                     <p className="text-center">No POSH Policies Available</p>
                 </div>
             ) : (
-                <DataTable
-                    columns={columns}
-                    data={data}
-                    loading={loading}
-                    pagingData={pagingData}
-                    onPaginationChange={({ pageIndex, pageSize }) => 
-                        fetchPolicies(pageIndex + 1, pageSize)
-                    }
-                    stickyHeader={true}
-                />
+                <>
+                    <DataTable
+                        columns={columns}
+                        data={data}
+                        loading={loading}
+                        pagingData={pagingData}
+                        onPaginationChange={({ pageIndex, pageSize }) => 
+                            fetchPolicies(pageIndex + 1, pageSize)
+                        }
+                        stickyHeader={true}
+                    />
+
+                    {/* Delete Confirmation Dialog */}
+                    <Dialog
+                        isOpen={deleteDialogOpen}
+                        onClose={() => setDeleteDialogOpen(false)}
+                        onRequestClose={() => setDeleteDialogOpen(false)}
+                    >
+                        <h5 className="mb-4">Confirm Delete</h5>
+                        <p>
+                            Are you sure you want to delete this POSH policy?
+                        </p>
+                        <div className="text-right mt-6">
+                            <Button
+                                className="ltr:mr-2 rtl:ml-2"
+                                variant="plain"
+                                onClick={() => setDeleteDialogOpen(false)}
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="solid"
+                                onClick={confirmDelete}
+                                loading={isDeleting}
+                            >
+                                Delete
+                            </Button>
+                        </div>
+                    </Dialog>
+                </>
             )}
         </div>
     );
