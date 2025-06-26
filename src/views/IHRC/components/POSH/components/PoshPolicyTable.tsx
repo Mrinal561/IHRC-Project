@@ -89,22 +89,23 @@ const PoshPolicyTable = ({ refreshKey }: PoshPolicyTableProps) => {
         }
     };
 
-    const handleDeleteClick = (policyId: number) => {
+  const handleDeleteClick = (policyId: number) => {
+    console.log('Delete clicked for ID:', policyId);
     const policy = data.find(p => p.id === policyId);
+    console.log('Found policy:', policy); // Add this line
     
     if (!policy) {
-        toast.push(
-            <Notification title="Error" type="danger">
-                Policy not found
-            </Notification>
-        );
+        console.error('Policy not found in data array');
         return;
     }
-
-    console.log('Deleting policy with ID:', policy.id);
+    
+    console.log('Setting selected policy and opening dialog');
     setSelectedPolicy(policy);
     setDeleteDialogOpen(true);
 };
+
+
+
     const confirmDelete = async () => {
         if (!selectedPolicy) return;
         
@@ -185,11 +186,14 @@ const PoshPolicyTable = ({ refreshKey }: PoshPolicyTableProps) => {
                     </Tooltip>
                     <Tooltip title="Delete Policy">
                         <Button
-                            size="sm"
-                            icon={<FiTrash />}
-                            onClick={() => handleDeleteClick(row.original.id)}
-                            className='hover:bg-transparent text-red-500'
-                        />
+    size="sm"
+    icon={<FiTrash />}
+    onClick={() => {
+        console.log('Delete clicked for ID:', row.original.id); // Debug log
+        handleDeleteClick(row.original.id);
+    }}
+    className="hover:bg-transparent text-red-500"
+/>
                     </Tooltip>
                 </div>
             )
