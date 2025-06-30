@@ -951,4 +951,15 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+     {
+        key: 'register.salaryRegister',
+        path: '/salary-register',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Register/components/SalaryRegister'
+                ),
+        ),
+        authority: [],
+    },
 ]

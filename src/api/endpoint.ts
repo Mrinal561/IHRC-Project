@@ -368,6 +368,11 @@ export const endpoints = {
         returnList: () => api('return-superadmin/return-name'),
         getList: () => api('return-superadmin/all')
 
+    },
+    register: {
+        listSalaryRegister: () => api('companyadmin/register/data'),
+        downloadSalaryRegisterTemplate: () => api('companyadmin/register/template/download'),
+        createSalaryRegister: () => api('companyadmin/register/upload')
     }
         
 }

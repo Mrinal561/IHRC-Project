@@ -3099,6 +3099,70 @@ const adminnav: NavigationTree[] = [
                     },
                 ],
         },
+        {
+            key: 'register.collapse',
+            path: '',
+            title: 'Register',
+            translateKey: 'nav.companySetup.register',
+            icon: 'remittanceCollapse',
+            type: NAV_ITEM_TYPE_COLLAPSE,
+            authority: [],
+            subMenu: [
+                {
+                    key: 'registerContractor.collapse',
+                    path: '',
+                    title: 'Register For Contractor',
+                    translateKey: 'nav.registerContractor.collapse',
+                    icon: '',
+                    type: NAV_ITEM_TYPE_COLLAPSE,
+                    authority: [],
+                    subMenu: [
+                        {
+                            key: 'registerContractor.collapse.contractorRegister',
+                            path: '/register-contractor',
+                            title: 'Contractor Register',
+                            translateKey: 'nav.registerContractor.collapse.contractorRegister',
+                            icon: '',
+                            type: NAV_ITEM_TYPE_ITEM,
+                            authority: [],
+                            subMenu: [], 
+                        }
+                    ]
+                },
+                {
+                    key: 'registerClient.collapse',
+                    path: '',
+                    title: 'Register For Client',
+                    translateKey: 'nav.registerClient.collapse',
+                    icon: '',
+                    type: NAV_ITEM_TYPE_COLLAPSE,
+                    authority: [],
+                    subMenu: [
+                        {
+                            key: 'registerClient.collapse.clientRegister',
+                            path: '/salary-register',
+                            title: 'Salary Register',
+                            translateKey: 'nav.registerClient.collapse.clientRegister',
+                            icon: '',
+                            type: NAV_ITEM_TYPE_ITEM,
+                            authority: [],
+                            subMenu: [], 
+                        },
+                        {
+                            key: 'registerClient.collapse.clientRegister',
+                            path: '/attendance-register',
+                            title: 'Attendance Register',
+                            translateKey: 'nav.registerClient.collapse.clientRegister',
+                            icon: '',
+                            type: NAV_ITEM_TYPE_ITEM,
+                            authority: [],
+                            subMenu: [], 
+                        }
+                    ]
+                },
+
+            ]
+        },
 ];
 
 const usernav: NavigationTree[] = [
