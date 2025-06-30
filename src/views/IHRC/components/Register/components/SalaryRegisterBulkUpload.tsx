@@ -126,8 +126,8 @@ const SalaryRegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
         endpoints.register.downloadSalaryRegisterTemplate(),
         {
           params: {
-            company_id: selectedCompany.value,
-            month: selectedMonth.value,
+            company_id: Number(selectedCompany.value),
+            month: selectedMonth.value.toString(),
             register_type: 'Salary Register'
           },
           responseType: 'blob'
