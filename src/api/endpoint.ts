@@ -372,7 +372,10 @@ export const endpoints = {
     register: {
         listSalaryRegister: () => api('companyadmin/register/data'),
         downloadSalaryRegisterTemplate: () => api('companyadmin/register/template/download'),
-        createSalaryRegister: () => api('companyadmin/register/upload')
+        createSalaryRegister: () => api('companyadmin/register/upload'),
+        listAttendanceRegister: () => api('companyadmin/register/data'),
+        downloadAttendanceRegisterTemplate: () => api('companyadmin/register/template/download'),
+        createAttendancceRegister: () => api('companyadmin/register/upload')
     }
         
 }

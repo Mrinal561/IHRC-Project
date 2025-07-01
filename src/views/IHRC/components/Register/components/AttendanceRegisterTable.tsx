@@ -19,15 +19,46 @@ interface AttendanceRegisterData {
   register_type: string;
   register_data: {
     [key: string]: any;
-    EmployeeName: string;
-    EmployeeNumber: string;
-    Location: string;
-    JobTitle: string;
-    ReportingManager: string;
-    Gender: string;
-    DOB: string;
-    DOJ: string;
-    // Add other fields as needed
+    // Daily status
+    "1": string; "2": string; "3": string; "4": string; "5": string;
+    "6": string; "7": string; "8": string; "9": string; "10": string;
+    "11": string; "12": string; "13": string; "14": string; "15": string;
+    "16": string; "17": string; "18": string; "19": string; "20": string;
+    "21": string; "22": string; "23": string; "24": string; "25": string;
+    "26": string; "27": string; "28": string; "29": string; "30": string;
+    "31"?: string;
+    
+    // Employee details
+    "Employee Name": string;
+    "Employee Number": string;
+    "Father/Husband Name": string;
+    "Gender": string;
+    "DOB": string;
+    "DOJ": string;
+    "Job Title": string;
+    "Location": string;
+    "Reporting Manager": string;
+    
+    // Attendance summary
+    "Total Days": number;
+    "Present Days": number;
+    "Absent Days": number;
+    "Weekly Offs": number;
+    "Holidays": number;
+    "WFH": number;
+    "WOH": number;
+    "On Duty": number;
+    "Missing Swipe Days": number;
+    "Total Paid Leave": number;
+    "Paid Leave Taken": number;
+    "Penalized Paid Leave": number;
+    "Pending Paid Leave Taken": number;
+    "Total Unpaid Leave": number;
+    "Unpaid Leave Taken": number;
+    "Penalized Unpaid Leave": number;
+    "Pending Unpaid Leave Taken": number;
+    "Pending WFH": number;
+    "Pending On Duty": number;
   };
   month: string;
   year: number;
@@ -53,6 +84,7 @@ const AttendanceRegisterTable = ({ data, meta }: AttendanceRegisterTableProps) =
       'P': 'text-green-600',
       'A': 'text-red-600',
       'WFH': 'text-blue-600',
+      'WOH': 'text-blue-400',
       'OD': 'text-purple-600',
       'WO': 'text-gray-600',
       'H': 'text-orange-600',
@@ -70,6 +102,7 @@ const AttendanceRegisterTable = ({ data, meta }: AttendanceRegisterTableProps) =
       'P': 'Present',
       'A': 'Absent',
       'WFH': 'Work From Home',
+      'WOH': 'Work From Office',
       'OD': 'On Duty',
       'WO': 'Weekly Off',
       'H': 'Holiday',
@@ -89,81 +122,57 @@ const AttendanceRegisterTable = ({ data, meta }: AttendanceRegisterTableProps) =
     month: item.month,
     year: item.year,
     id: item.id,
-    uuid: item.uuid
+    uuid: item.uuid,
+    created_by_name: item.created_by_name,
+    created_at: item.created_at,
+    updated_at: item.updated_at
   }));
 
   const columns: ColumnDef<typeof transformedData[0]>[] = useMemo(
     () => [
-      {
+        {
         header: 'Company',
+        enableSorting: false,
         accessorKey: 'company_name',
-        cell: (props) => {
-          const value = props.getValue() as string;
-          return (
-            <Tooltip title={value} placement="top">
-              <div className="w-42 truncate">{value.length > 22 ? value.substring(0, 22) + '...' : value}</div>
-            </Tooltip>
-          );
-        },
+        cell: (props) => (
+          <div className="w-40 truncate">{props.getValue()}</div>
+        ),
       },
+      // Employee Information
       {
-        header: 'Emp No',
+        header: 'Emp ID',
+        enableSorting: false,
         accessorKey: 'Employee Number',
         cell: (props) => (
-          <div className="w-24 truncate">{props.getValue()}</div>
+          <div className="w-24 truncate font-medium">{props.getValue()}</div>
         ),
       },
       {
-        header: 'Name',
+        header: 'Employee Name',
+        enableSorting: false,
         accessorKey: 'Employee Name',
         cell: (props) => {
           const value = props.getValue() as string;
           return (
             <Tooltip title={value} placement="top">
-              <div className="w-36 truncate">
-                {value.length > 20 ? value.substring(0, 20) + '...' : value}
+              <div className="w-40 truncate font-medium">
+                {value}
               </div>
             </Tooltip>
           );
         },
       },
       {
-        header: 'Job Title',
-        accessorKey: 'Job Title',
-        cell: (props) => {
-          const value = props.getValue() as string;
-          return (
-            <Tooltip title={value} placement="top">
-              <div className="w-40 truncate">
-                {value.length > 24 ? value.substring(0, 24) + '...' : value}
-              </div>
-            </Tooltip>
-          );
-        },
-      },
-      {
-        header: 'Location',
-        accessorKey: 'Location',
+        header: 'Father/Husband',
+        enableSorting: false,
+        accessorKey: 'Father/Husband Name',
         cell: (props) => (
-          <div className="w-28 truncate">{props.getValue()}</div>
+          <div className="w-40 truncate">{props.getValue()}</div>
         ),
       },
       {
-        header: 'Manager',
-        accessorKey: 'Reporting Manager',
-        cell: (props) => {
-          const value = props.getValue() as string;
-          return (
-            <Tooltip title={value} placement="top">
-              <div className="w-36 truncate">
-                {value.length > 20 ? value.substring(0, 20) + '...' : value}
-              </div>
-            </Tooltip>
-          );
-        },
-      },
-      {
         header: 'Gender',
+        enableSorting: false,
         accessorKey: 'Gender',
         cell: (props) => (
           <div className="w-20 truncate">{props.getValue()}</div>
@@ -171,139 +180,202 @@ const AttendanceRegisterTable = ({ data, meta }: AttendanceRegisterTableProps) =
       },
       {
         header: 'DOB',
+        enableSorting: false,
         accessorKey: 'DOB',
         cell: (props) => {
           const date = new Date(props.getValue() as string);
           return (
             <div className="w-24 truncate">
-              {date.toLocaleDateString()}
+              {date.toLocaleDateString('en-IN')}
             </div>
           );
         },
       },
       {
         header: 'DOJ',
+        enableSorting: false,
         accessorKey: 'DOJ',
         cell: (props) => {
           const date = new Date(props.getValue() as string);
           return (
             <div className="w-24 truncate">
-              {date.toLocaleDateString()}
+              {date.toLocaleDateString('en-IN')}
             </div>
           );
         },
       },
-      // Daily status columns (1-31)
+      
+      // Job Details
+      {
+        header: 'Designation',
+        enableSorting: false,
+        accessorKey: 'Job Title',
+        cell: (props) => (
+          <div className="w-40 truncate">{props.getValue()}</div>
+        ),
+      },
+      {
+        header: 'Location',
+        enableSorting: false,
+        accessorKey: 'Location',
+        cell: (props) => (
+          <div className="w-32 truncate">{props.getValue()}</div>
+        ),
+      },
+      {
+        header: 'Reporting Manager',
+        enableSorting: false,
+        accessorKey: 'Reporting Manager',
+        cell: (props) => (
+          <div className="w-40 truncate">{props.getValue()}</div>
+        ),
+      },
+      
+
+      // Daily Attendance (1-31)
       ...Array.from({ length: 31 }, (_, i) => {
         const day = i + 1;
         return {
           header: day.toString(),
+          enableSorting: false,
           accessorKey: day.toString(),
           cell: (props) => {
             const status = props.getValue() as string;
+            if (!status) return <div className="w-8"></div>;
             return (
-              <Tooltip title={getStatusFullName(status)} placement="top">
-                <div className={`w-12 truncate text-center ${getStatusColor(status)}`}>
-                  {status}
+              <Tooltip title={`${day} ${data[0]?.month}: ${getStatusFullName(status)}`} placement="top">
+                <div className={`w-8 text-center ${getStatusColor(status)}`}>
+                  {status.split('(')[0]} {/* Show just P for P(MS) */}
                 </div>
               </Tooltip>
             );
           },
         };
       }),
-      // Summary columns
+
+      // Attendance Summary
       {
         header: 'Present',
+        enableSorting: false,
         accessorKey: 'Present Days',
         cell: (props) => (
-          <div className="w-20 truncate text-center text-green-600 font-medium">
+          <div className="w-16 text-center text-green-600 font-medium">
             {props.getValue()}
           </div>
         ),
       },
       {
         header: 'WFH',
+        enableSorting: false,
         accessorKey: 'WFH',
         cell: (props) => (
-          <div className="w-16 truncate text-center text-blue-600 font-medium">
+          <div className="w-12 text-center text-blue-600 font-medium">
             {props.getValue()}
           </div>
         ),
       },
       {
-        header: 'On Duty',
+        header: 'WOH',
+        enableSorting: false,
+        accessorKey: 'WOH',
+        cell: (props) => (
+          <div className="w-12 text-center text-blue-400 font-medium">
+            {props.getValue()}
+          </div>
+        ),
+      },
+      {
+        header: 'OD',
+        enableSorting: false,
         accessorKey: 'On Duty',
         cell: (props) => (
-          <div className="w-16 truncate text-center text-purple-600 font-medium">
-            {props.getValue()}
-          </div>
-        ),
-      },
-      {
-        header: 'PL',
-        accessorKey: 'Paid Leave Taken',
-        cell: (props) => (
-          <div className="w-16 truncate text-center text-indigo-600 font-medium">
-            {props.getValue()}
-          </div>
-        ),
-      },
-      {
-        header: 'UL',
-        accessorKey: 'Unpaid Leave Taken',
-        cell: (props) => (
-          <div className="w-16 truncate text-center text-pink-600 font-medium">
-            {props.getValue()}
-          </div>
-        ),
-      },
-      {
-        header: 'MS',
-        accessorKey: 'Missing Swipe Days',
-        cell: (props) => (
-          <div className="w-16 truncate text-center text-yellow-600 font-medium">
+          <div className="w-12 text-center text-purple-600 font-medium">
             {props.getValue()}
           </div>
         ),
       },
       {
         header: 'WO',
+        enableSorting: false,
         accessorKey: 'Weekly Offs',
         cell: (props) => (
-          <div className="w-16 truncate text-center text-gray-600 font-medium">
+          <div className="w-12 text-center text-gray-600 font-medium">
             {props.getValue()}
           </div>
         ),
       },
       {
-        header: 'Holidays',
+        header: 'H',
+        enableSorting: false,
         accessorKey: 'Holidays',
         cell: (props) => (
-          <div className="w-16 truncate text-center text-orange-600 font-medium">
+          <div className="w-12 text-center text-orange-600 font-medium">
+            {props.getValue()}
+          </div>
+        ),
+      },
+      {
+        header: 'PL',
+        enableSorting: false,
+        accessorKey: 'Paid Leave Taken',
+        cell: (props) => (
+          <div className="w-12 text-center text-indigo-600 font-medium">
+            {props.getValue()}
+          </div>
+        ),
+      },
+      {
+        header: 'UL',
+        enableSorting: false,
+        accessorKey: 'Unpaid Leave Taken',
+        cell: (props) => (
+          <div className="w-12 text-center text-pink-600 font-medium">
+            {props.getValue()}
+          </div>
+        ),
+      },
+      {
+        header: 'PPL',
+        enableSorting: false,
+        accessorKey: 'Penalized Paid Leave',
+        cell: (props) => (
+          <div className="w-12 text-center text-rose-600 font-medium">
+            {props.getValue()}
+          </div>
+        ),
+      },
+      {
+        header: 'MS',
+        enableSorting: false,
+        accessorKey: 'Missing Swipe Days',
+        cell: (props) => (
+          <div className="w-12 text-center text-yellow-600 font-medium">
+            {props.getValue()}
+          </div>
+        ),
+      },
+      {
+        header: 'Absent',
+        enableSorting: false,
+        accessorKey: 'Absent Days',
+        cell: (props) => (
+          <div className="w-12 text-center text-red-600 font-medium">
             {props.getValue()}
           </div>
         ),
       },
       {
         header: 'Total Days',
+        enableSorting: false,
         accessorKey: 'Total Days',
         cell: (props) => (
-          <div className="w-16 truncate text-center font-medium">
-            {props.getValue()}
-          </div>
-        ),
-      },
-      {
-        header: 'Absent Days',
-        accessorKey: 'Absent Days',
-        cell: (props) => (
-          <div className="w-16 truncate text-center text-red-600 font-medium">
+          <div className="w-12 text-center font-bold">
             {props.getValue()}
           </div>
         ),
       },
     ],
-    []
+    [data]
   );
 
   const [tableData, setTableData] = useState({
@@ -335,11 +407,7 @@ const AttendanceRegisterTable = ({ data, meta }: AttendanceRegisterTableProps) =
 
   return (
     <div className="w-full overflow-x-auto">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold">
-          {data[0]?.month} {data[0]?.year} Attendance Register
-        </h3>
-      </div>
+     
       <DataTable
         columns={columns}
         data={transformedData}
