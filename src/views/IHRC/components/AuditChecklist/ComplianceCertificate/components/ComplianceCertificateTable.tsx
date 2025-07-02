@@ -11,27 +11,52 @@ interface ComplianceCertificateTableProps {
 }
 
 const ComplianceCertificateTable: React.FC<ComplianceCertificateTableProps> = ({ data, onDownloadSuccess }) => {
+    // const handleDownload = async (certificateId: number) => {
+    //     try {
+    //         // This will trigger the browser download
+    //         const response = await httpClient.get(endpoints.compliance.downloadCertificate(certificateId));
+    //         if(response){
+
+    //             toast.push(
+    //                 <Notification title="Success" type="success" closable>
+    //                 Download started successfully
+    //             </Notification>
+    //         );
+    //     }
+            
+    //         onDownloadSuccess();
+    //     } catch (error) {
+    //         console.error('Failed to download certificate:', error);
+    //         toast.push(
+    //             <Notification title="Error" type="error" closable>
+    //                 Failed to download certificate
+    //             </Notification>
+    //         );
+    //     }
+    // };
+
     const handleDownload = async (certificateId: number) => {
         try {
-            // This will trigger the browser download
-            window.open(`${endpoints.compliance.downloadCertificate(certificateId)}`, '_blank');
-            
-            toast.push(
-                <Notification title="Success" type="success" closable>
-                    Download started successfully
-                </Notification>
+            const response = await httpClient.get(
+                endpoints.compliance.downloadCertificate(certificateId), 
+                {
+                    responseType: 'blob'
+                }
             );
             
-            onDownloadSuccess();
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `certificate.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
         } catch (error) {
-            console.error('Failed to download certificate:', error);
-            toast.push(
-                <Notification title="Error" type="error" closable>
-                    Failed to download certificate
-                </Notification>
-            );
+            console.error('Download error:', error);
         }
     };
+
 
     const columns = [
         {
