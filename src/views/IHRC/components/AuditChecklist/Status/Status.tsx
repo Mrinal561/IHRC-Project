@@ -341,7 +341,7 @@ const Status: React.FC = () => {
   const statusOptions = [
     { value: 'pending', label: 'Pending' },
     { value: 'approved', label: 'Approved' },
-    { value: 'rejected', label: 'Rejected' },
+    // { value: 'rejected', label: 'Rejected' },
   ];
 
   if (!isInitialized || !permissionCheckComplete) {

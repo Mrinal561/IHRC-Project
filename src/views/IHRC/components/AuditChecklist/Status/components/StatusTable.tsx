@@ -12,7 +12,8 @@ interface StatusTableProps {
   data: any[];
   loading: boolean;
   selectedView: 'owner' | 'approver' | 'auditor';
-  selectedStatus: 'pending' | 'approved' | 'rejected';
+  // selectedStatus: 'pending' | 'approved' | 'rejected';
+  selectedStatus: 'pending' | 'approved';
   onSearch: (term: string) => void;
   pagination: {
     total: number;
