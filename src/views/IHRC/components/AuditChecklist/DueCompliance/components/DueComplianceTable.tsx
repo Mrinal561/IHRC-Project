@@ -112,8 +112,12 @@ interface ComplianceDetailTableProps {
     loading?: boolean
     selectedRole: 'owner' | 'approver' | 'auditor'
     onUploadSingle?: (complianceId: number, file: File, remark: string) => void
-    onApprove?: (complianceId: number, complianceStatus: string) => void;
-  onReject?: (complianceId: number, reason: string, complianceStatus: string) => void;
+    onApprove?: (complianceId: number, complianceStatus: string) => void
+    onReject?: (
+        complianceId: number,
+        reason: string,
+        complianceStatus: string,
+    ) => void
     onViewDetails?: (complianceId: number) => Promise<any>
     pagination: {
         total: number
@@ -313,56 +317,68 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     // }
 
     const handleUploadConfirm = async () => {
-  if (!selectedFile) {
-    toast.push(<Notification title="Error" type="error">Please select a file</Notification>);
-    return;
-  }
+        if (!selectedFile) {
+            toast.push(
+                <Notification title="Error" type="error">
+                    Please select a file
+                </Notification>,
+            )
+            return
+        }
 
-  if (!selectedCompliance?.id) return;
+        if (!selectedCompliance?.id) return
 
-  setIsLoading(true);
+        setIsLoading(true)
 
-  try {
-    const base64String = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        resolve(result.split(',')[1]);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(selectedFile);
-    });
+        try {
+            const base64String = await new Promise<string>(
+                (resolve, reject) => {
+                    const reader = new FileReader()
+                    reader.onload = () => {
+                        const result = reader.result as string
+                        resolve(result.split(',')[1])
+                    }
+                    reader.onerror = reject
+                    reader.readAsDataURL(selectedFile)
+                },
+            )
 
-    const payload = {
-      document: base64String,
-      company_id: selectedCompliance.company_id,
-      filename: selectedFile.name,
-      mimetype: selectedFile.type,
-      complianceStatus: selectedRole === 'owner' ? complianceStatus : undefined
-    };
+            const payload = {
+                document: base64String,
+                company_id: selectedCompliance.company_id,
+                filename: selectedFile.name,
+                mimetype: selectedFile.type,
+                complianceStatus:
+                    selectedRole === 'owner' ? complianceStatus : undefined,
+            }
 
-    const response = await httpClient.post(
-      endpoints.compliance.dueComplianceDocumentUpload(selectedCompliance.id),
-      payload
-    );
+            const response = await httpClient.post(
+                endpoints.compliance.dueComplianceDocumentUpload(
+                    selectedCompliance.id,
+                ),
+                payload,
+            )
 
-    toast.push(<Notification title="Success" type="success">Document uploaded</Notification>);
-    setIsUploadDialogOpen(false);
-    setSelectedFile(null);
-    setRemark('');
-    setComplianceStatus('');
-
-  } catch (error: any) {
-    console.error('Upload error:', error);
-    toast.push(
-      <Notification title="Error" type="error">
-        {error.response?.data?.message || 'Upload failed'}
-      </Notification>
-    );
-  } finally {
-    setIsLoading(false);
-  }
-};
+            toast.push(
+                <Notification title="Success" type="success">
+                    Document uploaded
+                </Notification>,
+            )
+            setIsUploadDialogOpen(false)
+            setSelectedFile(null)
+            setRemark('')
+            setComplianceStatus('')
+        } catch (error: any) {
+            console.error('Upload error:', error)
+            toast.push(
+                <Notification title="Error" type="error">
+                    {error.response?.data?.message || 'Upload failed'}
+                </Notification>,
+            )
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     // const handleRejectConfirm = async () => {
     //     if (!rejectReason) {
@@ -385,89 +401,153 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     //     }
     // }
 
-//     const handleRejectConfirm = async () => {
-//   if (!rejectReason) {
-//     toast.push(
-//       <Notification title="Error" type="danger">
-//         Please enter a rejection reason
-//       </Notification>
-//     );
-//     return;
-//   }
+    //     const handleRejectConfirm = async () => {
+    //   if (!rejectReason) {
+    //     toast.push(
+    //       <Notification title="Error" type="danger">
+    //         Please enter a rejection reason
+    //       </Notification>
+    //     );
+    //     return;
+    //   }
 
-//   if (!complianceStatus) {
-//     toast.push(
-//       <Notification title="Error" type="danger">
-//         Please select a compliance status
-//       </Notification>
-//     );
-//     return;
-//   }
+    //   if (!complianceStatus) {
+    //     toast.push(
+    //       <Notification title="Error" type="danger">
+    //         Please select a compliance status
+    //       </Notification>
+    //     );
+    //     return;
+    //   }
 
-//   if (!selectedCompliance?.id) return;
+    //   if (!selectedCompliance?.id) return;
 
-//   try {
-//     await onReject?.(selectedCompliance.id, rejectReason, complianceStatus);
-//     setIsRejectDialogOpen(false);
-//     setRejectReason('');
-//     setComplianceStatus('');
-//   } catch (error) {
-//     console.error('Reject error:', error);
-//   }
-// };
+    //   try {
+    //     await onReject?.(selectedCompliance.id, rejectReason, complianceStatus);
+    //     setIsRejectDialogOpen(false);
+    //     setRejectReason('');
+    //     setComplianceStatus('');
+    //   } catch (error) {
+    //     console.error('Reject error:', error);
+    //   }
+    // };
 
-const handleRejectConfirm = async () => {
-  if (!rejectReason) {
-    toast.push(
-      <Notification title="Error" type="danger">
-        Please enter a rejection reason
-      </Notification>
-    );
-    return;
-  }
+    const handleApproveConfirm = async () => {
+        if (!complianceStatus) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    Please select a compliance status
+                </Notification>,
+            )
+            return
+        }
 
-  if (!complianceStatus) {
-    toast.push(
-      <Notification title="Error" type="danger">
-        Please select a compliance status
-      </Notification>
-    );
-    return;
-  }
+        if (!selectedCompliance?.id) return
 
-  if (!selectedCompliance?.id) return;
+        try {
+            let endpoint
+            if (selectedRole === 'approver') {
+                endpoint = endpoints.compliance.approveOwnerCompliance(
+                    selectedCompliance.id,
+                )
+            } else if (selectedRole === 'auditor') {
+                endpoint = endpoints.compliance.approveApproverCompliance(
+                    selectedCompliance.id,
+                )
+            } else {
+                throw new Error('Invalid role for approval')
+            }
 
-  try {
-    const payload = {
-      complianceStatus: complianceStatus,
-      rejectionReason: rejectReason
-    };
+            const payload = {
+                complianceStatus: complianceStatus,
+            }
 
-    await httpClient.post(
-      endpoints.compliance.rejectOwnerCompliance(selectedCompliance.id),
-      payload
-    );
+            await httpClient.post(endpoint, payload)
 
-    toast.push(
-      <Notification title="Success" type="success">
-        Compliance rejected successfully
-      </Notification>
-    );
+            toast.push(
+                <Notification title="Success" type="success">
+                    Compliance approved successfully
+                </Notification>,
+            )
 
-    setIsRejectDialogOpen(false);
-    setRejectReason('');
-    setComplianceStatus('');
-    
-    // Optionally refresh your data here
-  } catch (error: any) {
-    console.error('Reject error:', error);
-    toast.push(
-      <Notification title="Error" type="error">
-        {error.response?.data?.message || 'Failed to reject compliance'}
-      </Notification>
-    );
-  }
-};
+            setIsApproveDialogOpen(false)
+            setComplianceStatus('')
+
+            // Optionally refresh your data here
+        } catch (error: any) {
+            console.error('Approve error:', error)
+            toast.push(
+                <Notification title="Error" type="error">
+                    {error.response?.data?.message ||
+                        'Failed to approve compliance'}
+                </Notification>,
+            )
+        }
+    }
+
+    const handleRejectConfirm = async () => {
+        if (!rejectReason) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    Please enter a rejection reason
+                </Notification>,
+            )
+            return
+        }
+
+        if (!complianceStatus) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    Please select a compliance status
+                </Notification>,
+            )
+            return
+        }
+
+        if (!selectedCompliance?.id) return
+
+        try {
+            let endpoint
+            if (selectedRole === 'approver') {
+                endpoint = endpoints.compliance.rejectOwnerCompliance(
+                    selectedCompliance.id,
+                )
+            } else if (selectedRole === 'auditor') {
+                endpoint = endpoints.compliance.rejectApproverCompliance(
+                    selectedCompliance.id,
+                )
+            } else {
+                throw new Error('Invalid role for rejection')
+            }
+
+            const payload = {
+                complianceStatus: complianceStatus,
+                rejectionReason: rejectReason,
+            }
+
+            await httpClient.post(endpoint, payload)
+
+            toast.push(
+                <Notification title="Success" type="success">
+                    Compliance rejected successfully
+                </Notification>,
+            )
+
+            setIsRejectDialogOpen(false)
+            setRejectReason('')
+            setComplianceStatus('')
+
+            // Optionally refresh your data here
+        } catch (error: any) {
+            console.error('Reject error:', error)
+            toast.push(
+                <Notification title="Error" type="error">
+                    {error.response?.data?.message ||
+                        'Failed to reject compliance'}
+                </Notification>,
+            )
+        }
+    }
 
     const columns: ColumnDef<DueComplianceDetailData>[] = useMemo(
         () => [
@@ -606,9 +686,11 @@ const handleRejectConfirm = async () => {
                                             <Button
                                                 size="sm"
                                                 onClick={() => {
-                  setSelectedCompliance(row.original);
-                  setIsApproveDialogOpen(true);
-                }}
+                                                    setSelectedCompliance(
+                                                        row.original,
+                                                    )
+                                                    setIsApproveDialogOpen(true)
+                                                }}
                                                 icon={<HiCheck />}
                                                 className="hover:bg-transparent text-green-500"
                                             />
@@ -617,9 +699,11 @@ const handleRejectConfirm = async () => {
                                             <Button
                                                 size="sm"
                                                 onClick={() => {
-                  setSelectedCompliance(row.original);
-                  setIsRejectDialogOpen(true);
-                }}
+                                                    setSelectedCompliance(
+                                                        row.original,
+                                                    )
+                                                    setIsRejectDialogOpen(true)
+                                                }}
                                                 icon={<HiX />}
                                                 className="hover:bg-transparent text-red-500"
                                             />
@@ -636,10 +720,12 @@ const handleRejectConfirm = async () => {
                                         >
                                             <Button
                                                 size="sm"
-                                                 onClick={() => {
-                  setSelectedCompliance(row.original);
-                  setIsApproveDialogOpen(true);
-                }}
+                                                onClick={() => {
+                                                    setSelectedCompliance(
+                                                        row.original,
+                                                    )
+                                                    setIsApproveDialogOpen(true)
+                                                }}
                                                 icon={<HiCheck />}
                                                 className="hover:bg-transparent text-green-500"
                                             />
@@ -648,9 +734,11 @@ const handleRejectConfirm = async () => {
                                             <Button
                                                 size="sm"
                                                 onClick={() => {
-                  setSelectedCompliance(row.original);
-                  setIsRejectDialogOpen(true);
-                }}
+                                                    setSelectedCompliance(
+                                                        row.original,
+                                                    )
+                                                    setIsRejectDialogOpen(true)
+                                                }}
                                                 icon={<HiX />}
                                                 className="hover:bg-transparent text-red-500"
                                             />
@@ -658,7 +746,7 @@ const handleRejectConfirm = async () => {
                                     </>
                                 )}
 
-                                {/* {(selectedRole === 'approver' && status === 'submitted') || 
+                            {/* {(selectedRole === 'approver' && status === 'submitted') || 
          (selectedRole === 'auditor' && status === 'approved_by_approver') && (
           <>
             <Tooltip title="Approve" placement="top">
@@ -774,77 +862,151 @@ const handleRejectConfirm = async () => {
             </div>
           </Dialog> */}
                     <Dialog
-  isOpen={isUploadDialogOpen}
-  onClose={() => setIsUploadDialogOpen(false)}
-  width={500}
->
-  <h5 className="mb-4">Upload Compliance Document</h5>
-  
-  <div className="mb-4 flex gap-2 items-center">
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      Set Compliance Status:
-    </label>
-    <div className="w-1/2"> {/* This wrapper will control the width */}
-      {selectedRole === 'owner' && (
-        <OutlinedSelect
-          label="Select compliance status"
-          options={ownerStatusOptions}
-          value={ownerStatusOptions.find(
-            (opt) => opt.value === complianceStatus,
-          )}
-          onChange={(option) =>
-            setComplianceStatus(option?.value || '')
-          }
-        />
-      )}
-    </div>
-  </div>
+                        isOpen={isUploadDialogOpen}
+                        onClose={() => setIsUploadDialogOpen(false)}
+                        width={500}
+                    >
+                        <h5 className="mb-4">Upload Compliance Document</h5>
 
-  <div className="mb-4">
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      Upload the document:
-    </label>
-    <Input
-      type="file"
-      onChange={(e) =>
-        setSelectedFile(e.target.files?.[0] || null)
-      }
-    />
-  </div>
-  
-  <div className="mb-4">
-    <Input
-      textArea
-      rows={3}
-      placeholder="Enter remark"
-      value={remark}
-      onChange={(e) => setRemark(e.target.value)}
-    />
-  </div>
+                        <div className="mb-4 flex gap-2 items-center">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Set Compliance Status:
+                            </label>
+                            <div className="w-1/2">
+                                {' '}
+                                {/* This wrapper will control the width */}
+                                {selectedRole === 'owner' && (
+                                    <OutlinedSelect
+                                        label="Select compliance status"
+                                        options={ownerStatusOptions}
+                                        value={ownerStatusOptions.find(
+                                            (opt) =>
+                                                opt.value === complianceStatus,
+                                        )}
+                                        onChange={(option) =>
+                                            setComplianceStatus(
+                                                option?.value || '',
+                                            )
+                                        }
+                                    />
+                                )}
+                            </div>
+                        </div>
 
-  <div className="text-right mt-6">
-    <Button
-      className="mr-2"
-      variant="plain"
-      onClick={() => {
-        setIsUploadDialogOpen(false)
-        setComplianceStatus('')
-      }}
-    >
-      Cancel
-    </Button>
-    <Button
-      variant="solid"
-      onClick={handleUploadConfirm}
-      disabled={
-        !selectedFile ||
-        (selectedRole === 'owner' && !complianceStatus)
-      }
-    >
-      Upload
-    </Button>
-  </div>
-</Dialog>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Upload the document:
+                            </label>
+                            <Input
+                                type="file"
+                                onChange={(e) =>
+                                    setSelectedFile(e.target.files?.[0] || null)
+                                }
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <Input
+                                textArea
+                                rows={3}
+                                placeholder="Enter remark"
+                                value={remark}
+                                onChange={(e) => setRemark(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="text-right mt-6">
+                            <Button
+                                className="mr-2"
+                                variant="plain"
+                                onClick={() => {
+                                    setIsUploadDialogOpen(false)
+                                    setComplianceStatus('')
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="solid"
+                                onClick={handleUploadConfirm}
+                                disabled={
+                                    !selectedFile ||
+                                    (selectedRole === 'owner' &&
+                                        !complianceStatus)
+                                }
+                            >
+                                Upload
+                            </Button>
+                        </div>
+                    </Dialog>
+                    {/* <Dialog
+                        isOpen={isApproveDialogOpen}
+                        onClose={() => {
+                            setIsApproveDialogOpen(false)
+                            setComplianceStatus('')
+                        }}
+                        width={500}
+                    >
+                        <h5 className="mb-4">Approve Compliance</h5>
+
+                        <div className="mb-4 flex gap-2 items-center">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Set Compliance Status:
+                            </label>
+
+                            <div className="w-1/2">
+                                <OutlinedSelect
+                                    // className="mb-4"
+                                    label="Select compliance status"
+                                    options={
+                                        selectedRole === 'approver'
+                                            ? approverStatusOptions
+                                            : auditorStatusOptions
+                                    }
+                                    value={(selectedRole === 'approver'
+                                        ? approverStatusOptions
+                                        : auditorStatusOptions
+                                    ).find(
+                                        (opt) => opt.value === complianceStatus,
+                                    )}
+                                    onChange={(option) =>
+                                        setComplianceStatus(option?.value || '')
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className="text-right mt-6">
+                            <Button
+                                className="mr-2"
+                                variant="plain"
+                                onClick={() => {
+                                    setIsApproveDialogOpen(false)
+                                    setComplianceStatus('')
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="solid"
+                                onClick={() => {
+                                    if (
+                                        selectedCompliance?.id &&
+                                        complianceStatus
+                                    ) {
+                                        onApprove?.(
+                                            selectedCompliance.id,
+                                            complianceStatus,
+                                        )
+                                        setIsApproveDialogOpen(false)
+                                    }
+                                }}
+                                disabled={!complianceStatus}
+                            >
+                                Confirm Approval
+                            </Button>
+                        </div>
+                    </Dialog> */}
+
                     <Dialog
   isOpen={isApproveDialogOpen}
   onClose={() => {
@@ -854,32 +1016,30 @@ const handleRejectConfirm = async () => {
   width={500}
 >
   <h5 className="mb-4">Approve Compliance</h5>
- 
- <div className="mb-4 flex gap-2 items-center">
+  
+  <div className="mb-4 flex gap-2 items-center">
     <label className="block text-sm font-medium text-gray-700 mb-1">
-      Set Compliance Status:
+      Compliance Status:
     </label>
-   
-   <div className="w-1/2">
-  <OutlinedSelect
-    // className="mb-4"
-    label="Select compliance status"
-    options={
-      selectedRole === 'approver' 
-      ? approverStatusOptions 
-      : auditorStatusOptions
-    }
-    value={
-      (selectedRole === 'approver' 
-        ? approverStatusOptions 
-        : auditorStatusOptions
-      ).find(opt => opt.value === complianceStatus)
-    }
-    onChange={(option) => setComplianceStatus(option?.value || '')}
-    />
+    <div className="w-1/2">
+      <OutlinedSelect
+        label="Select status"
+        options={
+          selectedRole === 'approver' 
+            ? approverStatusOptions 
+            : auditorStatusOptions
+        }
+        value={
+          (selectedRole === 'approver' 
+            ? approverStatusOptions 
+            : auditorStatusOptions
+          ).find(opt => opt.value === complianceStatus)
+        }
+        onChange={(option) => setComplianceStatus(option?.value || '')}
+      />
     </div>
+  </div>
 
-    </div>
   <div className="text-right mt-6">
     <Button
       className="mr-2"
@@ -893,12 +1053,7 @@ const handleRejectConfirm = async () => {
     </Button>
     <Button
       variant="solid"
-      onClick={() => {
-        if (selectedCompliance?.id && complianceStatus) {
-          onApprove?.(selectedCompliance.id, complianceStatus);
-          setIsApproveDialogOpen(false);
-        }
-      }}
+      onClick={handleApproveConfirm}
       disabled={!complianceStatus}
     >
       Confirm Approval
@@ -945,7 +1100,7 @@ const handleRejectConfirm = async () => {
                             </Button>
                         </div>
                     </Dialog> */}
-                    <Dialog
+                   <Dialog
   isOpen={isRejectDialogOpen}
   onClose={() => {
     setIsRejectDialogOpen(false);
