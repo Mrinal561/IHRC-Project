@@ -481,14 +481,14 @@ const HistoryPageTable: React.FC = () => {
     }, [tableData.pageIndex, tableData.pageSize, tableData.query, tableData.sort, selectedCompany, selectedState]);
 
     const columns: ColumnDef<ComplianceData>[] = [
-        {
-            header: 'Instance ID',
-            enableSorting: false,
-            accessorKey: 'record_id',
-            cell: (props) => (
-                <div className="w-40 text-start">{props.getValue() as string}</div>
-            ),
-        },
+        // {
+        //     header: 'Instance ID',
+        //     enableSorting: false,
+        //     accessorKey: 'record_id',
+        //     cell: (props) => (
+        //         <div className="w-40 text-start">{props.getValue() as string}</div>
+        //     ),
+        // },
         {
             header: 'Company',
             enableSorting: false,
