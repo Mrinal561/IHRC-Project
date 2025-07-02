@@ -124,7 +124,10 @@ export const endpoints = {
         rejectApproverCompliance: (id:any) => api(`companyadmin/compliance/checklists/auditor/reject/${id}`),
         detailDueCompliance: (id:any) => api(`companyadmin/compliance/checklists/due-compliance/${id}`),
         complianceHistoryList: () => api('companyadmin/compliance/checklists/history'),
-        downloadComplianceHistory: () => api('companyadmin/compliance/checklists/history-checklist')
+        downloadComplianceHistory: () => api('companyadmin/compliance/checklists/history-checklist'),
+        listCertificate: () => api('comapnyadmin/compliance/checklists/certificate'),
+        creteCertificate: () => api('companyadmin/compliance/checklists/compliance-certificate'),
+        downloadCertificate: (id:any) => api(`companyadmin/compliance/checklists/compliance-certificate/download/${id}`)
 
     },
     esiSetup: {
