@@ -638,6 +638,16 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 ),
             },
             {
+                header: 'Rejection Reason',
+                enableSorting: false,
+                accessorKey: 'rejection_reason',
+                cell: (props) => (
+                    <div className="w-24">
+                        {capitalizeFirstLetter(props.getValue() as string)}
+                    </div>
+                ),
+            },
+            {
                 header: 'Actions',
                 id: 'actions',
                 cell: ({ row }) => {
