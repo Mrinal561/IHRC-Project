@@ -385,7 +385,38 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     //     }
     // }
 
-    const handleRejectConfirm = async () => {
+//     const handleRejectConfirm = async () => {
+//   if (!rejectReason) {
+//     toast.push(
+//       <Notification title="Error" type="danger">
+//         Please enter a rejection reason
+//       </Notification>
+//     );
+//     return;
+//   }
+
+//   if (!complianceStatus) {
+//     toast.push(
+//       <Notification title="Error" type="danger">
+//         Please select a compliance status
+//       </Notification>
+//     );
+//     return;
+//   }
+
+//   if (!selectedCompliance?.id) return;
+
+//   try {
+//     await onReject?.(selectedCompliance.id, rejectReason, complianceStatus);
+//     setIsRejectDialogOpen(false);
+//     setRejectReason('');
+//     setComplianceStatus('');
+//   } catch (error) {
+//     console.error('Reject error:', error);
+//   }
+// };
+
+const handleRejectConfirm = async () => {
   if (!rejectReason) {
     toast.push(
       <Notification title="Error" type="danger">
@@ -407,12 +438,34 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
   if (!selectedCompliance?.id) return;
 
   try {
-    await onReject?.(selectedCompliance.id, rejectReason, complianceStatus);
+    const payload = {
+      complianceStatus: complianceStatus,
+      rejectionReason: rejectReason
+    };
+
+    await httpClient.post(
+      endpoints.compliance.rejectOwnerCompliance(selectedCompliance.id),
+      payload
+    );
+
+    toast.push(
+      <Notification title="Success" type="success">
+        Compliance rejected successfully
+      </Notification>
+    );
+
     setIsRejectDialogOpen(false);
     setRejectReason('');
     setComplianceStatus('');
-  } catch (error) {
+    
+    // Optionally refresh your data here
+  } catch (error: any) {
     console.error('Reject error:', error);
+    toast.push(
+      <Notification title="Error" type="error">
+        {error.response?.data?.message || 'Failed to reject compliance'}
+      </Notification>
+    );
   }
 };
 
@@ -901,40 +954,40 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
   width={500}
 >
   <h5 className="mb-4">Reject Compliance</h5>
- <div className="mb-4 flex gap-2 items-center">
+  
+  <div className="mb-4 flex gap-2 items-center">
     <label className="block text-sm font-medium text-gray-700 mb-1">
-      Set Compliance Status:
+      Compliance Status:
     </label>
-   
-   <div className="w-1/2">
-   <OutlinedSelect
-    // className="mb-4"
-    label="Select compliance status"
-    options={
-      selectedRole === 'approver' 
-        ? approverStatusOptions 
-        : auditorStatusOptions
-    }
-    value={
-      (selectedRole === 'approver' 
-        ? approverStatusOptions 
-        : auditorStatusOptions
-      ).find(opt => opt.value === complianceStatus)
-    }
-    onChange={(option) => setComplianceStatus(option?.value || '')}
-  />
+    <div className="w-1/2">
+      <OutlinedSelect
+        label="Select status"
+        options={
+          selectedRole === 'approver' 
+            ? approverStatusOptions 
+            : auditorStatusOptions
+        }
+        value={
+          (selectedRole === 'approver' 
+            ? approverStatusOptions 
+            : auditorStatusOptions
+          ).find(opt => opt.value === complianceStatus)
+        }
+        onChange={(option) => setComplianceStatus(option?.value || '')}
+      />
     </div>
+  </div>
 
-    </div>
- 
-  <Input
-    textArea
-    rows={3}
-    placeholder="Enter rejection reason"
-    value={rejectReason}
-    onChange={(e) => setRejectReason(e.target.value)}
-    className="mb-4"
-  />
+  <div className="mb-4">
+    <Input
+      textArea
+      rows={3}
+      placeholder="Enter rejection reason"
+      value={rejectReason}
+      onChange={(e) => setRejectReason(e.target.value)}
+    />
+  </div>
+
   <div className="text-right mt-6">
     <Button
       className="mr-2"
