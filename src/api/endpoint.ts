@@ -125,7 +125,7 @@ export const endpoints = {
         detailDueCompliance: (id:any) => api(`companyadmin/compliance/checklists/due-compliance/${id}`),
         complianceHistoryList: () => api('companyadmin/compliance/checklists/history'),
         downloadComplianceHistory: () => api('companyadmin/compliance/checklists/history-checklist'),
-        listCertificate: () => api('comapnyadmin/compliance/checklists/certificate'),
+        listCertificate: () => api('companyadmin/compliance/checklists/certificate'),
         creteCertificate: () => api('companyadmin/compliance/checklists/compliance-certificate'),
         downloadCertificate: (id:any) => api(`companyadmin/compliance/checklists/compliance-certificate/download/${id}`)
 
