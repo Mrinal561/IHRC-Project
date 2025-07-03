@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui'
 import React, { useState } from 'react'
 import { HiDownload, HiPlusCircle } from 'react-icons/hi'
-import SalaryRegisterBulkUpload from './SalaryRegisterBulkUpload'
+import SalaryRegisterBulkUpload from './RegisterBulkUpload'
 import AttendanceRegisterBulkUpload from './AttendanceRegisterBulkUpload';
 
 interface AttendanceRegisterToolProps {

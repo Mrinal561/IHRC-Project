@@ -3140,24 +3140,24 @@ const adminnav: NavigationTree[] = [
                     subMenu: [
                         {
                             key: 'registerClient.collapse.clientRegister',
-                            path: '/salary-register',
-                            title: 'Salary Register',
+                            path: '/registers',
+                            title: 'Registers',
                             translateKey: 'nav.registerClient.collapse.clientRegister',
                             icon: '',
                             type: NAV_ITEM_TYPE_ITEM,
                             authority: [],
                             subMenu: [], 
                         },
-                        {
-                            key: 'registerClient.collapse.clientRegister',
-                            path: '/attendance-register',
-                            title: 'Attendance Register',
-                            translateKey: 'nav.registerClient.collapse.clientRegister',
-                            icon: '',
-                            type: NAV_ITEM_TYPE_ITEM,
-                            authority: [],
-                            subMenu: [], 
-                        }
+                        // {
+                        //     key: 'registerClient.collapse.clientRegister',
+                        //     path: '/attendance-register',
+                        //     title: 'Attendance Register',
+                        //     translateKey: 'nav.registerClient.collapse.clientRegister',
+                        //     icon: '',
+                        //     type: NAV_ITEM_TYPE_ITEM,
+                        //     authority: [],
+                        //     subMenu: [], 
+                        // }
                     ]
                 },
 

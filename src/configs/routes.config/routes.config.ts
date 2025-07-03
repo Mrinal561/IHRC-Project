@@ -535,6 +535,17 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'entityMenu.registerSetup',
+        path: `${APP_PREFIX_PATH}/IHRC/register-setup/:companyName`,
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Entity/RegisterSetup/RegisterSetup'
+                ),
+        ),
+        authority: [],
+    },
+    {
         key: 'entityMenu.companyDetails',
         path: `${APP_PREFIX_PATH}/IHRC/company-details/:companyName`,
         component: lazy(
@@ -952,12 +963,12 @@ export const protectedRoutes = [
         authority: [],
     },
      {
-        key: 'register.salaryRegister',
-        path: '/salary-register',
+        key: 'register.generateRegister',
+        path: '/registers',
         component: lazy(
             () =>
                 import(
-                    '@/views/IHRC/components/Register/components/SalaryRegister'
+                    '@/views/IHRC/components/Register/components/Register'
                 ),
         ),
         authority: [],
@@ -973,4 +984,15 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+    // {
+    //     key: 'company.registerSetup',
+    //     path: '/register-setup',
+    //     component: lazy(
+    //         () =>
+    //             import(
+    //                 '@/views/IHRC/components/Entity/RegisterSetup/RegisterSetup'
+    //             ),
+    //     ),
+    //     authority: [],
+    // },
 ]

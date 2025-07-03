@@ -1,13 +1,13 @@
 import { Button } from '@/components/ui'
 import React, { useState } from 'react'
 import { HiDownload, HiPlusCircle } from 'react-icons/hi'
-import SalaryRegisterBulkUpload from './SalaryRegisterBulkUpload'
+import RegisterBulkUpload from './RegisterBulkUpload';
 
 interface SalaryRegisterToolProps {
     onSuccess: () => void;
 }
 
-const SalaryRegisterTool: React.FC<SalaryRegisterToolProps> = ({ onSuccess }) => {
+const RegisterTool: React.FC<SalaryRegisterToolProps> = ({ onSuccess }) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     const handleBulkUploadSuccess = () => {
@@ -32,11 +32,11 @@ const SalaryRegisterTool: React.FC<SalaryRegisterToolProps> = ({ onSuccess }) =>
                     icon={<HiPlusCircle />}
                     onClick={() => setIsDialogOpen(true)}
                 >
-                    Add Salary Data
+                    Add Register Data
                 </Button>
             </div>
 
-            <SalaryRegisterBulkUpload
+            <RegisterBulkUpload
                 isOpen={isDialogOpen}
                 onClose={() => setIsDialogOpen(false)}
                 onSuccess={handleBulkUploadSuccess}
@@ -45,4 +45,4 @@ const SalaryRegisterTool: React.FC<SalaryRegisterToolProps> = ({ onSuccess }) =>
     )
 }
 
-export default SalaryRegisterTool
+export default RegisterTool

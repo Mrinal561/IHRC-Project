@@ -1,11 +1,12 @@
 import { AdaptableCard } from '@/components/shared'
 import React, { useState, useEffect } from 'react'
-import SalaryRegisterTool from './SalaryRegisterTool'
-import SalaryRegisterTable from './SalaryRegisterTable'
+import SalaryRegisterTool from './RegisterTool'
 import httpClient from '@/api/http-client'
 import { endpoints } from '@/api/endpoint'
 import { useAppSelector } from '@/store'
 import { HiOutlineViewGrid } from 'react-icons/hi'
+import RegisterTable from './RegisterTable'
+import RegisterTool from './RegisterTool'
 
 const FINANCIAL_YEAR_KEY = 'selectedFinancialYear'
 const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged'
@@ -51,8 +52,8 @@ const SalaryRegister = () => {
             const year = getYearFromFinancialYear(financialYear);
             const response = await httpClient.get(endpoints.register.listSalaryRegister(), {
                 params: {
-                    register_type: 'Salary Register',
-                    year: year // Pass the extracted year instead of financial_year
+                    // register_type: 'Salary Register',
+                    // year: year // Pass the extracted year instead of financial_year
                 }
             })
             setData(response.data.data)
@@ -77,9 +78,9 @@ const SalaryRegister = () => {
         <AdaptableCard className="h-full" bodyClass="h-full">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
                 <div className="mb-4 lg:mb-0">
-                    <h3 className="text-2xl font-bold">Salary Register</h3>
+                    <h3 className="text-2xl font-bold">Registers</h3>
                 </div>
-                <SalaryRegisterTool onSuccess={handleRefresh} />
+                <RegisterTool onSuccess={handleRefresh} />
             </div>
             {loading ? (
                 <div className="py-10 text-gray-400">Loading...</div>
@@ -91,7 +92,7 @@ const SalaryRegister = () => {
                     </div>
                 </div>
             ) : (
-                <SalaryRegisterTable data={data} />
+                <RegisterTable data={data} />
             )}
         </AdaptableCard>
     )

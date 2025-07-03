@@ -162,6 +162,11 @@ export const endpoints = {
         bulkCreate:()=> api('companyadmin/ptsetup/bulk-create'),
         downloadData: () => api('companyadmin/ptsetup/ptsetup-data/export')
     },
+    registerSetup: {
+        createRegisterSetup: () => api('companyadmin/register/register-setup'),
+        updateRegisterSetup: (id:any) => api(`companyadmin/register/register-setup/${id}`),
+        listRegisterSetup: () => api('companyadmin/register/register-setup')
+    },
     tracker: {
         downloadFormat: () => api('/companyadmin/pfsetup/pf-tracker/exportdata'),
         pfUpload: () => api('companyadmin/pfsetup/pf-tracker'),
@@ -378,7 +383,8 @@ export const endpoints = {
         createSalaryRegister: () => api('companyadmin/register/upload'),
         listAttendanceRegister: () => api('companyadmin/register/data'),
         downloadAttendanceRegisterTemplate: () => api('companyadmin/register/template/download'),
-        createAttendancceRegister: () => api('companyadmin/register/upload')
+        createAttendancceRegister: () => api('companyadmin/register/upload'),
+        exportRegister: () => api('companyadmin/register/export/house-rent')
     }
         
 }

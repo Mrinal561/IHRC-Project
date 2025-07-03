@@ -47,7 +47,7 @@ const generateMonthOptions = (financialYear: string | null) => {
   return months;
 };
 
-const SalaryRegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({ 
+const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({ 
   isOpen, 
   onClose, 
   onSuccess 
@@ -304,4 +304,4 @@ const SalaryRegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
   );
 };
 
-export default SalaryRegisterBulkUpload;
+export default RegisterBulkUpload;
