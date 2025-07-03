@@ -43,7 +43,7 @@ const RegisterSetupTable: React.FC<RegisterSetupTableProps> = ({
     {
       header: 'Company',
       enableSorting: false,
-      accessorKey: 'Company.name',
+      accessorKey: 'company_name',
       cell: (props) => (
         <div className="w-40 truncate">{props.getValue() || 'N/A'}</div>
       ),
