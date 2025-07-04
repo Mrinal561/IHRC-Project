@@ -271,10 +271,12 @@
 
 import React, { useMemo, useState } from 'react';
 import { DataTable } from '@/components/shared';
-import { Button, Tooltip, Dialog } from '@/components/ui';
+import { Button, Tooltip, Dialog, toast, Notification } from '@/components/ui';
 import { HiDownload, HiOutlineViewGrid } from 'react-icons/hi';
 import { FiTrash } from 'react-icons/fi';
 import PoshPolicy from './PoshPolicy';
+import httpClient from '@/api/http-client';
+import { endpoints } from '@/api/endpoint';
 
 interface PoshPolicyTableProps {
     data: PoshPolicy[];
@@ -285,7 +287,8 @@ interface PoshPolicyTableProps {
         limit: number;
     };
     onPaginationChange: (page: number, limit: number) => void;
-    onDelete: (id: number) => void;
+    // onDelete: (id: number) => void;
+    onReferesh: () => void
     onDownload: (id: number) => void;
 }
 
@@ -295,6 +298,7 @@ const PoshPolicyTable = ({
     pagingData, 
     onPaginationChange,
     // onDelete,
+    onReferesh,
     onDownload
 }: PoshPolicyTableProps) => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -303,11 +307,13 @@ const PoshPolicyTable = ({
     const columns = useMemo(() => [
         {
             header: 'Company Name',
+            enableSorting: false,
             accessorKey: 'company_name',
             cell: ({ row }) => <div className="font-medium">{row.original.company_name}</div>
         },
         {
             header: 'Status',
+            enableSorting: false,
             accessorKey: 'is_active',
             cell: ({ row }) => (
                 <div className={`w-20 font-semibold px-2 py-1 rounded-md text-sm text-center h-8 ${
@@ -319,6 +325,7 @@ const PoshPolicyTable = ({
         },
         {
             header: 'Created By',
+            enableSorting: false,
             accessorKey: 'created_by_name',
             cell: ({ row }) => <div className="font-medium">{row.original.created_by_name}</div>
         },
@@ -351,10 +358,32 @@ const PoshPolicyTable = ({
         }
     ], []);
 
+     const handleDeletePolicy = async (id: number) => {
+    try {
+        await httpClient.delete(endpoints.poshSetup.policyDelete(id));
+        toast.push(
+            <Notification title="Success" type="success">
+                Policy deleted successfully
+            </Notification>
+        );
+        // fetchPolicies(pagingData.page, pagingData.limit);
+        setDeleteDialogOpen(false);
+        onReferesh();
+    } catch (error) {
+        console.error('Delete error:', error);
+        toast.push(
+            <Notification title="Error" type="error">
+                Failed to delete policy
+            </Notification>
+        );
+    }
+};
+
+
     const confirmDelete = () => {
         if (selectedPolicyId) {
             // onDelete(selectedPolicyId);
-            setDeleteDialogOpen(false);
+            handleDeletePolicy(selectedPolicyId)
         }
     };
 

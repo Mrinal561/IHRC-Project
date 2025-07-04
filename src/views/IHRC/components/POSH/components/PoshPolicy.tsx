@@ -381,6 +381,7 @@ const PoshPolicy = () => {
                 pagingData={pagingData}
                 onPaginationChange={fetchPolicies}
                 onDownload={handleDownloadPolicy}
+                onReferesh={fetchPolicies}
                 // onDelete={(id) => {
                 //     setSelectedPolicyId(id);
                 //     setDeleteDialogOpen(true);
