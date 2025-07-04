@@ -18,6 +18,7 @@ interface UploadedESIDetailsProps {
   loading: boolean;
   groupId: string;
   companyId:string;
+  // onRefersh: () => void
 }
 
 
@@ -29,6 +30,8 @@ const UploadedESIDetails: React.FC<UploadedESIDetailsProps> = ({ onBack, loading
   const navigate = useNavigate();
   const [data, setData] = useState<esiChallanData[]>([]);
 const [isLoading, setIsLoading] = useState(false);
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
 const {login} = store.getState();
   const [financialYear, setFinancialYear] = useState(sessionStorage.getItem(FINANCIAL_YEAR_KEY));
 const [pagination, setPagination] = useState({
@@ -100,7 +103,14 @@ const params: any = {
   return '₹' + lastThree;
 };
 
+useEffect(() => {
+    fetchEsiTrackerData(pagination.pageIndex, pagination.pageSize);
+  }, [fetchEsiTrackerData, pagination.pageIndex, pagination.pageSize, refreshCounter]);
 
+  // Create refresh function
+  const handleRefresh = useCallback(() => {
+    setRefreshCounter(prev => prev + 1);
+  }, []);
 
   const columns: ColumnDef<esiChallanData>[] = useMemo(
     () => [
@@ -337,11 +347,12 @@ const params: any = {
             <EsiConfigDropdown companyName={row.original.EsiSetup.Company.name} 
             companyGroupName={row.original.EsiSetup.CompanyGroup.name} 
             trackerId={row.original.id}  
-            onRefresh={fetchEsiTrackerData} />
+            onRefresh={handleRefresh} 
+          />
         ),
       },
     ],
-    []
+    [handleRefresh]
   );
 
   const backFunction = () => {

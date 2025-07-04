@@ -55,7 +55,7 @@ const ESITrackerTool: React.FC<{
   };
 
   if (showUploadedDetails) {
-    return <UploadedESIDetails onBack={handleBack} loading={isLoading} groupId={filters.groupId} companyId={filters.companyId} />;
+    return <UploadedESIDetails onBack={handleBack} loading={isLoading} groupId={filters.groupId} companyId={filters.companyId}  />;
   }
 
   const handleDateRangeApply = (start: Date, end: Date) => {

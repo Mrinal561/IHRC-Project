@@ -271,6 +271,10 @@ const ESITracker: React.FC = () => {
             params['esi_code[]'] = currentFilters.esiCode;
         }
 
+        if (financialYear) {
+        params['financial_year'] = financialYear;
+    }
+
         setIsLoading(true);
         httpClient.get(endpoints.esiTracker.getAll(), {
             params
@@ -290,7 +294,7 @@ const ESITracker: React.FC = () => {
         }).finally(() => {
             setIsLoading(false);
         });
-    }, []); // No dependencies needed
+    }, [financialYear]); // No dependencies needed
 
     const handlePaginationChange = (page: number) => {
         setPagination((prev) => ({ ...prev, pageIndex: page }));
