@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Dialog, Input, Notification } from '@/components/ui';
+import { Button, Dialog, Input, Notification, toast } from '@/components/ui';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
 import PoshBulkUpload from './components/PoshBulkUpload';
 import PoshTable from './components/PoshTable';
@@ -250,13 +250,21 @@ useEffect(() => {
     }
 
     try {
-      await httpClient.post(endpoints.poshSetup.createPoshReturn(), {
+     const response = await httpClient.post(endpoints.poshSetup.createPoshReturn(), {
         ...formData,
         company_id: Number(formData.company_id),
         branch_id: Number(formData.branch_id),
         created_by: userId,
         year: Number(formData.year)
       });
+
+if(response){
+  toast.push(
+    <Notification title='Success' type='success'>
+      POSH return created successfully
+    </Notification>
+  )
+}
 
       
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { DataTable } from '@/components/shared';
-import { Button, Tooltip, Notification } from '@/components/ui';
+import { Button, Tooltip, Notification, toast } from '@/components/ui';
 import { HiDownload, HiOutlineViewGrid } from 'react-icons/hi';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
@@ -84,6 +84,8 @@ const CommitteeTable = () => {
                     responseType: 'blob'
                 }
             );
+
+            
             
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
