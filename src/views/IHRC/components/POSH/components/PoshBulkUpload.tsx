@@ -54,7 +54,7 @@ const PoshBulkUpload: React.FC<PoshBulkUploadProps> = ({ onUploadSuccess }) => {
 
 
             const formData = new FormData()
-            formData.append('document', file)
+            formData.append('file', file)
             formData.append('remark', remark)
             formData.append('companyId', selectedCompany)
             formData.append('year', selectedYear)
