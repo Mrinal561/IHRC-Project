@@ -76,29 +76,84 @@ const CommitteeTable = () => {
         }
     };
 
-    const handleDownload = async (id: string) => {
-        try {
-            const response = await httpClient.get(
-                endpoints.poshSetup.poshCommitteeIndividualDocumentDownload(id), 
-                {
-                    responseType: 'blob'
-                }
-            );
+    // const handleDownload = async (id: string) => {
+    //     try {
+    //         const response = await httpClient.get(
+    //             endpoints.poshSetup.poshCommitteeIndividualDocumentDownload(id), 
+    //             {
+    //                 responseType: 'blob'
+    //             }
+    //         );
 
             
             
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `committee-policy-${id}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Download error:', error);
+            
+    //         const url = window.URL.createObjectURL(new Blob([response.data]));
+    //         const link = document.createElement('a');
+    //         link.href = url;
+    //         link.setAttribute('download', `committee-policy-${id}.pdf`);
+    //         document.body.appendChild(link);
+    //         link.click();
+    //         document.body.removeChild(link);
+    //         window.URL.revokeObjectURL(url);
+
+    //         if(!response) {
+    //             toast.push(
+    //                 <Notification title='Error' type='error'>
+    //                     No POSH document found in setup
+    //                 </Notification>
+    //             )
+    //         }
+
+
+    //     } catch (error) {
+    //         console.error('Download error:', error);
+    //     }
+    // };
+
+
+   const handleDownload = async (id: string) => {
+    try {
+        // First check if document exists
+        const checkResponse = await httpClient.get(
+            endpoints.poshSetup.poshCommitteeIndividualDocumentDownload(id)
+        );
+
+        if (checkResponse.data.success === false) {
+            toast.push(
+                <Notification title='Error' type='error'>
+                    {checkResponse.data.message}
+                </Notification>
+            );
+            return;
         }
-    };
+
+        // If exists, download as blob
+        const downloadResponse = await httpClient.get(
+            endpoints.poshSetup.poshCommitteeIndividualDocumentDownload(id), 
+            {
+                responseType: 'blob'
+            }
+        );
+
+        const url = window.URL.createObjectURL(downloadResponse.data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `committee-policy-${id}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Download error:', error);
+        toast.push(
+            <Notification title='Error' type='error'>
+                Failed to download document
+            </Notification>
+        );
+    }
+};
+
 
     useEffect(() => {
         fetchCommittees();

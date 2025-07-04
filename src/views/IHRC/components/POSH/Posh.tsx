@@ -405,33 +405,22 @@ const resetForm = () => {
   };
 
 const generateYearOption = () => {
-  // Safely extract base year from financial year format (e.g., "2025-26")
-  const financialYearParts = currentFinancialYear.split('-');
-  const baseYear = financialYearParts.length > 0 ? parseInt(financialYearParts[0]) : new Date().getFullYear();
-  
-  // Ensure we have a valid number
-  if (isNaN(baseYear)) {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 5 }, (_, i) => ({
-      value: currentYear - i,
-      label: (currentYear - i).toString()
-    }));
-  }
-
-  return Array.from({ length: 5 }, (_, i) => ({
-    value: baseYear - i,
-    label: (baseYear - i).toString()
-  }));
-};
-
-
-  const generateYearOptions = () => {
   const currentYear = new Date().getFullYear();
-  return Array.from({ length: 5 }, (_, i) => ({
-    value: (currentYear - i).toString(),
-    label: (currentYear - i).toString()
+  // Generate array of previous 4 years (currentYear-1 to currentYear-4)
+  return Array.from({ length: 4 }, (_, i) => ({
+    value: currentYear - (i + 1),  // +1 to exclude current year
+    label: (currentYear - (i + 1)).toString()
   }));
 };
+
+
+//   const generateYearOptions = () => {
+//   const currentYear = new Date().getFullYear();
+//   return Array.from({ length: 5 }, (_, i) => ({
+//     value: (currentYear - i).toString(),
+//     label: (currentYear - i).toString()
+//   }));
+// };
 
 
   return (
@@ -510,8 +499,8 @@ const generateYearOption = () => {
     <div>
       <label className="block text-sm font-medium mb-2">Select Year</label>
       <OutlinedSelect
-        options={generateYearOptions()}
-        value={generateYearOptions().find(option => option.value === bulkDownloadData.year) || null}
+        options={generateYearOption()}
+        value={generateYearOption().find(option => option.value === bulkDownloadData.year) || null}
         onChange={(selectedOption) => setBulkDownloadData(prev => ({
           ...prev,
           year: selectedOption?.value || currentFinancialYear
@@ -627,12 +616,12 @@ const generateYearOption = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
       <label className="block text-sm font-medium mb-2">Select Year</label>
-     <OutlinedSelect
-  options={generateYearOption()}
-  value={formData.year ? generateYearOption().find(option => option.value === formData.year) : null}
-  onChange={(selectedOption) => handleInputChange('year', selectedOption?.value)}
-  label="Select Year"
-/>
+    <OutlinedSelect
+      options={generateYearOption()}
+      value={formData.year ? generateYearOption().find(option => option.value === formData.year) : null}
+      onChange={(selectedOption) => handleInputChange('year', selectedOption?.value || new Date().getFullYear() - 1)}
+      label="Select Year"
+    />
     </div>
           </div>
 
