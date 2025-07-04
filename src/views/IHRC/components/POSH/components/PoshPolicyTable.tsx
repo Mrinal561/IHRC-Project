@@ -294,7 +294,7 @@ const PoshPolicyTable = ({
     loading, 
     pagingData, 
     onPaginationChange,
-    onDelete,
+    // onDelete,
     onDownload
 }: PoshPolicyTableProps) => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -353,7 +353,7 @@ const PoshPolicyTable = ({
 
     const confirmDelete = () => {
         if (selectedPolicyId) {
-            onDelete(selectedPolicyId);
+            // onDelete(selectedPolicyId);
             setDeleteDialogOpen(false);
         }
     };

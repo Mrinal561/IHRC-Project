@@ -381,10 +381,10 @@ const PoshPolicy = () => {
                 pagingData={pagingData}
                 onPaginationChange={fetchPolicies}
                 onDownload={handleDownloadPolicy}
-                onDelete={(id) => {
-                    setSelectedPolicyId(id);
-                    setDeleteDialogOpen(true);
-                }}
+                // onDelete={(id) => {
+                //     setSelectedPolicyId(id);
+                //     setDeleteDialogOpen(true);
+                // }}
             />
             
             <AddPolicyDialog
