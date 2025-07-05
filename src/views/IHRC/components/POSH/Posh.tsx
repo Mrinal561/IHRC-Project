@@ -10,6 +10,7 @@ import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 import { useAppSelector } from '@/store';
 import useAuth from '@/utils/hooks/useAuth';
+import LimitedLineInput from '@/components/ui/Input/LimitedLineInput';
 
 const FINANCIAL_YEAR_KEY = 'selectedFinancialYear'
 const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged';
@@ -628,13 +629,20 @@ const generateYearOption = () => {
 
           <div>
             <label className="block text-sm font-medium mb-2">Nature of Action Taken</label>
-            <Input
+            {/* <Input
               textArea
               rows={3}
               value={formData.nature_of_action_taken}
               onChange={(e) => handleInputChange('nature_of_action_taken', e.target.value)}
               placeholder="Describe the actions taken..."
-            />
+            /> */}
+             <LimitedLineInput
+    value={formData.nature_of_action_taken}
+    onChange={(value) => handleInputChange('nature_of_action_taken', value)}
+    maxCharsPerLine={80}
+    rows={3}
+    placeholder="Describe the actions taken (max 80 characters per line)..."
+  />
           </div>
 
           <div className="flex justify-end gap-2 mt-4">

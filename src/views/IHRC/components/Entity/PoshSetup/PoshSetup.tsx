@@ -675,7 +675,7 @@ const PoshSetup = () => {
               onClick={handleSubmit}
               loading={isLoading}
             >
-              Save
+              Upload
             </Button>
           </>
         ) : (
@@ -693,7 +693,7 @@ const PoshSetup = () => {
             variant="solid" 
             onClick={() => setIsEditMode(true)}
           >
-            Create Configuration
+            Upload Configuration
           </Button>
         )}
       </div>
