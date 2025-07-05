@@ -67,7 +67,7 @@ const handleSubmit = async () => {
             onClose={onClose}
             width={500}
         >
-            <h5 className="mb-4">Upload POSH Policy</h5>
+            <h5 className="mb-4">Upload Policy</h5>
             
             <div className="mb-4">
                 <label className="block mb-2">Select Company</label>

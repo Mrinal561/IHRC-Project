@@ -324,7 +324,7 @@ const PoshPolicyTable = ({
             )
         },
         {
-            header: 'Created By',
+            header: 'Uploaded By',
             enableSorting: false,
             accessorKey: 'created_by_name',
             cell: ({ row }) => <div className="font-medium">{row.original.created_by_name}</div>
