@@ -1,7 +1,5 @@
 
 
-
-
 // import React, { useEffect, useState, useRef } from 'react';
 // import { Button, toast, Notification } from '@/components/ui';
 // import { HiArrowLeft, HiEye } from 'react-icons/hi';
@@ -9,6 +7,7 @@
 // import { endpoints } from '@/api/endpoint';
 // import { useLocation, useNavigate } from 'react-router-dom';
 // import OutlinedSelect from '@/components/ui/Outlined/Outlined';
+// import OutlinedInput from '@/components/ui/OutlinedInput/OutlinedInput';
 
 // interface SelectOption {
 //   value: string;
@@ -23,6 +22,8 @@
 // interface PoshConfig {
 //   id: number;
 //   return_level: string;
+//   address?: string;
+//   address_pincode?: string;
 //   document?: string;
 //   original_filename?: string;
 //   mime_type?: string;
@@ -42,6 +43,8 @@
 //   const fileInputRef = useRef<HTMLInputElement>(null);
 
 //   const [selectedReturnLevel, setSelectedReturnLevel] = useState<SelectOption | null>(null);
+//   const [address, setAddress] = useState('');
+//   const [addressPincode, setAddressPincode] = useState('');
 //   const [isLoading, setIsLoading] = useState(false);
 //   const [hasExistingConfig, setHasExistingConfig] = useState(false);
 //   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -63,6 +66,8 @@
 //       if (configData) {
 //         setHasExistingConfig(true);
 //         setCurrentConfig(configData);
+//         setAddress(configData.address || '');
+//         setAddressPincode(configData.address_pincode || '');
 //         const option = returnLevelOptions.find(opt => opt.value === configData.return_level);
 //         setSelectedReturnLevel(option || null);
 //       }
@@ -83,7 +88,6 @@
 
 //   const handleViewDocument = () => {
 //     if (!currentConfig?.document) return;
-//     // Construct the full URL with your API gateway prefix
 //     const fullPath = `${import.meta.env.VITE_API_GATEWAY}/${currentConfig.document}`;
 //     window.open(fullPath, '_blank');
 //   };
@@ -115,6 +119,8 @@
 //       const payload = {
 //         return_level: selectedReturnLevel.value,
 //         company_id: Number(companyId),
+//         address: address,
+//         address_pincode: addressPincode,
 //         ...(selectedFile && {
 //           document: {
 //             document: base64String,
@@ -181,13 +187,47 @@
 //             options={returnLevelOptions}
 //             value={selectedReturnLevel}
 //             onChange={setSelectedReturnLevel}
+//             isDisabled={!isEditMode}
+//           />
+//         </div>
+
+//         <div>
+//   <label className="text-gray-600 mb-2 block">
+//     Company Address
+//   </label>
+//   <OutlinedInput
+//     textarea
+//     value={address}
+//     onChange={(value) => {
+//       // Split into lines and ensure each line has max 36 chars
+//       const lines = value.split('\n');
+//       const processedLines = lines.map(line => 
+//         line.length > 36 ? line.substring(0, 36) : line
+//       );
+//       setAddress(processedLines.join('\n'));
+//     }}
+//     label="Enter company address (max 36 chars per line)"
+//     disabled={!isEditMode}
+//     maxCharsPerLine={36} // Add this new prop
+//     // placeholder="Type address (press Enter for new line)"
+//   />
+// </div>
+
+//         <div>
+//           <label className="text-gray-600 mb-2 block">
+//             District,State,Pincode
+//           </label>
+//           <OutlinedInput
+//             value={addressPincode}
+//             onChange={(value) => setAddressPincode(value)}
+//             label="Enter District,State,Pincode"
 //             disabled={!isEditMode}
 //           />
 //         </div>
 
 //         <div>
 //           <label className="text-gray-600 mb-2 block">
-//             POSH Document {!hasExistingConfig && <span className="text-red-500">*</span>}
+//             POSH Policy {!hasExistingConfig && <span className="text-red-500">*</span>}
 //           </label>
           
 //           {isEditMode ? (
@@ -204,7 +244,7 @@
 //                   file:bg-blue-50 file:text-blue-700
 //                   hover:file:bg-blue-100"
 //               />
-//               {/* {currentConfig?.document && (
+//               {currentConfig?.document && (
 //                 <button
 //                   onClick={handleViewDocument}
 //                   className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
@@ -212,25 +252,23 @@
 //                 >
 //                   <HiEye size={20} />
 //                 </button>
-//               )} */}
+//               )}
+//             </div>
+//           ) : currentConfig?.document ? (
+//             <div className="flex items-center">
+//               <span className="text-gray-600 mr-2">
+//                 {currentConfig.original_filename || 'View document'}
+//               </span>
+//               <button
+//                 onClick={handleViewDocument}
+//                 className="p-2 hover:bg-gray-100 rounded-full"
+//                 title="View Document"
+//               >
+//                 <HiEye size={20} />
+//               </button>
 //             </div>
 //           ) : (
 //             <p className="text-gray-400">Click on edit button if you want to upload the document or changing the return level</p>
-//         //   : currentConfig?.document ? (
-//         //     <div className="flex items-center">
-//         //       <span className="text-gray-600 mr-2">
-//         //         {currentConfig.original_filename || 'View document'}
-//         //       </span>
-//         //       <button
-//         //         onClick={handleViewDocument}
-//         //         className="p-2 hover:bg-gray-100 rounded-full"
-//         //         title="View Document"
-//         //       >
-//         //         <HiEye size={20} />
-//         //       </button>
-//         //     </div>
-//         //   ) 
-           
 //           )}
 //         </div>
 //       </div>
@@ -271,7 +309,7 @@
 //             variant="solid" 
 //             onClick={() => setIsEditMode(true)}
 //           >
-//             Create
+//             Upload
 //           </Button>
 //         )}
 //       </div>
@@ -280,6 +318,18 @@
 // };
 
 // export default PoshSetup;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -333,6 +383,7 @@ const PoshSetup = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentConfig, setCurrentConfig] = useState<PoshConfig | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (companyId) {
@@ -369,10 +420,53 @@ const PoshSetup = () => {
     setSelectedFile(e.target.files?.[0] || null);
   };
 
-  const handleViewDocument = () => {
-    if (!currentConfig?.document) return;
-    const fullPath = `${import.meta.env.VITE_API_GATEWAY}/${currentConfig.document}`;
-    window.open(fullPath, '_blank');
+  const handleViewDocument = async () => {
+    if (!currentConfig?.id) return;
+
+    try {
+      setIsDownloading(true);
+      const response = await httpClient.get(
+        endpoints.poshSetup.poshSetupDocumentDownload(currentConfig.id),
+        {
+          responseType: 'blob'
+        }
+      );
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Set filename (use original if available, otherwise generate one)
+      const fileExtension = currentConfig.document?.split('.').pop() || 'pdf';
+      const filename = currentConfig.original_filename || 
+        `posh-document-${currentConfig.id}.${fileExtension}`;
+      link.setAttribute('download', filename);
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Show success notification
+      toast.push(
+        <Notification title="Success" type="success">
+          Document downloaded successfully
+        </Notification>
+      );
+    } catch (error: any) {
+      console.error('Download error:', error);
+      toast.push(
+        <Notification title="Error" type="danger">
+          {error.response?.data?.message || 'Failed to download document'}
+        </Notification>
+      );
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -418,9 +512,11 @@ const PoshSetup = () => {
         payload
       );
 
-      toast.push(<Notification title="Success" type="success">
-        {hasExistingConfig ? 'Configuration updated' : 'Configuration created'}
-      </Notification>);
+      toast.push(
+        <Notification title="Success" type="success">
+          {hasExistingConfig ? 'Configuration updated' : 'Configuration created'}
+        </Notification>
+      );
       setIsEditMode(false);
       fetchPoshConfig();
     } catch (error: any) {
@@ -435,7 +531,11 @@ const PoshSetup = () => {
   };
 
   const showErrorNotification = (message: string) => {
-    toast.push(<Notification title="Error" type="danger">{message}</Notification>);
+    toast.push(
+      <Notification title="Error" type="danger">
+        {message}
+      </Notification>
+    );
   };
 
   return (
@@ -475,26 +575,23 @@ const PoshSetup = () => {
         </div>
 
         <div>
-  <label className="text-gray-600 mb-2 block">
-    Company Address
-  </label>
-  <OutlinedInput
-    textarea
-    value={address}
-    onChange={(value) => {
-      // Split into lines and ensure each line has max 36 chars
-      const lines = value.split('\n');
-      const processedLines = lines.map(line => 
-        line.length > 36 ? line.substring(0, 36) : line
-      );
-      setAddress(processedLines.join('\n'));
-    }}
-    label="Enter company address (max 36 chars per line)"
-    disabled={!isEditMode}
-    maxCharsPerLine={36} // Add this new prop
-    // placeholder="Type address (press Enter for new line)"
-  />
-</div>
+          <label className="text-gray-600 mb-2 block">
+            Company Address
+          </label>
+          <OutlinedInput
+            textarea
+            value={address}
+            onChange={(value) => {
+              const lines = value.split('\n');
+              const processedLines = lines.map(line => 
+                line.length > 36 ? line.substring(0, 36) : line
+              );
+              setAddress(processedLines.join('\n'));
+            }}
+            label="Enter company address (max 36 chars per line)"
+            disabled={!isEditMode}
+          />
+        </div>
 
         <div>
           <label className="text-gray-600 mb-2 block">
@@ -528,30 +625,34 @@ const PoshSetup = () => {
                   hover:file:bg-blue-100"
               />
               {currentConfig?.document && (
-                <button
+                <Button
+                  icon={<HiEye />}
+                  size="sm"
+                  variant="plain"
                   onClick={handleViewDocument}
-                  className="p-2 hover:bg-gray-100 rounded-full flex-shrink-0"
-                  title="View Document"
-                >
-                  <HiEye size={20} />
-                </button>
+                  loading={isDownloading}
+                  disabled={isDownloading}
+                  title="Download Document"
+                />
               )}
             </div>
           ) : currentConfig?.document ? (
-            <div className="flex items-center">
-              <span className="text-gray-600 mr-2">
-                {currentConfig.original_filename || 'View document'}
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600">
+                {currentConfig.original_filename || 'Download document'}
               </span>
-              <button
+              <Button
+                icon={<HiEye />}
+                size="sm"
+                variant="plain"
                 onClick={handleViewDocument}
-                className="p-2 hover:bg-gray-100 rounded-full"
-                title="View Document"
-              >
-                <HiEye size={20} />
-              </button>
+                loading={isDownloading}
+                disabled={isDownloading}
+                title="Download Document"
+              />
             </div>
           ) : (
-            <p className="text-gray-400">Click on edit button if you want to upload the document or changing the return level</p>
+            <p className="text-gray-400">No document uploaded yet</p>
           )}
         </div>
       </div>
@@ -592,7 +693,7 @@ const PoshSetup = () => {
             variant="solid" 
             onClick={() => setIsEditMode(true)}
           >
-            Upload
+            Create Configuration
           </Button>
         )}
       </div>
