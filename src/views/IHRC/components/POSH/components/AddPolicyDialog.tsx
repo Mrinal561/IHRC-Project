@@ -99,7 +99,7 @@ const handleSubmit = async () => {
                     icon={<HiPlusCircle />}
                     onClick={handleSubmit}
                 >
-                    Create Policy
+                    Upload Policy
                 </Button>
             </div>
         </Dialog>
