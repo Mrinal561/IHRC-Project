@@ -475,16 +475,26 @@ const PoshSetup = () => {
         </div>
 
         <div>
-          <label className="text-gray-600 mb-2 block">
-            Company Address
-          </label>
-          <OutlinedInput
-            value={address}
-            onChange={(value) => setAddress(value)}
-            label="Enter company address"
-            disabled={!isEditMode}
-          />
-        </div>
+  <label className="text-gray-600 mb-2 block">
+    Company Address
+  </label>
+  <OutlinedInput
+    textarea
+    value={address}
+    onChange={(value) => {
+      // Split into lines and ensure each line has max 36 chars
+      const lines = value.split('\n');
+      const processedLines = lines.map(line => 
+        line.length > 36 ? line.substring(0, 36) : line
+      );
+      setAddress(processedLines.join('\n'));
+    }}
+    label="Enter company address (max 36 chars per line)"
+    disabled={!isEditMode}
+    maxCharsPerLine={36} // Add this new prop
+    // placeholder="Type address (press Enter for new line)"
+  />
+</div>
 
         <div>
           <label className="text-gray-600 mb-2 block">
@@ -500,7 +510,7 @@ const PoshSetup = () => {
 
         <div>
           <label className="text-gray-600 mb-2 block">
-            POSH Document {!hasExistingConfig && <span className="text-red-500">*</span>}
+            POSH Policy {!hasExistingConfig && <span className="text-red-500">*</span>}
           </label>
           
           {isEditMode ? (
@@ -582,7 +592,7 @@ const PoshSetup = () => {
             variant="solid" 
             onClick={() => setIsEditMode(true)}
           >
-            Create
+            Upload
           </Button>
         )}
       </div>

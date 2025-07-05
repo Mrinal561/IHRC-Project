@@ -1,5 +1,7 @@
 // import React, { useState } from 'react';
 
+import { useState } from "react";
+
 // interface OutlinedInputProps {
 //   label: string;
 //   value: string;
@@ -54,41 +56,89 @@
 
 // export default OutlinedInput;
 
-import React, { useState } from 'react';
 
-interface OutlinedInputProps {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  textarea?: boolean;
-  maxLabelWidth?: string;
-  disabled?: boolean;
-}
 
-const OutlinedInput: React.FC<OutlinedInputProps> = ({ 
-  label, 
-  value, 
-  onChange, 
-  textarea = false,
-  maxLabelWidth = '90%',
-  disabled = false
-}) => {
-  const [isFocused, setIsFocused] = useState(false);
 
-  const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => setIsFocused(false);
 
-  const isFloating = isFocused || value !== '';
 
-//   return (
-//     <div className="relative">
+
+
+
+// import React, { useState } from 'react';
+
+// interface OutlinedInputProps {
+//   label: string;
+//   value: string;
+//   onChange: (value: string) => void;
+//   textarea?: boolean;
+//   maxLabelWidth?: string;
+//   disabled?: boolean;
+//   maxCharsPerLine?: number; // New prop
+//   placeholder?: string;
+// }
+
+// const OutlinedInput: React.FC<OutlinedInputProps> = ({ 
+//   label, 
+//   value, 
+//   onChange, 
+//   textarea = false,
+//   maxLabelWidth = '90%',
+//   disabled = false
+// }) => {
+//   const [isFocused, setIsFocused] = useState(false);
+
+//   const handleFocus = () => setIsFocused(true);
+//   const handleBlur = () => setIsFocused(false);
+
+//   const isFloating = isFocused || value !== '';
+
+// //   return (
+// //     <div className="relative">
+// //       <div className="absolute top-0 left-0 w-full h-full border rounded-md pointer-events-none border-gray-300">
+// //         <span
+// //           className={`absolute px-1 transition-all duration-200 whitespace-nowrap overflow-hidden text-ellipsis ${
+// //             isFloating
+// //               ? '-top-3 left-3 text-xs font-semibold bg-white text-indigo-600'
+// //               : 'top-2 left-2 text-sm text-gray-500'
+// //           }`}
+// //           style={{ maxWidth: maxLabelWidth }}
+// //         >
+// //           {label}
+// //         </span>
+// //       </div>
+
+// //       {textarea ? (
+// //         <textarea
+// //           value={value}
+// //           onChange={(e) => onChange(e.target.value)}
+// //           onFocus={handleFocus}
+// //           onBlur={handleBlur}
+// //           className="w-full px-3 py-2 bg-transparent border-none focus:outline-none resize-none"
+// //           rows={4}
+// //         />
+// //       ) : (
+// //         <input
+// //           type="text"
+// //           value={value}
+// //           onChange={(e) => onChange(e.target.value)}
+// //           onFocus={handleFocus}
+// //           onBlur={handleBlur}
+// //           className="w-full px-3 py-2 bg-transparent border-none focus:outline-none"
+// //         />
+// //       )}
+// //     </div>
+// //   );
+// // };
+
+// return (
+//     <div className={`relative ${disabled ? 'opacity-50' : ''}`}>
 //       <div className="absolute top-0 left-0 w-full h-full border rounded-md pointer-events-none border-gray-300">
 //         <span
 //           className={`absolute px-1 transition-all duration-200 whitespace-nowrap overflow-hidden text-ellipsis ${
 //             isFloating
 //               ? '-top-3 left-3 text-xs font-semibold bg-white text-indigo-600'
 //               : 'top-2 left-2 text-sm text-gray-500'
-//           }`}
+//           } ${disabled ? 'text-gray-400' : ''}`}
 //           style={{ maxWidth: maxLabelWidth }}
 //         >
 //           {label}
@@ -98,27 +148,101 @@ const OutlinedInput: React.FC<OutlinedInputProps> = ({
 //       {textarea ? (
 //         <textarea
 //           value={value}
-//           onChange={(e) => onChange(e.target.value)}
+//           onChange={(e) => !disabled && onChange(e.target.value)}
 //           onFocus={handleFocus}
 //           onBlur={handleBlur}
 //           className="w-full px-3 py-2 bg-transparent border-none focus:outline-none resize-none"
 //           rows={4}
+//           disabled={disabled}
 //         />
 //       ) : (
 //         <input
 //           type="text"
 //           value={value}
-//           onChange={(e) => onChange(e.target.value)}
+//           onChange={(e) => !disabled && onChange(e.target.value)}
 //           onFocus={handleFocus}
 //           onBlur={handleBlur}
 //           className="w-full px-3 py-2 bg-transparent border-none focus:outline-none"
+//           disabled={disabled}
 //         />
 //       )}
 //     </div>
 //   );
 // };
 
-return (
+// export default OutlinedInput;
+
+
+
+
+interface OutlinedInputProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  textarea?: boolean;
+  maxLabelWidth?: string;
+  disabled?: boolean;
+  maxCharsPerLine?: number; // New prop
+  placeholder?: string; // New prop
+}
+
+const OutlinedInput: React.FC<OutlinedInputProps> = ({ 
+  label, 
+  value, 
+  onChange, 
+  textarea = false,
+  maxLabelWidth = '90%',
+  disabled = false,
+  maxCharsPerLine,
+  placeholder
+}) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleFocus = () => setIsFocused(true);
+  const handleBlur = () => setIsFocused(false);
+
+  const isFloating = isFocused || value !== '';
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  if (!maxCharsPerLine) {
+    onChange(e.target.value);
+    return;
+  }
+
+  const cursorPosition = e.target.selectionStart;
+  const valueBeforeCursor = e.target.value.substring(0, cursorPosition);
+  const linesBeforeCursor = valueBeforeCursor.split('\n');
+  const currentLineIndex = linesBeforeCursor.length - 1;
+  const currentLine = linesBeforeCursor[currentLineIndex];
+
+  // Cast the native event to InputEvent to access inputType
+  const nativeEvent = e.nativeEvent as InputEvent;
+
+  // If current line reaches max chars and user didn't press enter, prevent input
+  if (currentLine.length >= maxCharsPerLine && nativeEvent.inputType !== 'insertLineBreak') {
+    return;
+  }
+
+  onChange(e.target.value);
+};
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  if (!maxCharsPerLine) return;
+
+  const textarea = e.target as HTMLTextAreaElement;
+  const cursorPosition = textarea.selectionStart;
+  const valueBeforeCursor = textarea.value.substring(0, cursorPosition);
+  const linesBeforeCursor = valueBeforeCursor.split('\n');
+  const currentLineIndex = linesBeforeCursor.length - 1;
+  const currentLine = linesBeforeCursor[currentLineIndex];
+
+  // Prevent typing beyond max chars (except for Enter key)
+  if (currentLine.length >= maxCharsPerLine && e.key !== 'Enter' && e.key !== 'Backspace') {
+    e.preventDefault();
+  }
+};
+
+  return (
     <div className={`relative ${disabled ? 'opacity-50' : ''}`}>
       <div className="absolute top-0 left-0 w-full h-full border rounded-md pointer-events-none border-gray-300">
         <span
@@ -136,12 +260,14 @@ return (
       {textarea ? (
         <textarea
           value={value}
-          onChange={(e) => !disabled && onChange(e.target.value)}
+          onChange={handleTextareaChange}
+          onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={handleBlur}
           className="w-full px-3 py-2 bg-transparent border-none focus:outline-none resize-none"
           rows={4}
           disabled={disabled}
+          placeholder={placeholder}
         />
       ) : (
         <input
@@ -154,10 +280,15 @@ return (
           disabled={disabled}
         />
       )}
+      
+      {maxCharsPerLine && textarea && (
+        <div className="text-xs text-gray-500 mt-1">
+          Max {maxCharsPerLine} characters per line
+        </div>
+      )}
     </div>
   );
 };
 
+
 export default OutlinedInput;
-
-
