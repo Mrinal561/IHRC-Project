@@ -3030,7 +3030,7 @@ const adminnav: NavigationTree[] = [
     {
              key: 'collapseMenu.collapse',
                 path: '',
-                title: 'Audit Checklist',
+                title: 'Audit Tracker',
                 translateKey: 'nav.collapseMenu.collapseMenu.collapse',
                 icon: 'auditCollapse',
                 type: NAV_ITEM_TYPE_COLLAPSE,
@@ -3464,7 +3464,7 @@ const SideNav = () => {
         'Notice Tracker' : 'Notice',
         'Return Tracker' : 'Return Tracker',
         'POSH' : 'POSH',
-        'Audit Checklist' : 'Audit Tracker',
+        'Audit Tracker' : 'Audit Tracker',
         
         // Menu level mappings
         'Entity Setup': 'Entity Setup',
@@ -3486,9 +3486,7 @@ const SideNav = () => {
         'Custom Checklist': 'Custom Checklist',
         'Compliance Checklist': 'Compliance Checklist',
         'Due Compliance': 'Due Compliance',
-        'Due Compliances': 'Due Compliance',
         'Certificate': 'Certificate',
-        'Compliance Certificate': 'Certificate',
         'History': 'History',
         'POSH Policy': 'POSH Policy',
         'POSH Committee': 'POSH Committee',
@@ -3501,17 +3499,14 @@ const SideNav = () => {
     const titleMapping = createTitleMapping();
 
     // Enhanced permission checking function
-  const hasPermission = (menuTitle: string): boolean => {
-    // Admin users should see all menu items
-    if (userType === 'admin') return true;
-    
+ const hasPermission = (menuTitle: string): boolean => {
     // Always allow Dashboard for all users
     if (menuTitle === 'Dashboard') return true;
     
     // Get the mapped name for checking permissions
     const mappedName = titleMapping[menuTitle] || menuTitle;
     
-    // For auditors, we need to check the specific permission structure
+    // Special handling for auditors
     if (userType === 'auditor') {
         for (const module of moduleList) {
             if (module.name === 'Audit Tracker') {
@@ -3525,22 +3520,25 @@ const SideNav = () => {
         return false;
     }
     
-    // Original permission check for other user types
+    // For all other users (including admin)
     for (const module of moduleList) {
+        // First check if this is a module-level match
         if (module.name === mappedName) {
-            return module.access?.can_list === true;
+            return true;
         }
         
+        // Then check menu items within modules
         if (module.menus) {
             for (const menu of module.menus) {
                 if (menu.name === mappedName) {
-                    return menu.access?.can_list === true;
+                    return menu.permissions?.can_list === true;
                 }
                 
+                // Check child menus if they exist
                 if (menu.children) {
                     for (const child of menu.children) {
                         if (child.name === mappedName) {
-                            return child.access?.can_list === true;
+                            return child.permissions?.can_list === true;
                         }
                     }
                 }
@@ -3552,20 +3550,6 @@ const SideNav = () => {
 };
 
 const filterNavigation = (navigation: NavigationTree[]): NavigationTree[] => {
-    // Admin users should see all navigation items
-    if (userType === 'admin') {
-        return navigation.map(item => {
-            if (item.subMenu) {
-                return {
-                    ...item,
-                    subMenu: filterNavigation(item.subMenu)
-                };
-            }
-            return item;
-        });
-    }
-
-    // For non-admin users, apply the permission filtering
     return navigation.filter(navItem => {
         // Check permission for this item
         const hasPermissionForItem = hasPermission(navItem.title);
