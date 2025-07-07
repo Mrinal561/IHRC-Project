@@ -29,72 +29,81 @@ const ReturnTrackerBulk: React.FC<ReturnBulkUploadProps> = ({ onUploadSuccess })
         setIsDialogOpen(true)
     }
 
-    const handleConfirm = async () => {
-        try {
-            setIsUploading(true)
+const handleConfirm = async () => {
+    try {
+        setIsUploading(true);
 
-            if (!file) {
-                toast.push(
-                    <Notification
-                        title="Error"
-                        closable={true}
-                        type="error"
-                    >
-                        Please select a file to upload
-                    </Notification>,
-                )
-                return
-            }
-
-            if (!selectedCompany || !selectedYear) {
-                toast.push(
-                    <Notification
-                        title="Error"
-                        closable={true}
-                        type="error"
-                    >
-                        Please select both company and year
-                    </Notification>,
-                )
-                return
-            }
-
-            const formData = new FormData()
-            formData.append('document', file)
-            formData.append('remark', remark)
-            formData.append('companyId', selectedCompany)
-            formData.append('year', selectedYear)
-
-            const res = await httpClient.post(
-                endpoints.return.bulkCreate(),
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                },
-            )
-
-            if (res) {
-                toast.push(
-                    <Notification title="Success" type="success">
-                        {res.data.message}
-                    </Notification>,
-                )
-
-                handleCancel()
-
-                if (onUploadSuccess) {
-                    onUploadSuccess()
-                }
-            }
-        } catch (error) {
-            console.error('Upload error:', error)
-           throw error;
-        } finally {
-            setIsUploading(false)
+        if (!file) {
+            toast.push(
+                <Notification title="Error" type="error" closable>
+                    Please select a file to upload
+                </Notification>
+            );
+            return;
         }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('remark', remark);
+
+        const res = await httpClient.post(
+            endpoints.return.bulkCreate(),
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        );
+
+        if (res.data) {
+            toast.push(
+                <Notification title="Success" type="success" closable>
+                    {res.data.message}
+                </Notification>
+            );
+            handleCancel();
+            onUploadSuccess?.();
+        }
+    } catch (error: any) {
+        console.error('Upload error:', error);
+        
+        let errorMessage = 'Failed to upload file';
+        let errorTitle = 'Error';
+        
+        // Handle API response errors
+        if (error.response?.data) {
+            const errorData = error.response.data;
+            
+            // Use the message directly from the response
+            errorMessage = errorData.message || 'Validation failed';
+            errorTitle = errorData.status === false ? 'Validation Error' : 'Error';
+            
+            // Add summary of failed records if available
+            if (errorData.failedRecords !== undefined && errorData.totalRecords !== undefined) {
+                errorMessage += `\n\nFailed records: ${errorData.failedRecords} of ${errorData.totalRecords}`;
+            }
+        } 
+        // Handle network errors
+        else if (error.message) {
+            errorMessage = error.message;
+        }
+
+        // Show the error toast
+        toast.push(
+            <Notification 
+                title={errorTitle} 
+                type="error" 
+                duration={5000}
+                closable
+            >
+                <div className="whitespace-pre-line">{errorMessage}</div>
+            </Notification>
+        );
+    } finally {
+        setIsUploading(false);
     }
+};
 
     const handleCancel = () => {
         setIsDialogOpen(false)
