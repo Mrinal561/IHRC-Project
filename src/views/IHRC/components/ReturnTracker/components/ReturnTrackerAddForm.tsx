@@ -1109,6 +1109,7 @@ interface SuperadminReturn {
   State: {
     name: string;
   };
+  is_active: boolean;
 }
 
 interface BranchOption extends SelectOption {
@@ -1279,6 +1280,8 @@ const ReturnTrackerAddForm = () => {
         const actOptionsList: SelectOption[] = [];
 
         returnsResponse.data.data.forEach((ret: SuperadminReturn) => {
+            if (!ret.is_active) return;
+
           if (ret.applicable === 'CENTRAL') {
             if (!uniqueActs.has(ret.act_name)) {
               actOptionsList.push({
@@ -1354,26 +1357,27 @@ const ReturnTrackerAddForm = () => {
     }
   };
 
-  const loadBranches = async (companyId: string) => {
-    try {
-      const response = await httpClient.get(endpoints.branch.getAllBranch(), {
-        params: { 'company_id[]': companyId },
-      });
-      const branchesData = response.data.data.map((branch: any) => ({
-        label: branch.name
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-          .join(' '),
-        value: String(branch.id),
-        location_id: branch.location_id,
-      }));
-      setAllBranches(branchesData);
-      setBranches([]);
-    } catch (error) {
-      console.error('Failed to load branches:', error);
-      showNotification('error', 'Failed to load branches');
-    }
-  };
+const loadBranches = async (companyId: string) => {
+  try {
+    const response = await httpClient.get(endpoints.branch.getAllBranch(), {
+      params: { 'company_id[]': companyId },
+    });
+    const branchesData = response.data.data.map((branch: any) => ({
+      label: branch.name
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' '),
+      value: String(branch.id),
+      location_id: branch.location_id,
+    }));
+    setAllBranches(branchesData);
+    setBranches([]); // Reset branches when company changes
+  } catch (error) {
+    console.error('Failed to load branches:', error);
+    showNotification('error', 'Failed to load branches');
+  }
+};
+
 
   const loadDistricts = async (stateId: string) => {
     try {
@@ -1593,20 +1597,22 @@ const handleSubmit = async (values: ReturnFormValues) => {
           isValid,
           isSubmitting,
         }) => {
-          useEffect(() => {
-            if (values.location_id && allBranches.length > 0) {
-              const filteredBranches = allBranches.filter(
-                branch => Number(branch.location_id) === Number(values.location_id)
-              );
-              setBranches(filteredBranches);
-              if (values.branch_id && !filteredBranches.some(b => b.value === String(values.branch_id))) {
-                setFieldValue('branch_id', '');
-              }
-            } else {
-              setBranches([]);
-              setFieldValue('branch_id', '');
-            }
-          }, [values.location_id, allBranches]);
+         useEffect(() => {
+  if (values.location_id && allBranches.length > 0) {
+    const filteredBranches = allBranches.filter(
+      branch => Number(branch.location_id) === Number(values.location_id)
+    );
+    setBranches(filteredBranches);
+    
+    // Reset branch selection if current selection is not in filtered list
+    if (values.branch_id && !filteredBranches.some(b => b.value === String(values.branch_id))) {
+      setFieldValue('branch_id', '');
+    }
+  } else {
+    setBranches([]);
+    setFieldValue('branch_id', '');
+  }
+}, [values.location_id, allBranches]);
 
           useEffect(() => {
             if (Object.keys(errors).length > 0) {
