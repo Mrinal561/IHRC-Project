@@ -122,13 +122,32 @@ const ReturnTrackerTable = ({
                 cell: ({ row }) => <div className="w-40 truncate">{row.original.branch_name}</div>,
             },
             {
-                header: 'Frequency',
-                enableSorting: false,
-                accessorKey: 'frequency',
-                cell: ({ row }) => (
-                    <div className="w-40 truncate capitalize">{row.original.frequency}</div>
-                ),
+            header: 'Frequency',
+            enableSorting: false,
+            accessorKey: 'frequency',
+            cell: ({ row }) => {
+                const formatFrequency = (frequency: string) => {
+                    switch (frequency) {
+                        case 'monthly':
+                            return 'Monthly';
+                        case 'yearly':
+                            return 'Yearly';
+                        case 'half_yearly':
+                            return 'Half Yearly';
+                        case 'quarterly':
+                            return 'Quarterly';
+                        default:
+                            return frequency;
+                    }
+                };
+                
+                return (
+                    <div className="w-40 truncate">
+                        {formatFrequency(row.original.frequency)}
+                    </div>
+                );
             },
+        },
             {
                 header: 'Month',
                 enableSorting: false,
@@ -148,15 +167,28 @@ const ReturnTrackerTable = ({
                 cell: ({ row }) => <div className="w-40 truncate">{row.original.year}</div>,
             },
             {
-                header: 'Submission Status',
-                enableSorting: false,
-                accessorKey: 'return_submission',
-                cell: ({ row }) => (
-                    <div className="w-40 truncate capitalize">
-                        {row.original.return_submission || '-'}
+            header: 'Submission Status',
+            enableSorting: false,
+            accessorKey: 'return_submission',
+            cell: ({ row }) => {
+                const formatStatus = (status: string) => {
+                    switch (status) {
+                        case 'applicable':
+                            return 'Applicable';
+                        case 'not_applicable':
+                            return 'Not Applicable';
+                        default:
+                            return status;
+                    }
+                };
+                
+                return (
+                    <div className="w-40 truncate">
+                        {formatStatus(row.original.return_submission) || '-'}
                     </div>
-                ),
+                );
             },
+        },
             {
                 header: 'NA Reason',
                 enableSorting: false,
