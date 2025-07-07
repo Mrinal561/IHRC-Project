@@ -385,7 +385,7 @@ const AddCommittee = () => {
     const navigate = useNavigate();
 
     const committeeTypeOptions = [
-        { value: 'one', label: 'One' },
+        { value: 'one', label: 'Single' },
         { value: 'zone', label: 'Zone' },
         { value: 'state', label: 'State Wise' }
     ];
