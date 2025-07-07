@@ -77,6 +77,11 @@ const Posh = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [companyGroupId, setCompanyGroupId] = useState('');
   
+  const [pagination, setPagination] = useState({
+        total: 0,
+        pageIndex: 1,
+        pageSize: 10,
+    });
 
   
   // Using your existing useAuth hook as-is
@@ -182,47 +187,63 @@ const Posh = () => {
   }
 };
 
- const fetchPoshReturns = async () => {
-  setLoading(true);
-  try {
-    const params: Record<string, any> = {
-      financial_year: financialYear
+const fetchPoshReturns = async () => {
+        setLoading(true);
+        try {
+            const params: Record<string, any> = {
+                financial_year: financialYear,
+                page: pagination.pageIndex,
+                limit: pagination.pageSize
+            };
+
+            if (searchTerm) {
+                params.search = searchTerm;
+            }
+
+            const response = await httpClient.get(endpoints.poshSetup.poshReturnList(), {
+                params
+            });
+            
+            const transformedData = response.data.data.map((item: any) => ({
+                id: item.id,
+                companyGroup: 'IHRC',
+                company: item.company_name,
+                branch: item.branch_name,
+                complaintsReceived: item.complaints_received,
+                complaintsDisposed: item.complaints_disposed,
+                pendingCases: item.pending_cases,
+                workshops: item.workshop_conducted,
+                actionTaken: item.nature_of_action_taken,
+                returnLevel: item.return_level === 'branch' ? 'Branch Level' : 'District Level'
+            }));
+            
+            setPoshData(transformedData);
+            setPagination(prev => ({
+                ...prev,
+                total: response.data.meta.total
+            }));
+        } catch (error) {
+            console.error('Failed to fetch POSH returns:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // Only add search if searchTerm exists
-    if (searchTerm) {
-      params.search = searchTerm;
-    }
+const handlePaginationChange = (page: number) => {
+        setPagination(prev => ({ ...prev, pageIndex: page }));
+    };
 
-    const response = await httpClient.get(endpoints.poshSetup.poshReturnList(), {
-      params
-    });
-    
-    const transformedData = response.data.data.map((item: any) => ({
-      id: item.id,
-      companyGroup: 'IHRC',
-      company: item.company_name,
-      branch: item.branch_name,
-      complaintsReceived: item.complaints_received,
-      complaintsDisposed: item.complaints_disposed,
-      pendingCases: item.pending_cases,
-      workshops: item.workshop_conducted,
-      actionTaken: item.nature_of_action_taken,
-      returnLevel: item.return_level === 'branch' ? 'Branch Level' : 'District Level'
-    }));
-    
-    setPoshData(transformedData);
-  } catch (error) {
-    console.error('Failed to fetch POSH returns:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+    const handlePageSizeChange = (newPageSize: number) => {
+        setPagination(prev => ({
+            ...prev,
+            pageSize: newPageSize,
+            pageIndex: 1,
+        }));
+    };
 
-// Update your useEffect that calls fetchPoshReturns
-useEffect(() => {
-  fetchPoshReturns();
-}, [financialYear, searchTerm]); 
+    useEffect(() => {
+        fetchPoshReturns();
+    }, [financialYear, searchTerm, pagination.pageIndex, pagination.pageSize]);
 
   const handleInputChange = (name: string, value: string | number) => {
   if (name === 'company_id') {
@@ -472,10 +493,14 @@ const generateYearOption = () => {
         </div>
       </div>
 
-      <PoshTable 
-        data={poshData}
-        loading={loading} 
-        onDownload={handleDownloadReport}      />
+     <PoshTable 
+                data={poshData}
+                loading={loading} 
+                onDownload={handleDownloadReport}
+                pagination={pagination}
+                onPaginationChange={handlePaginationChange}
+                onPageSizeChange={handlePageSizeChange}
+            />
 
 <Dialog
   isOpen={isBulkDownloadOpen}

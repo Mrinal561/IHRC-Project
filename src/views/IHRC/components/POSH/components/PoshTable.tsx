@@ -19,14 +19,23 @@ interface PoshTableData {
 interface PoshTableProps {
     data: PoshTableData[];
     loading: boolean;
-    onDownload: (id: string) => void;  // Uncommented and added this prop
+    onDownload: (id: string) => void;
+   pagination: {
+        total: number;
+        pageIndex: number;
+        pageSize: number;
+    };
+    onPaginationChange: (page: number) => void;
+    onPageSizeChange: (pageSize: number) => void;
 }
 
 
 
 
 
-const PoshTable = ({ data, loading, onDownload }: PoshTableProps) => {
+const PoshTable = ({ data, loading, onDownload,pagination,
+    onPaginationChange,
+    onPageSizeChange }: PoshTableProps) => {
 
  
 
@@ -114,11 +123,13 @@ const PoshTable = ({ data, loading, onDownload }: PoshTableProps) => {
                 skeletonAvatarColumns={[0]}
                 skeletonAvatarProps={{ className: 'rounded-md' }}
                 loading={loading}
-                pagingData={{
-                    total: data.length,
-                    pageIndex: 1,
-                    pageSize: 10
-                }}
+                 pagingData={{
+                            total: pagination.total,
+                            pageIndex: pagination.pageIndex,
+                            pageSize: pagination.pageSize,
+                        }}
+                        onPaginationChange={onPaginationChange}
+                        onSelectChange={onPageSizeChange}
                 stickyHeader={true}
                 stickyFirstColumn={true}
                 stickyLastColumn={true}
