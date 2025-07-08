@@ -375,7 +375,8 @@ export const endpoints = {
         downloadData: () => api('companyadmin/returns/export/data'),
         returnActList: () => api('return-superadmin/act-name'),
         returnList: () => api('return-superadmin/return-name'),
-        getList: () => api('return-superadmin/all')
+        getList: () => api('return-superadmin/all'),
+        downloadDocument: (id:any) => api(`companyadmin/returns/document/download/${id}`)
 
     },
     register: {

@@ -46,6 +46,8 @@ const ReturnTrackerTable = ({
     const navigate = useNavigate();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     // const [loading, setLoading] = useState(false);
+        const [downloading, setDownloading] = useState<string | null>(null);
+
     const [tableData, setTableData] = useState({
         total: 0,
         pageIndex: 1,
@@ -80,6 +82,51 @@ const ReturnTrackerTable = ({
     //         // setLoading(false);
     //     }
     // };
+
+
+     const handleDownloadDocument = async (returnId: string) => {
+        try {
+            setDownloading(returnId);
+            const response = await httpClient.get(
+                endpoints.return.downloadDocument(returnId),
+                { responseType: 'blob' } // Important for file downloads
+            );
+
+            // Create a blob from the response
+            const blob = new Blob([response.data]);
+            
+            // Create a temporary URL for the blob
+            const url = window.URL.createObjectURL(blob);
+            
+            // Create a temporary anchor element to trigger the download
+            const a = document.createElement('a');
+            a.href = url;
+            
+            // Extract filename from content-disposition header or use a default
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = 'document';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1];
+                }
+            }
+            
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error downloading document:', error);
+            // You might want to show an error message to the user here
+        } finally {
+            setDownloading(null);
+        }
+    };
+
 
     const formatDate = (dateString: string) => {
         if (!dateString) return '-';
@@ -213,21 +260,24 @@ const ReturnTrackerTable = ({
                     <div className="w-40 truncate">{row.original.delay_reason || '-'}</div>
                 ),
             },
-            {
+           {
                 header: 'Return Document',
                 enableSorting: false,
                 accessorKey: 'return_copy',
                 cell: ({ row }) => (
                     <div className="w-40 flex items-center justify-center">
                         {row.original.return_copy ? (
-                            <a 
-                                href={row.original.return_copy} 
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <button 
+                                onClick={() => handleDownloadDocument(row.original.id)}
                                 className="text-blue-600 hover:text-blue-800 transition-colors"
+                                disabled={downloading === row.original.id}
                             >
-                                <FiFile className="w-5 h-5" />
-                            </a>
+                                {downloading === row.original.id ? (
+                                    <span>Downloading...</span>
+                                ) : (
+                                    <FiFile className="w-5 h-5" />
+                                )}
+                            </button>
                         ) : (
                             <span className="text-gray-400">
                                 <FiFile className="w-5 h-5" />
@@ -255,7 +305,7 @@ const ReturnTrackerTable = ({
                 ),
             },
         ],
-        [navigate]
+        [navigate, downloading]
     );
 
      const handlePaginationChange = (pageIndex: number, pageSize: number) => {

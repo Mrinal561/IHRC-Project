@@ -735,7 +735,6 @@
 // // //         authority: [],
 // // //         subMenu:[]
 // // //     },
-   
 
 // // //     // {
 // // //     //     key: 'register.collapse',
@@ -996,7 +995,6 @@
 // // // }
 
 // // // export default SideNav
-
 
 // // import React, { useEffect } from 'react';
 // // import classNames from 'classnames';
@@ -1271,7 +1269,7 @@
 // //         authority: [],
 // //         subMenu: [],
 // //     },
-   
+
 // // ];
 
 // // const usernav: NavigationTree[] = [
@@ -1386,7 +1384,7 @@
 // //         authority: [],
 // //         subMenu: [],
 // //     },
-  
+
 // // ];
 
 // // const filterNavigation = (
@@ -1420,10 +1418,10 @@
 // //                             (child: any) => child.name === title
 // //                         );
 // //                         if (childMenu) {
-// //                             return { 
-// //                                 menu: childMenu, 
+// //                             return {
+// //                                 menu: childMenu,
 // //                                 access: childMenu.access,
-// //                                 parentModule: module 
+// //                                 parentModule: module
 // //                             };
 // //                         }
 // //                     }
@@ -1469,7 +1467,7 @@
 
 // //     //     // Find menu item in module list
 // //     //     const menuInfo = findMenuInModuleList(navItem.title, moduleList);
-        
+
 // //     //     // Handle items with submenus
 // //     //     if (navItem.subMenu && navItem.subMenu.length > 0) {
 // //     //         // For admin, recursively filter without permission check
@@ -1520,7 +1518,7 @@
 
 // //         // Find menu item in module list
 // //         const menuInfo = findMenuInModuleList(navItem.title, moduleList);
-        
+
 // //         // Handle items with submenus
 // //         if (navItem.subMenu && navItem.subMenu.length > 0) {
 // //             // For admin, recursively filter without permission check
@@ -1581,7 +1579,7 @@
 // //                         authority: [],
 // //                         subMenu: [],
 // //                     },
-                    
+
 // //                     {
 // //                         key: 'poshTracker.collapse.item2',
 // //                         path: '/committee',
@@ -1663,7 +1661,7 @@
 // //                         authority: [],
 // //                         subMenu: [],
 // //                     },
-                    
+
 // //                     {
 // //                         key: 'complianceCertificate.item5',
 // //                         path: '/compliance-certificate',
@@ -1692,8 +1690,6 @@
 // //     }
 
 // //     return filteredNav;
-
-
 
 // // };
 
@@ -1803,8 +1799,6 @@
 // // };
 
 // // export default SideNav;
-
-
 
 // import React, { useEffect } from 'react';
 // import classNames from 'classnames';
@@ -2109,7 +2103,7 @@
 //                         authority: [],
 //                         subMenu: [],
 //                     },
-                    
+
 //                     {
 //                         key: 'poshTracker.collapse.item2',
 //                         path: '/committee',
@@ -2181,7 +2175,7 @@
 //                         authority: [],
 //                         subMenu: [],
 //                     },
-                    
+
 //                     {
 //                         key: 'complianceCertificate.item5',
 //                         path: '/compliance-certificate',
@@ -2367,7 +2361,7 @@
 //                         authority: [],
 //                         subMenu: [],
 //                     },
-                    
+
 //                     {
 //                         key: 'complianceCertificate.item5',
 //                         path: '/compliance-certificate',
@@ -2409,7 +2403,7 @@
 //                         authority: [],
 //                         subMenu: [],
 //                     },
-                    
+
 //                     {
 //                         key: 'poshTracker.collapse.item2',
 //                         path: '/committee',
@@ -2474,7 +2468,7 @@
 //                         authority: [],
 //                         subMenu: [],
 //                     },
-                    
+
 //                 ],
 //         },
 // ]
@@ -2483,7 +2477,7 @@
 //     const { login } = store.getState();
 //     const { moduleAccess: moduleList, PermissionModules } = login.user.user;
 //     const isAdmin = login.user.type === 'admin';
-    
+
 //     const themeColor = useAppSelector((state) => state.theme.themeColor);
 //     const primaryColorLevel = useAppSelector((state) => state.theme.primaryColorLevel);
 //     const navMode = useAppSelector((state) => state.theme.navMode);
@@ -2498,7 +2492,7 @@
 //     // Create a mapping function to match navigation titles with module/menu names
 //     const createTitleMapping = () => {
 //         const mapping = {};
-        
+
 //         // Module level mappings
 //         mapping['Company Setup'] = 'Company Setup';
 //         mapping['Agreement'] = 'Agreement';
@@ -2507,7 +2501,7 @@
 //         mapping['Return Tracker'] = 'Return Tracker';
 //         mapping['POSH'] = 'POSH';
 //         mapping['Audit Checklist'] = 'Audit Tracker';
-        
+
 //         // Menu level mappings
 //         mapping['Entity Setup'] = 'Entity Setup';
 //         mapping['User Setup'] = 'User Setup';
@@ -2535,7 +2529,7 @@
 //         mapping['POSH Policy'] = 'POSH Policy';
 //         mapping['POSH Committee'] = 'POSH Committee';
 //         mapping['POSH Return'] = 'POSH Return';
-        
+
 //         return mapping;
 //     };
 
@@ -2545,20 +2539,20 @@
 //     const hasPermission = (menuTitle: string): boolean => {
 //         // Always allow Dashboard for all users
 //         if (menuTitle === 'Dashboard') return true;
-        
+
 //         // Always allow Global Settings for admin
 //         if (menuTitle === 'Global Settings' && isAdmin) return true;
-        
+
 //         // Get the mapped name for checking permissions
 //         const mappedName = titleMapping[menuTitle] || menuTitle;
-        
+
 //         // Search through moduleAccess structure
 //         for (const module of moduleList) {
 //             // Check if this is a module-level match
 //             if (module.name === mappedName) {
 //                 return true; // Module exists, so user has access to it
 //             }
-            
+
 //             // Check menus within the module
 //             if (module.menus) {
 //                 for (const menu of module.menus) {
@@ -2566,7 +2560,7 @@
 //                         // Check permissions for this specific menu
 //                         return menu.permissions?.can_list === true;
 //                     }
-                    
+
 //                     // Check children/submenus
 //                     if (menu.children) {
 //                         for (const child of menu.children) {
@@ -2578,7 +2572,7 @@
 //                 }
 //             }
 //         }
-        
+
 //         return false;
 //     };
 
@@ -2589,7 +2583,6 @@
 //             return true;
 //         }
 
-        
 //             // Check permission for this item
 //             if (!hasPermission(navItem.title)) {
 //                 return false;
@@ -2600,7 +2593,7 @@
 //                 // Create a deep copy of the submenu to avoid modifying the original
 //                 const originalSubMenu = navItem.subMenu;
 //                 navItem.subMenu = filterNavigation([...navItem.subMenu]);
-                
+
 //                 // For collapse items, show the module if:
 //                 // 1. It's admin with Global Settings
 //                 // 2. It has at least one visible submenu
@@ -2610,12 +2603,12 @@
 //                     if (isAdmin && navItem.title === 'Global Settings') {
 //                         return true;
 //                     }
-                    
+
 //                     // For other collapse items, show if there are visible submenus
 //                     // OR if the user has permission for the parent module
 //                     const hasVisibleSubmenus = navItem.subMenu.length > 0;
 //                     const hasParentModulePermission = hasPermission(navItem.title);
-                    
+
 //                     return hasVisibleSubmenus || hasParentModulePermission;
 //                 }
 //             }
@@ -2700,11 +2693,10 @@
 
 // export default SideNav;
 
-
-import React, { useEffect } from 'react';
-import classNames from 'classnames';
-import ScrollBar from '@/components/ui/ScrollBar';
-import { HiClock, HiUserCircle, HiMap } from 'react-icons/hi';
+import React, { useEffect } from 'react'
+import classNames from 'classnames'
+import ScrollBar from '@/components/ui/ScrollBar'
+import { HiClock, HiUserCircle, HiMap } from 'react-icons/hi'
 import {
     SIDE_NAV_WIDTH,
     SIDE_NAV_COLLAPSED_WIDTH,
@@ -2713,30 +2705,30 @@ import {
     NAV_MODE_TRANSPARENT,
     SIDE_NAV_CONTENT_GUTTER,
     LOGO_X_GUTTER,
-} from '@/constants/theme.constant';
+} from '@/constants/theme.constant'
 import {
     NAV_ITEM_TYPE_TITLE,
     NAV_ITEM_TYPE_ITEM,
     NAV_ITEM_TYPE_COLLAPSE,
-} from '@/constants/navigation.constant';
-import type { NavigationTree } from '@/@types/navigation';
-import Logo from '@/components/template/Logo';
-import navigationConfig from '@/configs/navigation.config';
-import VerticalMenuContent from '@/components/template/VerticalMenuContent';
-import useResponsive from '@/utils/hooks/useResponsive';
-import { useAppSelector } from '@/store';
-import { HiMapPin } from 'react-icons/hi2';
-import store from '../../store';
+} from '@/constants/navigation.constant'
+import type { NavigationTree } from '@/@types/navigation'
+import Logo from '@/components/template/Logo'
+import navigationConfig from '@/configs/navigation.config'
+import VerticalMenuContent from '@/components/template/VerticalMenuContent'
+import useResponsive from '@/utils/hooks/useResponsive'
+import { useAppSelector } from '@/store'
+import { HiMapPin } from 'react-icons/hi2'
+import store from '../../store'
 
 const sideNavStyle = {
     width: SIDE_NAV_WIDTH,
     minWidth: SIDE_NAV_WIDTH,
-};
+}
 
 const sideNavCollapseStyle = {
     width: SIDE_NAV_COLLAPSED_WIDTH,
     minWidth: SIDE_NAV_COLLAPSED_WIDTH,
-};
+}
 
 const adminnav: NavigationTree[] = [
     {
@@ -2832,7 +2824,8 @@ const adminnav: NavigationTree[] = [
                         key: 'entitySetup.collapse.branchagreement',
                         path: '/agreements',
                         title: 'Agreement',
-                        translateKey: 'nav.entitySetup.collapse.branchagreement',
+                        translateKey:
+                            'nav.entitySetup.collapse.branchagreement',
                         icon: '',
                         type: NAV_ITEM_TYPE_ITEM,
                         authority: [],
@@ -2975,7 +2968,7 @@ const adminnav: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
-     {
+    {
         key: 'returnTraccker',
         path: '/return-tracker',
         title: 'Return Tracker',
@@ -2986,184 +2979,185 @@ const adminnav: NavigationTree[] = [
         subMenu: [],
     },
     {
-                key: 'posh.collapse',
-                path: '/poshTracker',
-                title: 'POSH',
-                translateKey: 'nav.poshTracker.collapse.collapse',
-                icon: 'remittanceCollapse',
-                type: NAV_ITEM_TYPE_COLLAPSE,
+        key: 'posh.collapse',
+        path: '/poshTracker',
+        title: 'POSH',
+        translateKey: 'nav.poshTracker.collapse.collapse',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_COLLAPSE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'poshTracker.collapse.item3',
+                path: '/policy',
+                title: 'POSH Policy',
+                translateKey: 'nav.poshTracker.collapse.item3',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
-                subMenu: [
-                    {
-                        key: 'poshTracker.collapse.item3',
-                        path: '/policy',
-                        title: 'POSH Policy',
-                        translateKey: 'nav.poshTracker.collapse.item3',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    
-                    {
-                        key: 'poshTracker.collapse.item2',
-                        path: '/committee',
-                        title: 'POSH Committee',
-                        translateKey: 'nav.poshTracker.collapse.item2',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    {
-                        key: 'poshTracker.collapse.item1',
-                        path: '/posh',
-                        title: 'POSH Return',
-                        translateKey: 'nav.poshTracker.collapse.item1',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                ]
-        },
+                subMenu: [],
+            },
+
+            {
+                key: 'poshTracker.collapse.item2',
+                path: '/committee',
+                title: 'POSH Committee',
+                translateKey: 'nav.poshTracker.collapse.item2',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'poshTracker.collapse.item1',
+                path: '/posh',
+                title: 'POSH Return',
+                translateKey: 'nav.poshTracker.collapse.item1',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ],
+    },
     {
-             key: 'collapseMenu.collapse',
+        key: 'collapseMenu.collapse',
+        path: '',
+        title: 'Audit Tracker',
+        translateKey: 'nav.collapseMenu.collapseMenu.collapse',
+        icon: 'auditCollapse',
+        type: NAV_ITEM_TYPE_COLLAPSE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'status.item1',
+                path: '/status',
+                title: 'Status',
+                translateKey: 'nav.collapseMenu.collapse.item6',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'customChecklist.item2',
+                path: '/custom-checklist',
+                title: 'Custom Checklist',
+                translateKey: 'nav.collapseMenu.collapse.item4',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'recommendedList.item3',
+                path: '/compliance-checklist',
+                title: 'Compliance Checklist',
+                translateKey: 'nav.collapseMenu.collapse.item1',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'dueCompliance.item4',
+                path: '/due-compliance',
+                title: 'Due Compliance',
+                translateKey: 'nav.collapseMenu.collapse.item5',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+
+            {
+                key: 'complianceCertificate.item5',
+                path: '/compliance-certificate',
+                title: 'Certificate',
+                translateKey: 'nav.collapseMenu.collapse.item7',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'history.item6',
+                path: '/history',
+                title: 'History',
+                translateKey: 'nav.collapseMenu.item8',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ],
+    },
+    {
+        key: 'register.collapse',
+        path: '',
+        title: 'Register',
+        translateKey: 'nav.companySetup.register',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_COLLAPSE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'registerContractor.collapse',
                 path: '',
-                title: 'Audit Tracker',
-                translateKey: 'nav.collapseMenu.collapseMenu.collapse',
-                icon: 'auditCollapse',
+                title: 'Register For Contractor',
+                translateKey: 'nav.registerContractor.collapse',
+                icon: '',
                 type: NAV_ITEM_TYPE_COLLAPSE,
                 authority: [],
                 subMenu: [
                     {
-                        key: 'status.item1',
-                        path: '/status',
-                        title: 'Status',
-                        translateKey: 'nav.collapseMenu.collapse.item6',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                     {
-                        key: 'customChecklist.item2',
-                        path: '/custom-checklist',
-                        title: 'Custom Checklist',
-                        translateKey: 'nav.collapseMenu.collapse.item4',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    {
-                        key: 'recommendedList.item3',
-                        path: '/compliance-checklist',
-                        title: 'Compliance Checklist',
-                        translateKey: 'nav.collapseMenu.collapse.item1',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    {
-                        key: 'dueCompliance.item4',
-                        path: '/due-compliance',
-                        title: 'Due Compliance',
-                        translateKey: 'nav.collapseMenu.collapse.item5',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    
-                    {
-                        key: 'complianceCertificate.item5',
-                        path: '/compliance-certificate',
-                        title: 'Certificate',
-                        translateKey: 'nav.collapseMenu.collapse.item7',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    {
-                        key: 'history.item6',
-                        path: '/history',
-                        title: 'History',
-                        translateKey: 'nav.collapseMenu.item8',
+                        key: 'registerContractor.collapse.contractorRegister',
+                        path: '/register-contractor',
+                        title: 'Contractor Register',
+                        translateKey:
+                            'nav.registerContractor.collapse.contractorRegister',
                         icon: '',
                         type: NAV_ITEM_TYPE_ITEM,
                         authority: [],
                         subMenu: [],
                     },
                 ],
-        },
-        {
-            key: 'register.collapse',
-            path: '',
-            title: 'Register',
-            translateKey: 'nav.companySetup.register',
-            icon: 'remittanceCollapse',
-            type: NAV_ITEM_TYPE_COLLAPSE,
-            authority: [],
-            subMenu: [
-                {
-                    key: 'registerContractor.collapse',
-                    path: '',
-                    title: 'Register For Contractor',
-                    translateKey: 'nav.registerContractor.collapse',
-                    icon: '',
-                    type: NAV_ITEM_TYPE_COLLAPSE,
-                    authority: [],
-                    subMenu: [
-                        {
-                            key: 'registerContractor.collapse.contractorRegister',
-                            path: '/register-contractor',
-                            title: 'Contractor Register',
-                            translateKey: 'nav.registerContractor.collapse.contractorRegister',
-                            icon: '',
-                            type: NAV_ITEM_TYPE_ITEM,
-                            authority: [],
-                            subMenu: [], 
-                        }
-                    ]
-                },
-                {
-                    key: 'registerClient.collapse',
-                    path: '',
-                    title: 'Register For Client',
-                    translateKey: 'nav.registerClient.collapse',
-                    icon: '',
-                    type: NAV_ITEM_TYPE_COLLAPSE,
-                    authority: [],
-                    subMenu: [
-                        {
-                            key: 'registerClient.collapse.clientRegister',
-                            path: '/registers',
-                            title: 'Registers',
-                            translateKey: 'nav.registerClient.collapse.clientRegister',
-                            icon: '',
-                            type: NAV_ITEM_TYPE_ITEM,
-                            authority: [],
-                            subMenu: [], 
-                        },
-                        // {
-                        //     key: 'registerClient.collapse.clientRegister',
-                        //     path: '/attendance-register',
-                        //     title: 'Attendance Register',
-                        //     translateKey: 'nav.registerClient.collapse.clientRegister',
-                        //     icon: '',
-                        //     type: NAV_ITEM_TYPE_ITEM,
-                        //     authority: [],
-                        //     subMenu: [], 
-                        // }
-                    ]
-                },
-
-            ]
-        },
-];
+            },
+            {
+                key: 'registerClient.collapse',
+                path: '',
+                title: 'Register For Client',
+                translateKey: 'nav.registerClient.collapse',
+                icon: '',
+                type: NAV_ITEM_TYPE_COLLAPSE,
+                authority: [],
+                subMenu: [
+                    {
+                        key: 'registerClient.collapse.clientRegister',
+                        path: '/registers',
+                        title: 'Registers',
+                        translateKey:
+                            'nav.registerClient.collapse.clientRegister',
+                        icon: '',
+                        type: NAV_ITEM_TYPE_ITEM,
+                        authority: [],
+                        subMenu: [],
+                    },
+                    // {
+                    //     key: 'registerClient.collapse.clientRegister',
+                    //     path: '/attendance-register',
+                    //     title: 'Attendance Register',
+                    //     translateKey: 'nav.registerClient.collapse.clientRegister',
+                    //     icon: '',
+                    //     type: NAV_ITEM_TYPE_ITEM,
+                    //     authority: [],
+                    //     subMenu: [],
+                    // }
+                ],
+            },
+        ],
+    },
+]
 
 const usernav: NavigationTree[] = [
     {
@@ -3278,120 +3272,120 @@ const usernav: NavigationTree[] = [
         subMenu: [],
     },
     {
-             key: 'collapseMenu.collapse',
-                path: '',
-                title: 'Audit Checklist',
-                translateKey: 'nav.collapseMenu.collapseMenu.collapse',
-                icon: 'auditCollapse',
-                type: NAV_ITEM_TYPE_COLLAPSE,
+        key: 'collapseMenu.collapse',
+        path: '',
+        title: 'Audit Checklist',
+        translateKey: 'nav.collapseMenu.collapseMenu.collapse',
+        icon: 'auditCollapse',
+        type: NAV_ITEM_TYPE_COLLAPSE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'status.item1',
+                path: '/status',
+                title: 'Status',
+                translateKey: 'nav.collapseMenu.collapse.item6',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
-                subMenu: [
-                    {
-                        key: 'status.item1',
-                        path: '/status',
-                        title: 'Status',
-                        translateKey: 'nav.collapseMenu.collapse.item6',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                     {
-                        key: 'customChecklist.item2',
-                        path: '/custom-checklist',
-                        title: 'Custom Checklist',
-                        translateKey: 'nav.collapseMenu.collapse.item4',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    {
-                        key: 'recommendedList.item3',
-                        path: '/compliance-checklist',
-                        title: 'Compliance Checklist',
-                        translateKey: 'nav.collapseMenu.collapse.item1',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    {
-                        key: 'dueCompliance.item4',
-                        path: '/due-compliance',
-                        title: 'Due Compliances',
-                        translateKey: 'nav.collapseMenu.collapse.item5',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    
-                    {
-                        key: 'complianceCertificate.item5',
-                        path: '/compliance-certificate',
-                        title: 'Compliance Certificate',
-                        translateKey: 'nav.collapseMenu.collapse.item7',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    {
-                        key: 'history.item6',
-                        path: '/history',
-                        title: 'History',
-                        translateKey: 'nav.collapseMenu.item8',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                ],
-        },
-        {
-                key: 'posh.collapse',
-                path: '/poshTracker',
-                title: 'POSH',
-                translateKey: 'nav.poshTracker.collapse.collapse',
-                icon: 'remittanceCollapse',
-                type: NAV_ITEM_TYPE_COLLAPSE,
+                subMenu: [],
+            },
+            {
+                key: 'customChecklist.item2',
+                path: '/custom-checklist',
+                title: 'Custom Checklist',
+                translateKey: 'nav.collapseMenu.collapse.item4',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
-                subMenu: [
-                    {
-                        key: 'poshTracker.collapse.item3',
-                        path: '/policy',
-                        title: 'POSH Policy',
-                        translateKey: 'nav.poshTracker.collapse.item3',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    
-                    {
-                        key: 'poshTracker.collapse.item2',
-                        path: '/committee',
-                        title: 'POSH Committee',
-                        translateKey: 'nav.poshTracker.collapse.item2',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    {
-                        key: 'poshTracker.collapse.item1',
-                        path: '/posh',
-                        title: 'POSH Return',
-                        translateKey: 'nav.poshTracker.collapse.item1',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                ]
-        },
-];
+                subMenu: [],
+            },
+            {
+                key: 'recommendedList.item3',
+                path: '/compliance-checklist',
+                title: 'Compliance Checklist',
+                translateKey: 'nav.collapseMenu.collapse.item1',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'dueCompliance.item4',
+                path: '/due-compliance',
+                title: 'Due Compliances',
+                translateKey: 'nav.collapseMenu.collapse.item5',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+
+            {
+                key: 'complianceCertificate.item5',
+                path: '/compliance-certificate',
+                title: 'Compliance Certificate',
+                translateKey: 'nav.collapseMenu.collapse.item7',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'history.item6',
+                path: '/history',
+                title: 'History',
+                translateKey: 'nav.collapseMenu.item8',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ],
+    },
+    {
+        key: 'posh.collapse',
+        path: '/poshTracker',
+        title: 'POSH',
+        translateKey: 'nav.poshTracker.collapse.collapse',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_COLLAPSE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'poshTracker.collapse.item3',
+                path: '/policy',
+                title: 'POSH Policy',
+                translateKey: 'nav.poshTracker.collapse.item3',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+
+            {
+                key: 'poshTracker.collapse.item2',
+                path: '/committee',
+                title: 'POSH Committee',
+                translateKey: 'nav.poshTracker.collapse.item2',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'poshTracker.collapse.item1',
+                path: '/posh',
+                title: 'POSH Return',
+                translateKey: 'nav.poshTracker.collapse.item1',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ],
+    },
+]
 
 const auditornav: NavigationTree[] = [
     {
@@ -3405,201 +3399,211 @@ const auditornav: NavigationTree[] = [
         subMenu: [],
     },
     {
-             key: 'collapseMenu.collapse',
-                path: '',
-                title: 'Audit Tracker',
-                translateKey: 'nav.collapseMenu.collapseMenu.collapse',
-                icon: 'auditCollapse',
-                type: NAV_ITEM_TYPE_COLLAPSE,
+        key: 'collapseMenu.collapse',
+        path: '',
+        title: 'Audit Tracker',
+        translateKey: 'nav.collapseMenu.collapseMenu.collapse',
+        icon: 'auditCollapse',
+        type: NAV_ITEM_TYPE_COLLAPSE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'status.item1',
+                path: '/status',
+                title: 'Status',
+                translateKey: 'nav.collapseMenu.collapse.item6',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
-                subMenu: [
-                    {
-                        key: 'status.item1',
-                        path: '/status',
-                        title: 'Status',
-                        translateKey: 'nav.collapseMenu.collapse.item6',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    {
-                        key: 'dueCompliance.item4',
-                        path: '/due-compliance',
-                        title: 'Due Compliances',
-                        translateKey: 'nav.collapseMenu.collapse.item5',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                    
-                ],
-        },
+                subMenu: [],
+            },
+            {
+                key: 'dueCompliance.item4',
+                path: '/due-compliance',
+                title: 'Due Compliances',
+                translateKey: 'nav.collapseMenu.collapse.item5',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ],
+    },
 ]
 
 const SideNav = () => {
-    const { login } = store.getState();
-    const { moduleAccess: moduleList, PermissionModules } = login.user.user;
-    const userType = login.user.type;
-    
-    const themeColor = useAppSelector((state) => state.theme.themeColor);
-    const primaryColorLevel = useAppSelector((state) => state.theme.primaryColorLevel);
-    const navMode = useAppSelector((state) => state.theme.navMode);
-    const mode = useAppSelector((state) => state.theme.mode);
-    const direction = useAppSelector((state) => state.theme.direction);
-    const currentRouteKey = useAppSelector((state) => state.base.common.currentRouteKey);
-    const sideNavCollapse = useAppSelector((state) => state.theme.layout.sideNavCollapse);
-    const userAuthority = useAppSelector((state) => state.auth.user.authority);
-    const { larger } = useResponsive();
+    const { login } = store.getState()
+    const { moduleAccess: moduleList, PermissionModules } = login.user.user
+    const userType = login.user.type
+
+    const themeColor = useAppSelector((state) => state.theme.themeColor)
+    const primaryColorLevel = useAppSelector(
+        (state) => state.theme.primaryColorLevel,
+    )
+    const navMode = useAppSelector((state) => state.theme.navMode)
+    const mode = useAppSelector((state) => state.theme.mode)
+    const direction = useAppSelector((state) => state.theme.direction)
+    const currentRouteKey = useAppSelector(
+        (state) => state.base.common.currentRouteKey,
+    )
+    const sideNavCollapse = useAppSelector(
+        (state) => state.theme.layout.sideNavCollapse,
+    )
+    const userAuthority = useAppSelector((state) => state.auth.user.authority)
+    const { larger } = useResponsive()
 
     // Create a mapping function to match navigation titles with module/menu names
     const createTitleMapping = () => {
         const mapping = {
-        
-        // Module level mappings
-        'Company Setup' : 'Company Setup',
-        'Agreement' : 'Agreement',
-        'Remittance Tracker' : 'Remittance Tracker',
-        'Notice Tracker' : 'Notice',
-        'Return Tracker' : 'Return Tracker',
-        'POSH' : 'POSH',
-        'Audit Tracker' : 'Audit Tracker',
-        
-        // Menu level mappings
-        'Entity Setup': 'Entity Setup',
-        'User Setup': 'User Setup',
-        'Auditor Setup': 'User Setup',
-        'Company Group': 'Company Group',
-        'Company': 'Company',
-        'Branch': 'Branch',
-        'Designation': 'Designation',
-        'User': 'User',
-        'Auditor': 'User',
-        'PF Tracker': 'PF Tracker',
-        'PFIW Tracker': 'PFIW Tracker',
-        'ESI Tracker': 'ESI Tracker',
-        'LWF Tracker': 'LWF Tracker',
-        'PT RC Tracker': 'PT RC Tracker',
-        'PT EC Tracker': 'PT EC Tracker',
-        'Status': 'Status',
-        'Custom Checklist': 'Custom Checklist',
-        'Compliance Checklist': 'Compliance Checklist',
-        'Due Compliance': 'Due Compliance',
-        'Certificate': 'Certificate',
-        'History': 'History',
-        'POSH Policy': 'POSH Policy',
-        'POSH Committee': 'POSH Committee',
-        'POSH Return': 'POSH Return',
-    
-    }
-        return mapping;
-    };
+            // Module level mappings
+            'Global Settings': 'Global Settings',
+            'Company Setup': 'Company Setup',
+            Agreement: 'Agreement',
+            'Remittance Tracker': 'Remittance Tracker',
+            'Notice Tracker': 'Notice',
+            'Return Tracker': 'Return Tracker',
+            POSH: 'POSH',
+            'Audit Tracker': 'Audit Tracker',
 
-    const titleMapping = createTitleMapping();
+            // Menu level mappings
+            'Entity Setup': 'Entity Setup',
+            'User Setup': 'User Setup',
+            'Auditor Setup': 'User Setup',
+            'Company Group': 'Company Group',
+            Company: 'Company',
+            Branch: 'Branch',
+            Designation: 'Designation',
+            User: 'User',
+            Auditor: 'User',
+            'PF Tracker': 'PF Tracker',
+            'PFIW Tracker': 'PFIW Tracker',
+            'ESI Tracker': 'ESI Tracker',
+            'LWF Tracker': 'LWF Tracker',
+            'PT RC Tracker': 'PT RC Tracker',
+            'PT EC Tracker': 'PT EC Tracker',
+            Status: 'Status',
+            'Custom Checklist': 'Custom Checklist',
+            'Compliance Checklist': 'Compliance Checklist',
+            'Due Compliance': 'Due Compliance',
+            Certificate: 'Certificate',
+            History: 'History',
+            'POSH Policy': 'POSH Policy',
+            'POSH Committee': 'POSH Committee',
+            'POSH Return': 'POSH Return',
+        }
+        return mapping
+    }
+
+    const titleMapping = createTitleMapping()
 
     // Enhanced permission checking function
- const hasPermission = (menuTitle: string): boolean => {
-    // Always allow Dashboard for all users
-    if (menuTitle === 'Dashboard') return true;
-    
-    // Get the mapped name for checking permissions
-    const mappedName = titleMapping[menuTitle] || menuTitle;
-    
-    // Special handling for auditors
-    if (userType === 'auditor') {
-        for (const module of moduleList) {
-            if (module.name === 'Audit Tracker') {
-                for (const menu of module.menus) {
-                    if (menu.name === mappedName) {
-                        return menu.permissions?.can_list === true;
+    const hasPermission = (menuTitle: string): boolean => {
+        // Always allow Dashboard for all users
+        if (menuTitle === 'Dashboard') return true
+        if (userType === 'admin' && menuTitle === 'Global Settings') return true
+
+        // Get the mapped name for checking permissions
+        const mappedName = titleMapping[menuTitle] || menuTitle
+
+        // Special handling for auditors
+        if (userType === 'auditor') {
+            for (const module of moduleList) {
+                if (module.name === 'Audit Tracker') {
+                    for (const menu of module.menus) {
+                        if (menu.name === mappedName) {
+                            return menu.permissions?.can_list === true
+                        }
                     }
                 }
             }
+            return false
         }
-        return false;
-    }
-    
-    // For all other users (including admin)
-    for (const module of moduleList) {
-        // First check if this is a module-level match
-        if (module.name === mappedName) {
-            return true;
-        }
-        
-        // Then check menu items within modules
-        if (module.menus) {
-            for (const menu of module.menus) {
-                if (menu.name === mappedName) {
-                    return menu.permissions?.can_list === true;
-                }
-                
-                // Check child menus if they exist
-                if (menu.children) {
-                    for (const child of menu.children) {
-                        if (child.name === mappedName) {
-                            return child.permissions?.can_list === true;
+
+        // For all other users (including admin)
+        for (const module of moduleList) {
+            // First check if this is a module-level match
+            if (module.name === mappedName) {
+                return true
+            }
+
+            // Then check menu items within modules
+            if (module.menus) {
+                for (const menu of module.menus) {
+                    if (menu.name === mappedName) {
+                        return menu.permissions?.can_list === true
+                    }
+
+                    // Check child menus if they exist
+                    if (menu.children) {
+                        for (const child of menu.children) {
+                            if (child.name === mappedName) {
+                                return child.permissions?.can_list === true
+                            }
                         }
                     }
                 }
             }
         }
+
+        return false
     }
-    
-    return false;
-};
 
-const filterNavigation = (navigation: NavigationTree[]): NavigationTree[] => {
-    return navigation.filter(navItem => {
-        // Check permission for this item
-        const hasPermissionForItem = hasPermission(navItem.title);
-        
-        // Process submenus if they exist
-        if (navItem.subMenu?.length) {
-            const filteredSubMenu = filterNavigation([...navItem.subMenu]);
-            navItem.subMenu = filteredSubMenu;
-            
-            // For collapse items, show if:
-            // 1. User has permission for the parent item OR
-            // 2. There are visible submenus
-            if (navItem.type === NAV_ITEM_TYPE_COLLAPSE) {
-                return hasPermissionForItem || filteredSubMenu.length > 0;
+    const filterNavigation = (
+        navigation: NavigationTree[],
+    ): NavigationTree[] => {
+        return navigation.filter((navItem) => {
+            if (userType === 'admin' && navItem.title === 'Global Settings')
+                return true
+
+            // Check permission for this item
+            const hasPermissionForItem = hasPermission(navItem.title)
+
+            // Process submenus if they exist
+            if (navItem.subMenu?.length) {
+                const filteredSubMenu = filterNavigation([...navItem.subMenu])
+                navItem.subMenu = filteredSubMenu
+
+                // For collapse items, show if:
+                // 1. User has permission for the parent item OR
+                // 2. There are visible submenus
+                if (navItem.type === NAV_ITEM_TYPE_COLLAPSE) {
+                    return hasPermissionForItem || filteredSubMenu.length > 0
+                }
             }
-        }
 
-        return hasPermissionForItem;
-    });
-};
+            return hasPermissionForItem
+        })
+    }
 
     // Get the appropriate navigation based on user type
     const getNavigationForUserType = () => {
-        switch(userType) {
+        switch (userType) {
             case 'admin':
-                return adminnav;
+                return adminnav
             case 'user':
-                return usernav;
+                return usernav
             case 'auditor':
-                return auditornav;
+                return auditornav
             default:
-                return usernav; // default to user nav if type not recognized
+                return usernav // default to user nav if type not recognized
         }
-    };
+    }
 
     // Get filtered navigation based on user role
-    const filteredNav = filterNavigation(getNavigationForUserType());
+    const filteredNav = filterNavigation(getNavigationForUserType())
 
     const sideNavColor = () => {
         if (navMode === NAV_MODE_THEMED) {
-            return `bg-${themeColor}-${primaryColorLevel} side-nav-${navMode}`;
+            return `bg-${themeColor}-${primaryColorLevel} side-nav-${navMode}`
         }
-        return `side-nav-${navMode}`;
-    };
+        return `side-nav-${navMode}`
+    }
 
     const logoMode = () => {
-        if (navMode === NAV_MODE_THEMED) return NAV_MODE_DARK;
-        if (navMode === NAV_MODE_TRANSPARENT) return mode;
-        return navMode;
-    };
+        if (navMode === NAV_MODE_THEMED) return NAV_MODE_DARK
+        if (navMode === NAV_MODE_TRANSPARENT) return mode
+        return navMode
+    }
 
     const menuContent = (
         <VerticalMenuContent
@@ -3610,7 +3614,7 @@ const filterNavigation = (navigation: NavigationTree[]): NavigationTree[] => {
             userAuthority={userAuthority as string[]}
             direction={direction}
         />
-    );
+    )
 
     const footerContent = (
         <div className="side-nav-footer mt-auto bg-gray-50 dark:bg-gray-800 p-3 rounded-lg mx-4 mb-4 overflow-x-hidden">
@@ -3623,9 +3627,9 @@ const filterNavigation = (navigation: NavigationTree[]): NavigationTree[] => {
                 </div>
             </div>
         </div>
-    );
+    )
 
-    if (!larger.md) return null;
+    if (!larger.md) return null
 
     return (
         <div
@@ -3641,7 +3645,11 @@ const filterNavigation = (navigation: NavigationTree[]): NavigationTree[] => {
                     <Logo
                         mode={logoMode()}
                         type={!sideNavCollapse ? 'streamline' : 'full'}
-                        className={!sideNavCollapse ? SIDE_NAV_CONTENT_GUTTER : LOGO_X_GUTTER}
+                        className={
+                            !sideNavCollapse
+                                ? SIDE_NAV_CONTENT_GUTTER
+                                : LOGO_X_GUTTER
+                        }
                     />
                 </div>
                 <div className="side-nav-middle flex-1">
@@ -3656,7 +3664,7 @@ const filterNavigation = (navigation: NavigationTree[]): NavigationTree[] => {
                 {sideNavCollapse && footerContent}
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default SideNav;
+export default SideNav
