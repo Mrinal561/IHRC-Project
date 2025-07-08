@@ -2265,7 +2265,7 @@ interface ReturnFormValues {
   district_id?: number | null;
   location_id?: number | null;
   branch_id?: number | null;
-  frequency: string;
+  frequency: string | null;
   year: number;
   month?: number | null;
   return_submission: string;
@@ -2305,7 +2305,7 @@ const validationSchema = Yup.object().shape({
   company_id: Yup.number().required('Company is required').min(1, 'Please select a company'),
   act_name: Yup.string().required('Act Name is required'),
   return_name: Yup.string().required('Return Name is required'),
-  frequency: Yup.string().required('Frequency is required'),
+  // frequency: Yup.string().required('Frequency is required'),
   year: Yup.number().required('Year is required').min(2000, 'Invalid year').max(2100, 'Invalid year'),
   return_submission: Yup.string().required('Return Submission is required'),
   
@@ -2711,6 +2711,7 @@ const ReturnTrackerAddForm = () => {
         branch_id: values.branch_id ? Number(values.branch_id) : null,
         year: Number(values.year),
         month: values.month ? Number(values.month) : null,
+        frequency: values.frequency || null,
         return_copy: values.return_submission === 'applicable' ? returnCopyBase64 : null,
         submission_date: values.return_submission === 'applicable' && values.submission_date 
           ? new Date(values.submission_date).toISOString() 
@@ -2745,7 +2746,7 @@ const ReturnTrackerAddForm = () => {
     act_name: '',
     return_name: '',
     state_id: null,
-    frequency: '',
+    frequency: null,
     year: new Date().getFullYear(),
     return_submission: '',
     submission_date: null,
@@ -2768,7 +2769,7 @@ const ReturnTrackerAddForm = () => {
       quarterly: 'Quarterly',
       half_yearly: 'Half Yearly',
       yearly: 'Yearly',
-      bi_annual: 'Bi-Annual'
+      bi_annual: 'Biennial'
     };
     
     return formatMap[frequency] || frequency;
@@ -3152,7 +3153,8 @@ const ReturnTrackerAddForm = () => {
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
-                      Frequency <span className="text-red-500">*</span>
+                      Frequency
+                       {/* <span className="text-red-500">*</span> */}
                     </label>
                     <OutlinedInput
                       label="Frequency"
