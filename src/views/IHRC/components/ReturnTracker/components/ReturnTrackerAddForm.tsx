@@ -2684,15 +2684,16 @@ const ReturnTrackerAddForm = () => {
       let returnCopyBase64 = '';
       if (values.return_copy && values.return_submission === 'applicable') {
         returnCopyBase64 = await new Promise<string>((resolve, reject) => {
-  const reader = new FileReader();
-  reader.onload = () => {
-    resolve(reader.result as string);  // ✅ Send the full data URI
-  };
-  reader.onerror = (error) => {
-    reject(error);
-  };
-  reader.readAsDataURL(values.return_copy as Blob);
-});
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]);
+          };
+          reader.onerror = (error) => {
+            reject(error);
+          };
+          reader.readAsDataURL(values.return_copy as Blob);
+        });
       }
 
       // Split act_name to remove state ID

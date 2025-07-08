@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Button, Dialog, Tooltip } from '@/components/ui';
+import { Button, Dialog, toast, Tooltip, Notification } from '@/components/ui';
 import { useNavigate } from 'react-router-dom';
 import { MdEdit } from 'react-icons/md';
 import { FiFile } from 'react-icons/fi';
@@ -47,6 +47,8 @@ const ReturnTrackerTable = ({
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     // const [loading, setLoading] = useState(false);
         const [downloading, setDownloading] = useState<string | null>(null);
+            const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
 
     const [tableData, setTableData] = useState({
         total: 0,
@@ -84,48 +86,66 @@ const ReturnTrackerTable = ({
     // };
 
 
-     const handleDownloadDocument = async (returnId: string) => {
-        try {
-            setDownloading(returnId);
-            const response = await httpClient.get(
-                endpoints.return.downloadDocument(returnId),
-                { responseType: 'blob' } // Important for file downloads
-            );
-
-            // Create a blob from the response
-            const blob = new Blob([response.data]);
-            
-            // Create a temporary URL for the blob
-            const url = window.URL.createObjectURL(blob);
-            
-            // Create a temporary anchor element to trigger the download
-            const a = document.createElement('a');
-            a.href = url;
-            
-            // Extract filename from content-disposition header or use a default
-            const contentDisposition = response.headers['content-disposition'];
-            let filename = 'document';
-            if (contentDisposition) {
-                const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-                if (filenameMatch && filenameMatch[1]) {
-                    filename = filenameMatch[1];
+    const handleDownloadDocument = async (returnId: string) => {
+    try {
+        setDownloadingId(returnId);
+        
+        const response = await httpClient.get(
+            endpoints.return.downloadDocument(returnId),
+            { 
+                responseType: 'blob',
+                // Add this to ensure proper headers are received
+                headers: {
+                    'Accept': 'application/pdf'
                 }
             }
-            
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            
-            // Clean up
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error('Error downloading document:', error);
-            // You might want to show an error message to the user here
-        } finally {
-            setDownloading(null);
+        );
+
+        // Extract filename from Content-Disposition header
+        const contentDisposition = response.headers['content-disposition'];
+        let filename = 'document.pdf'; // Default fallback
+        
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename="?(.+\.pdf)"?/i);
+            if (filenameMatch && filenameMatch[1]) {
+                filename = filenameMatch[1].replace(/['"]/g, '');
+            }
         }
-    };
+
+        // Create blob with explicit PDF type
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(link);
+        }, 100);
+
+        toast.push(
+            <Notification title="Success" type="success" duration={2500}>
+                Download started successfully
+            </Notification>
+        );
+    } catch (error) {
+        console.error('Error downloading document:', error);
+        toast.push(
+            <Notification title="Error" type="danger" duration={2500}>
+                Failed to download document
+            </Notification>
+        );
+    } finally {
+        setDownloadingId(null);
+    }
+};
+
 
 
     const formatDate = (dateString: string) => {
@@ -267,17 +287,15 @@ const ReturnTrackerTable = ({
                 cell: ({ row }) => (
                     <div className="w-40 flex items-center justify-center">
                         {row.original.return_copy ? (
-                            <button 
+                            <Button
+                                size="sm"
+                                variant="plain"
+                                icon={<FiFile className="w-5 h-5 text-blue-600 hover:text-blue-800 transition-colors" />}
                                 onClick={() => handleDownloadDocument(row.original.id)}
-                                className="text-blue-600 hover:text-blue-800 transition-colors"
-                                disabled={downloading === row.original.id}
-                            >
-                                {downloading === row.original.id ? (
-                                    <span>Downloading...</span>
-                                ) : (
-                                    <FiFile className="w-5 h-5" />
-                                )}
-                            </button>
+                                loading={downloadingId === row.original.id}
+                                disabled={downloadingId === row.original.id}
+                                title="Download Document"
+                            />
                         ) : (
                             <span className="text-gray-400">
                                 <FiFile className="w-5 h-5" />
