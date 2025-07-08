@@ -9,6 +9,7 @@ import {
     toast,
     Notification,
     Badge,
+    DatePicker,
 } from '@/components/ui'
 import { RiEyeLine } from 'react-icons/ri'
 import { HiUpload, HiCheck, HiX } from 'react-icons/hi'
@@ -18,6 +19,7 @@ import { HiOutlineViewGrid } from 'react-icons/hi'
 import httpClient from '@/api/http-client'
 import { endpoints } from '@/api/endpoint'
 import OutlinedSelect from '@/components/ui/Outlined/Outlined'
+import dayjs from 'dayjs'
 
 interface DetailRowProps {
     label: string
@@ -170,6 +172,8 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     const [isLoading, setIsLoading] = useState(false)
     const [complianceStatus, setComplianceStatus] = useState<string>('')
     const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false)
+    const [actualDateOfPayment, setActualDateOfPayment] = useState<string | null>(null);
+
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -316,69 +320,152 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     //     }
     // }
 
+    // const handleUploadConfirm = async () => {
+    //     if (!selectedFile) {
+    //         toast.push(
+    //             <Notification title="Error" type="error">
+    //                 Please select a file
+    //             </Notification>,
+    //         )
+    //         return
+    //     }
+
+    //     if (!selectedCompliance?.id) return
+
+    //     setIsLoading(true)
+
+    //     try {
+    //         const base64String = await new Promise<string>(
+    //             (resolve, reject) => {
+    //                 const reader = new FileReader()
+    //                 reader.onload = () => {
+    //                     const result = reader.result as string
+    //                     resolve(result.split(',')[1])
+    //                 }
+    //                 reader.onerror = reject
+    //                 reader.readAsDataURL(selectedFile)
+    //             },
+    //         )
+
+    //         const payload = {
+    //             document: base64String,
+    //             company_id: selectedCompliance.company_id,
+    //             filename: selectedFile.name,
+    //             mimetype: selectedFile.type,
+    //             complianceStatus: selectedRole === 'owner' ? complianceStatus : undefined,
+    //             actual_date_of_payment: actualDateOfPayment 
+    //         ? dayjs(actualDateOfPayment).format('YYYY-MM-DD') 
+    //         : undefined,
+    //         }
+
+    //         const response = await httpClient.post(
+    //             endpoints.compliance.dueComplianceDocumentUpload(
+    //                 selectedCompliance.id,
+    //             ),
+    //             payload,
+    //         )
+
+    //         toast.push(
+    //             <Notification title="Success" type="success">
+    //                 Document uploaded
+    //             </Notification>,
+    //         )
+    //         setIsUploadDialogOpen(false)
+    //         setSelectedFile(null)
+    //         setRemark('')
+    //         setComplianceStatus('')
+    //         setActualDateOfPayment(null);
+    //     } catch (error: any) {
+    //         console.error('Upload error:', error)
+    //         toast.push(
+    //             <Notification title="Error" type="error">
+    //                 {error.response?.data?.message || 'Upload failed'}
+    //             </Notification>,
+    //         )
+    //     } finally {
+    //         setIsLoading(false)
+    //     }
+    // }
+
     const handleUploadConfirm = async () => {
-        if (!selectedFile) {
-            toast.push(
-                <Notification title="Error" type="error">
-                    Please select a file
-                </Notification>,
-            )
-            return
-        }
-
-        if (!selectedCompliance?.id) return
-
-        setIsLoading(true)
-
-        try {
-            const base64String = await new Promise<string>(
-                (resolve, reject) => {
-                    const reader = new FileReader()
-                    reader.onload = () => {
-                        const result = reader.result as string
-                        resolve(result.split(',')[1])
-                    }
-                    reader.onerror = reject
-                    reader.readAsDataURL(selectedFile)
-                },
-            )
-
-            const payload = {
-                document: base64String,
-                company_id: selectedCompliance.company_id,
-                filename: selectedFile.name,
-                mimetype: selectedFile.type,
-                complianceStatus:
-                    selectedRole === 'owner' ? complianceStatus : undefined,
-            }
-
-            const response = await httpClient.post(
-                endpoints.compliance.dueComplianceDocumentUpload(
-                    selectedCompliance.id,
-                ),
-                payload,
-            )
-
-            toast.push(
-                <Notification title="Success" type="success">
-                    Document uploaded
-                </Notification>,
-            )
-            setIsUploadDialogOpen(false)
-            setSelectedFile(null)
-            setRemark('')
-            setComplianceStatus('')
-        } catch (error: any) {
-            console.error('Upload error:', error)
-            toast.push(
-                <Notification title="Error" type="error">
-                    {error.response?.data?.message || 'Upload failed'}
-                </Notification>,
-            )
-        } finally {
-            setIsLoading(false)
-        }
+    // Check if selectedCompliance is null
+    if (!selectedCompliance) {
+        toast.push(
+            <Notification title="Error" type="danger">
+                No compliance selected
+            </Notification>,
+        );
+        return;
     }
+
+    // Validate proof mandatory field
+    if (selectedCompliance.proof_mandatory && !selectedFile) {
+        toast.push(
+            <Notification title="Error" type="danger">
+                Document is required for this compliance
+            </Notification>,
+        );
+        return;
+    }
+
+   
+
+    setIsLoading(true);
+
+    try {
+        let base64String = '';
+        if (selectedFile) {
+            base64String = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const result = reader.result as string;
+                    resolve(result.split(',')[1]);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(selectedFile);
+            });
+        }
+
+        const payload = {
+            document: selectedFile ? base64String : undefined,
+            company_id: selectedCompliance.company_id,
+            filename: selectedFile?.name,
+            mimetype: selectedFile?.type,
+            complianceStatus: selectedRole === 'owner' ? complianceStatus : undefined,
+            actual_date_of_payment: actualDateOfPayment 
+                ? dayjs(actualDateOfPayment).format('YYYY-MM-DD') 
+                : undefined,
+        };
+
+        const response = await httpClient.post(
+            endpoints.compliance.dueComplianceDocumentUpload(
+                selectedCompliance.id,
+            ),
+            payload,
+        );
+
+        toast.push(
+            <Notification title="Success" type="success">
+                {selectedFile ? 'Document uploaded' : 'Status updated'}
+            </Notification>,
+        );
+        
+        setIsUploadDialogOpen(false);
+        setSelectedFile(null);
+        setRemark('');
+        setComplianceStatus('');
+        setActualDateOfPayment(null);
+    } catch (error: any) {
+        console.error('Upload error:', error);
+        toast.push(
+            <Notification title="Error" type="error">
+                {error.response?.data?.message || 'Operation failed'}
+            </Notification>,
+        );
+    } finally {
+        setIsLoading(false);
+    }
+}
 
     // const handleRejectConfirm = async () => {
     //     if (!rejectReason) {
@@ -549,6 +636,60 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
         }
     }
 
+   const calculateCurrentDueDate = (dueDate: string, frequency: string): string => {
+    if (!dueDate) return 'N/A';
+    
+    const originalDate = new Date(dueDate);
+    const currentDate = new Date();
+    const originalMonth = originalDate.getMonth();
+    const currentMonth = currentDate.getMonth();
+    
+    switch (frequency.toLowerCase()) {
+        case 'monthly':
+            // For monthly, keep the day but use current month and year
+            return new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                originalDate.getDate()
+            ).toLocaleDateString();
+            
+        case 'yearly':
+            // For yearly, keep the day and month but use current year
+            return new Date(
+                currentDate.getFullYear(),
+                originalMonth,
+                originalDate.getDate()
+            ).toLocaleDateString();
+            
+        case 'half-yearly':
+            // For half-yearly, we need to determine which half we're in
+            // First half is Jan-Jun, second is Jul-Dec
+            const isFirstHalf = currentMonth < 6;
+            const targetMonth = isFirstHalf ? originalMonth : originalMonth + 6;
+            
+            return new Date(
+                currentDate.getFullYear(),
+                targetMonth,
+                originalDate.getDate()
+            ).toLocaleDateString();
+            
+        case 'quarterly':
+            // For quarterly, we need to determine which quarter we're in
+            const quarter = Math.floor(currentMonth / 3);
+            const targetMonthQuarterly = originalMonth + (quarter * 3);
+            
+            return new Date(
+                currentDate.getFullYear(),
+                targetMonthQuarterly,
+                originalDate.getDate()
+            ).toLocaleDateString();
+            
+        default:
+            // For one-time or unknown frequencies, return the original date
+            return originalDate.toLocaleDateString();
+    }
+}
+
     const columns: ColumnDef<DueComplianceDetailData>[] = useMemo(
         () => [
             {
@@ -637,6 +778,25 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                     </div>
                 ),
             },
+            {
+            header: 'Due Date',
+            enableSorting: false,
+            accessorFn: (row) => row.due_dates?.first_due_date || null,
+            cell: (props) => {
+                const dueDate = props.getValue() as string | null;
+                const frequency = props.row.original.due_date_frequency;
+                
+                const calculatedDueDate = dueDate 
+                    ? calculateCurrentDueDate(dueDate, frequency)
+                    : 'N/A';
+                
+                return (
+                    <div className="w-32">
+                        {calculatedDueDate}
+                    </div>
+                );
+            },
+        },
             {
                 header: 'Rejection Reason',
                 enableSorting: false,
@@ -905,15 +1065,37 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Upload the document:
-                            </label>
-                            <Input
-                                type="file"
-                                onChange={(e) =>
-                                    setSelectedFile(e.target.files?.[0] || null)
-                                }
-                            />
+            Actual Date of Payment:
+        </label>
+       <DatePicker
+            inputtable
+            clearable
+            size="sm"
+            value={actualDateOfPayment ? new Date(actualDateOfPayment) : null}
+            onChange={(date) => {
+                setActualDateOfPayment(date ? dayjs(date).format('YYYY-MM-DD') : null);
+            }}
+            inputFormat="YYYY-MM-DD"
+            placeholder="Select payment date"
+        />
                         </div>
+
+                        <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+            Upload the document:
+            {selectedCompliance?.proof_mandatory && (
+                <span className="text-red-500 ml-1">*</span>
+            )}
+        </label>
+        <Input
+            type="file"
+            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            className={`${selectedCompliance?.proof_mandatory && !selectedFile ? 'border-red-500' : ''}`}
+        />
+        {selectedCompliance?.proof_mandatory && !selectedFile && (
+            <p className="mt-1 text-sm text-red-600">Document is required</p>
+        )}
+    </div>
 
                         <div className="mb-4">
                             <Input
@@ -932,6 +1114,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                                 onClick={() => {
                                     setIsUploadDialogOpen(false)
                                     setComplianceStatus('')
+                                    setActualDateOfPayment(null);
                                 }}
                             >
                                 Cancel
