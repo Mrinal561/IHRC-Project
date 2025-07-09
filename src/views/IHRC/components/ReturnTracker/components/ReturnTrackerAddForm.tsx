@@ -2301,11 +2301,156 @@ interface BranchOption extends SelectOption {
   location_id: number;
 }
 
+// const validationSchema = Yup.object().shape({
+//   company_id: Yup.number().required('Company is required').min(1, 'Please select a company'),
+//   act_name: Yup.string().required('Act Name is required'),
+//   return_name: Yup.string().required('Return Name is required'),
+//   // frequency: Yup.string().required('Frequency is required'),
+//   year: Yup.number().required('Year is required').min(2000, 'Invalid year').max(2100, 'Invalid year'),
+//   return_submission: Yup.string().required('Return Submission is required'),
+  
+//   state_id: Yup.number().when('act_name', {
+//     is: (act_name: string) => {
+//       if (!act_name) return false;
+//       const [, stateId] = act_name.split('||');
+//       return stateId !== 'CENTRAL';
+//     },
+//     then: (schema) => schema.required('State is required'),
+//   }),
+  
+//   district_id: Yup.number().when('act_name', {
+//     is: (act_name: string) => {
+//       if (!act_name) return false;
+//       const [, stateId] = act_name.split('||');
+//       return stateId !== 'CENTRAL';
+//     },
+//     then: (schema) => schema.required('District is required'),
+//   }),
+  
+//   location_id: Yup.number().when('act_name', {
+//     is: (act_name: string) => {
+//       if (!act_name) return false;
+//       const [, stateId] = act_name.split('||');
+//       return stateId !== 'CENTRAL';
+//     },
+//     then: (schema) => schema.required('Location is required'),
+//   }),
+  
+//   branch_id: Yup.number().when('act_name', {
+//     is: (act_name: string) => {
+//       if (!act_name) return false;
+//       const [, stateId] = act_name.split('||');
+//       return stateId !== 'CENTRAL';
+//     },
+//     then: (schema) => schema.required('Branch is required'),
+//   }),
+  
+//   submission_date: Yup.string().when('return_submission', {
+//     is: 'applicable',
+//     then: (schema) => schema.required('Submission Date is required'),
+//   }),
+  
+//   delay_reason: Yup.string().when(['return_submission', 'submission_date'], {
+//     is: (return_submission: string, submission_date: string) => 
+//       return_submission === 'applicable' && submission_date,
+//     then: (schema) => schema.test(
+//       'is-delayed',
+//       'Delay reason is required for delayed returns',
+//       function (value) {
+//         const { parent } = this;
+//         const superadminReturn = parent._superadminReturn;
+        
+//         if (!superadminReturn || !superadminReturn.due_dates || !parent.submission_date) {
+//           return true;
+//         }
+
+//         const dueDates = superadminReturn.due_dates;
+//         let dueDate: Date | null = null;
+//         const submissionDate = new Date(parent.submission_date);
+
+//         switch (parent.frequency) {
+//           case 'monthly':
+//             dueDate = new Date(dueDates.first_due_date);
+//             break;
+//           case 'quarterly':
+//             if (parent.month) {
+//               if (parent.month >= 1 && parent.month <= 3) {
+//                 dueDate = new Date(dueDates.first_due_date);
+//               } else if (parent.month >= 4 && parent.month <= 6) {
+//                 dueDate = new Date(dueDates.second_due_date);
+//               } else if (parent.month >= 7 && parent.month <= 9) {
+//                 dueDate = new Date(dueDates.third_due_date);
+//               } else {
+//                 dueDate = new Date(dueDates.last_due_date);
+//               }
+//             }
+//             break;
+//           case 'half_yearly':
+//             if (parent.month && parent.month <= 6) {
+//               dueDate = new Date(dueDates.first_due_date);
+//             } else {
+//               dueDate = new Date(dueDates.last_due_date);
+//             }
+//             break;
+//           case 'yearly':
+//             dueDate = new Date(dueDates.first_due_date);
+//             break;
+//           case 'bi_annual':
+//             dueDate = new Date(dueDates.bi_annual_due_date);
+//             break;
+//         }
+
+//         if (dueDate && submissionDate > dueDate) {
+//           return !!value;
+//         }
+//         return true;
+//       }
+//     ),
+//   }),
+  
+//   not_applicable_reason: Yup.string().when('return_submission', {
+//     is: 'not_applicable',
+//     then: (schema) => schema.required('Not Applicable Reason is required'),
+//   }),
+  
+//   return_copy: Yup.mixed().when('return_submission', {
+//     is: 'applicable',
+//     then: (schema) => schema
+//       .required('Return copy is required')
+//       .test('fileSize', 'File size must be less than 20MB', (value) => {
+//         if (!value) return false;
+//         return (value as File).size <= 20 * 1024 * 1024;
+//       })
+//       .test('fileType', 'Only PDF, Excel, and image files are allowed', (value) => {
+//         if (!value) return false;
+//         const file = value as File;
+//         const allowedTypes = [
+//           'application/pdf',
+//           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+//           'application/vnd.ms-excel',
+//           'image/jpeg',
+//           'image/png'
+//         ];
+//         return allowedTypes.includes(file.type);
+//       }),
+//     otherwise: (schema) => schema.nullable()
+//   }),
+  
+//   month: Yup.number().when('frequency', {
+//   is: (frequency: string) => ['monthly', 'quarterly', 'half_yearly'].includes(frequency),
+//   then: (schema) => schema
+//     .required('Month is required')
+//     .min(1, 'Month must be between 1 and 12')
+//     .max(12, 'Month must be between 1 and 12'),
+//   otherwise: (schema) => schema.nullable()
+// }),
+// });
+
+
 const validationSchema = Yup.object().shape({
   company_id: Yup.number().required('Company is required').min(1, 'Please select a company'),
   act_name: Yup.string().required('Act Name is required'),
   return_name: Yup.string().required('Return Name is required'),
-  // frequency: Yup.string().required('Frequency is required'),
   year: Yup.number().required('Year is required').min(2000, 'Invalid year').max(2100, 'Invalid year'),
   return_submission: Yup.string().required('Return Submission is required'),
   
@@ -2345,68 +2490,20 @@ const validationSchema = Yup.object().shape({
     then: (schema) => schema.required('Branch is required'),
   }),
   
+   month: Yup.number()
+    .nullable()
+    .min(1, 'Month must be between 1 and 12')
+    .max(12, 'Month must be between 1 and 12'),
+
+
+  
   submission_date: Yup.string().when('return_submission', {
     is: 'applicable',
     then: (schema) => schema.required('Submission Date is required'),
   }),
   
-  delay_reason: Yup.string().when(['return_submission', 'submission_date'], {
-    is: (return_submission: string, submission_date: string) => 
-      return_submission === 'applicable' && submission_date,
-    then: (schema) => schema.test(
-      'is-delayed',
-      'Delay reason is required for delayed returns',
-      function (value) {
-        const { parent } = this;
-        const superadminReturn = parent._superadminReturn;
-        
-        if (!superadminReturn || !superadminReturn.due_dates || !parent.submission_date) {
-          return true;
-        }
-
-        const dueDates = superadminReturn.due_dates;
-        let dueDate: Date | null = null;
-        const submissionDate = new Date(parent.submission_date);
-
-        switch (parent.frequency) {
-          case 'monthly':
-            dueDate = new Date(dueDates.first_due_date);
-            break;
-          case 'quarterly':
-            if (parent.month) {
-              if (parent.month >= 1 && parent.month <= 3) {
-                dueDate = new Date(dueDates.first_due_date);
-              } else if (parent.month >= 4 && parent.month <= 6) {
-                dueDate = new Date(dueDates.second_due_date);
-              } else if (parent.month >= 7 && parent.month <= 9) {
-                dueDate = new Date(dueDates.third_due_date);
-              } else {
-                dueDate = new Date(dueDates.last_due_date);
-              }
-            }
-            break;
-          case 'half_yearly':
-            if (parent.month && parent.month <= 6) {
-              dueDate = new Date(dueDates.first_due_date);
-            } else {
-              dueDate = new Date(dueDates.last_due_date);
-            }
-            break;
-          case 'yearly':
-            dueDate = new Date(dueDates.first_due_date);
-            break;
-          case 'bi_annual':
-            dueDate = new Date(dueDates.bi_annual_due_date);
-            break;
-        }
-
-        if (dueDate && submissionDate > dueDate) {
-          return !!value;
-        }
-        return true;
-      }
-    ),
-  }),
+  // Updated delay reason validation - required when submission_date is provided and return is delayed
+ delay_reason: Yup.string().nullable(),
   
   not_applicable_reason: Yup.string().when('return_submission', {
     is: 'not_applicable',
@@ -2435,12 +2532,8 @@ const validationSchema = Yup.object().shape({
       }),
     otherwise: (schema) => schema.nullable()
   }),
-  
-  month: Yup.number().when('frequency', {
-    is: (frequency: string) => ['monthly', 'quarterly', 'half_yearly'].includes(frequency),
-    then: (schema) => schema.required('Month is required').min(1, 'Invalid month').max(12, 'Invalid month'),
-  }),
 });
+
 
 const ReturnTrackerAddForm = () => {
   const navigate = useNavigate();
@@ -2710,13 +2803,13 @@ const ReturnTrackerAddForm = () => {
         location_id: values.location_id ? Number(values.location_id) : null,
         branch_id: values.branch_id ? Number(values.branch_id) : null,
         year: Number(values.year),
-        month: values.month ? Number(values.month) : null,
+        ...(values.month && { month: Number(values.month) }),
         frequency: values.frequency || null,
         return_copy: values.return_submission === 'applicable' ? returnCopyBase64 : null,
         submission_date: values.return_submission === 'applicable' && values.submission_date 
           ? new Date(values.submission_date).toISOString() 
           : null,
-        delay_reason: values.return_submission === 'applicable' ? values.delay_reason : null,
+        ...(values.delay_reason && { delay_reason: values.delay_reason }),
         not_applicable_reason: values.return_submission === 'not_applicable' 
           ? values.not_applicable_reason 
           : null
@@ -3194,10 +3287,11 @@ const ReturnTrackerAddForm = () => {
                     )}
                   </div>
 
-                  {['monthly', 'quarterly', 'half_yearly'].includes(values.frequency) && (
+                  {/* {['monthly', 'quarterly', 'half_yearly', 'yearly'].includes(values.frequency) && ( */}
                     <div className="space-y-2">
                       <label className="text-sm font-medium">
-                        Month <span className="text-red-500">*</span>
+                        Month 
+                        {/* <span className="text-red-500">*</span> */}
                       </label>
                       <Field name="month">
                         {({ field }: any) => (
@@ -3216,7 +3310,7 @@ const ReturnTrackerAddForm = () => {
                         <p className="text-red-500 text-xs">{errors.month}</p>
                       )}
                     </div>
-                  )}
+                  {/* // )} */}
                 </div>
 
                 {/* 7th Row: Return File Submission */}
@@ -3342,28 +3436,29 @@ const ReturnTrackerAddForm = () => {
                           <p className="text-red-500 text-xs">{errors.return_copy}</p>
                         )}
                       </div>
-                      {isDelayed && (
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">
-                            Delay Reason <span className="text-red-500">*</span>
-                          </label>
-                          <Field name="delay_reason">
-                            {({ field }: any) => (
-                              <OutlinedInput
-                                label="Enter Delay Reason"
-                                value={values.delay_reason || ''}
-                                onChange={(value: string) => {
-                                  setFieldValue('delay_reason', value);
-                                }}
-                                onBlur={() => setFieldTouched('delay_reason', true)}
-                              />
-                            )}
-                          </Field>
-                          {errors.delay_reason && touched.delay_reason && (
-                            <p className="text-red-500 text-xs">{errors.delay_reason}</p>
-                          )}
-                        </div>
-                      )}
+                      {values.return_submission === 'applicable' && (
+  <div className="space-y-2">
+    <label className="text-sm font-medium">
+      Delay Reason 
+      {/* <span className="text-red-500">*</span> */}
+    </label>
+    <Field name="delay_reason">
+      {({ field }: any) => (
+        <OutlinedInput
+          label="Enter Delay Reason"
+          value={values.delay_reason || ''}
+          onChange={(value: string) => {
+            setFieldValue('delay_reason', value);
+          }}
+          onBlur={() => setFieldTouched('delay_reason', true)}
+        />
+      )}
+    </Field>
+    {errors.delay_reason && touched.delay_reason && (
+      <p className="text-red-500 text-xs">{errors.delay_reason}</p>
+    )}
+  </div>
+)}
                     </div>
                   </>
                 )}
