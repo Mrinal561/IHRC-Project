@@ -10,6 +10,56 @@ import useAuth from '@/utils/hooks/useAuth';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 
+
+
+interface ReturnTrackerItem {
+    id: string;
+    uuid: string;
+    company_id: number;
+    act_name: string;
+    return_name: string;
+    state_id: number | null;
+    district_id: number | null;
+    location_id: number | null;
+    branch_id: number | null;
+    frequency: string | null;
+    year: number;
+    month: number | null;
+    return_submission: string;
+    submission_date: string | null;
+    delay_reason: string | null;
+    return_copy: string | null;
+    not_applicable_reason: string | null;
+    is_delayed: boolean;
+    state?: {
+        id: number;
+        name: string;
+    };
+    district?: {
+        id: number;
+        name: string;
+        state_id: number;
+    };
+    location?: {
+        id: number;
+        name: string;
+        district_id: number;
+    };
+    branch?: {
+        id: number;
+        name: string;
+        location_id: number;
+    };
+    company: {
+        id: number;
+        name: string;
+    };
+    // These might be coming from your API response
+    state_name?: string;
+    branch_name?: string;
+}
+
+
 const ReturnTrackerTool = () => {
     const auth = useAuth();
     const userId = auth?.user?.id || 0;
@@ -26,14 +76,14 @@ const ReturnTrackerTool = () => {
         sort_by: 'id'
     });
 
-    const [tableData, setTableData] = useState([]);
+const [tableData, setTableData] = useState<ReturnTrackerItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState({
-        page: 1,
-        limit: 10,
-        totalPages: 1,
-        totalResults: 0
-    });
+            total: 0,
+            pageIndex: 1,
+            pageSize: 10,
+        });
+    
 
    // In your ReturnTrackerTool component
 const fetchReturns = async () => {
@@ -55,18 +105,26 @@ const fetchReturns = async () => {
 
         const response = await httpClient.get(endpoints.return.list(), { params });
 
-        setTableData(response.data.data);
-        setPagination(response.data.paginate_data);
+        // Transform the API response to match DataTable expectations
+setTableData(response.data.data as ReturnTrackerItem[]);
+        setPagination({
+            total: response.data.meta?.totalResults || 0,
+            pageIndex: response.data.meta?.page || 1,
+            pageSize: response.data.meta?.limit || 10,
+        });
     } catch (error) {
         console.error('Failed to fetch returns:', error);
+        setTableData([]);
+        setPagination({
+            total: 0,
+            pageIndex: 1,
+            pageSize: 10,
+        });
     } finally {
         setLoading(false);
     }
 };
-
-    useEffect(() => {
-        fetchReturns();
-    }, [filters]);
+  
 
     const handleFilterChange = (newFilters: any) => {
         setFilters(prev => ({
@@ -76,12 +134,25 @@ const fetchReturns = async () => {
         }));
     };
 
-    const handlePageChange = (newPage: number) => {
-        setFilters(prev => ({
+    // In ReturnTrackerTool.tsx
+
+const handlePaginationChange = (page: number) => {
+        setPagination(prev => ({ ...prev, pageIndex: page }));
+    };
+
+    const handlePageSizeChange = (newPageSize: number) => {
+        setPagination(prev => ({
             ...prev,
-            page: newPage
+            pageSize: newPageSize,
+            pageIndex: 1,
         }));
     };
+
+      useEffect(() => {
+            console.log('Fetching returns...', { filters, pagination });
+
+        fetchReturns();
+}, [filters, pagination.pageIndex, pagination.pageSize, currentFinancialYear, userId]);
 
     const handleDownloadAllData = async () => {
         try {
@@ -141,10 +212,15 @@ const fetchReturns = async () => {
 
             <div className="mt-8">
                 <ReturnTrackerTable 
-                    data={tableData} 
-                    loading={loading}
-                    pagination={pagination}
-                    onPageChange={handlePageChange}
+                  data={tableData} 
+    loading={loading}
+    pagination={pagination}
+    onPaginationChange={(page) => {
+        setFilters(prev => ({ ...prev, page }));
+    }}
+    onPageSizeChange={(pageSize) => {
+        setFilters(prev => ({ ...prev, page_size: pageSize, page: 1 }));
+    }}
                 />
             </div>
         </div>

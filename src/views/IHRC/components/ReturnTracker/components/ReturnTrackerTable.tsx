@@ -8,40 +8,70 @@ import { HiOutlineViewGrid } from 'react-icons/hi';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 
+// Define a unified interface that matches your API response
 interface ReturnTrackerData {
     id: string;
+    uuid: string;
+    company_id: number;
     act_name: string;
     return_name: string;
-    state_name: string;
-    branch_name: string;
-    frequency: string;
-    month: number;
+    state_id: number | null;
+    district_id: number | null;
+    location_id: number | null;
+    branch_id: number | null;
+    frequency: string | null;
     year: number;
+    month: number | null;
     return_submission: string;
-    not_applicable_reason: string;
-    submission_date: string;
-    delay_reason: string;
-    return_copy: string;
+    submission_date: string | null;
+    delay_reason: string | null;
+    return_copy: string | null;
+    not_applicable_reason: string | null;
+    is_delayed: boolean;
+    state?: {
+        id: number;
+        name: string;
+    };
+    district?: {
+        id: number;
+        name: string;
+        state_id: number;
+    };
+    location?: {
+        id: number;
+        name: string;
+        district_id: number;
+    };
+    branch?: {
+        id: number;
+        name: string;
+        location_id: number;
+    };
+    company: {
+        id: number;
+        name: string;
+    };
 }
 
+// Update your props interface
 interface ReturnTrackerTableProps {
     data: ReturnTrackerData[];
     loading: boolean;
     pagination: {
-        page: number;
-        limit: number;
-        totalPages: number;
-        totalResults: number;
+        total: number;
+        pageIndex: number;
+        pageSize: number;
     };
-    onPageChange: (page: number, pageSize: number) => void;
+    onPaginationChange: (page: number) => void;
+    onPageSizeChange: (pageSize: number) => void;
 }
-
 
 const ReturnTrackerTable = ({
     data: returns,
     loading,
     pagination,
-    onPageChange
+    onPaginationChange,
+    onPageSizeChange
 }: ReturnTrackerTableProps) => {
     const navigate = useNavigate();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -180,7 +210,27 @@ const ReturnTrackerTable = ({
                 header: 'State',
                 enableSorting: false,
                 accessorKey: 'state_name',
-                cell: ({ row }) => <div className="w-40 truncate">{row.original.state_name}</div>,
+                cell: ({ row }) => <div className="w-40 truncate">{row.original.state?.name || '--'}</div>,
+            },
+            {
+                header: 'District',
+                enableSorting: false,
+                accessorKey: 'district',
+                cell: ({ row }) => (
+                    <div className="w-40 truncate">
+                        {row.original.district?.name || '--'}
+                    </div>
+                ),
+            },
+            {
+                header: 'Location',
+                enableSorting: false,
+                accessorKey: 'location',
+                cell: ({ row }) => (
+                    <div className="w-40 truncate">
+                        {row.original.location?.name || '--'}
+                    </div>
+                ),
             },
             {
                 header: 'Branch',
@@ -203,6 +253,8 @@ const ReturnTrackerTable = ({
                             return 'Half Yearly';
                         case 'quarterly':
                             return 'Quarterly';
+                        case 'bi_annual':
+                            return 'Binneial';
                         default:
                             return frequency;
                     }
@@ -326,9 +378,10 @@ const ReturnTrackerTable = ({
         [navigate, downloading]
     );
 
-     const handlePaginationChange = (pageIndex: number, pageSize: number) => {
-        onPageChange(pageIndex, pageSize);
-    };
+    // In ReturnTrackerTable.tsx
+// const handlePaginationChange = (page: number) => {
+//     onPageChange(page, tableData.pageSize); // Keep using the current pageSize
+// };
 
     return (
         <div className="relative">
@@ -345,11 +398,11 @@ const ReturnTrackerTable = ({
                     skeletonAvatarColumns={[0]}
                     skeletonAvatarProps={{ className: 'rounded-md' }}
                     pagingData={{
-                        total: tableData.total,
-                        pageIndex: tableData.pageIndex,
-                        pageSize: tableData.pageSize,
-                    }}
-                    onPaginationChange={handlePaginationChange}
+                            total: pagination.total,
+                            pageIndex: pagination.pageIndex,
+                            pageSize: pagination.pageSize,
+                        }}
+                        onPaginationChange={onPaginationChange}
                     stickyHeader={true}
                     stickyFirstColumn={true}
                     stickyLastColumn={true}
