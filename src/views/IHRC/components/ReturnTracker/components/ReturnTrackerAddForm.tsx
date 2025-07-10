@@ -244,6 +244,7 @@ const validationSchema = Yup.object().shape({
     then: (schema) => schema.required('Branch is required'),
   }),
   
+  
    month: Yup.number()
   .nullable()
   .typeError('This field requires to be filled in with a numeric number')
