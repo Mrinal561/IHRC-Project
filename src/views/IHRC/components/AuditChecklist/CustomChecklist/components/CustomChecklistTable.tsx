@@ -29,6 +29,7 @@ interface CustomChecklist {
     compliance_type: string;
     compliance_frequency: string;
     criticality: string;
+    proof_mandatory: boolean;
     due_date_frequency: string;
     due_dates: {
         first_due_date?: string;
@@ -236,6 +237,16 @@ const CustomChecklistTable = () => {
                     );
                 },
             },
+            {
+            header: 'Proof Mandatory',
+            enableSorting: false,
+            accessorKey: 'proof_mandatory',
+            cell: (props) => (
+                <div className="w-24 capitalize">
+                    {props.getValue() ? 'Yes' : 'No'}
+                </div>
+            ),
+        },
             {
                 header: 'Status',
                 enableSorting: false,

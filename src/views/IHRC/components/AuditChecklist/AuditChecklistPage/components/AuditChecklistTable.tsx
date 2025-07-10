@@ -30,6 +30,7 @@ export type AuditChecklistData = {
     compliance_type: string
     compliance_frequency: string
     criticality: string
+    proof_mandatory: boolean
     due_date_frequency: string
     due_dates: {
         first_due_date: string | null
@@ -252,6 +253,16 @@ const AuditChecklistTable: React.FC<AuditChecklistTableProps> = ({
                     )
                 },
             },
+            {
+            header: 'Proof Mandatory',
+            enableSorting: false,
+            accessorKey: 'proof_mandatory',
+            cell: (props) => (
+                <div className="w-24 capitalize">
+                    {props.getValue() ? 'Yes' : 'No'}
+                </div>
+            ),
+        },
             {
                 header: 'Due Date',
                 enableSorting: false,
