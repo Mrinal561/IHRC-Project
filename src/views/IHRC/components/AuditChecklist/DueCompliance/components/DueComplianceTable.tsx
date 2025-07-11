@@ -20,6 +20,7 @@ import httpClient from '@/api/http-client'
 import { endpoints } from '@/api/endpoint'
 import OutlinedSelect from '@/components/ui/Outlined/Outlined'
 import dayjs from 'dayjs'
+import { FiFile } from 'react-icons/fi'
 
 interface DetailRowProps {
     label: string
@@ -54,6 +55,7 @@ export type DueComplianceDetailData = {
     compliance_type: string
     compliance_frequency: string
     criticality: string
+    actual_date_of_payment: string | null; 
     due_date_frequency: string
     due_dates: {
         first_due_date: string | null
@@ -129,6 +131,7 @@ interface ComplianceDetailTableProps {
     onPaginationChange: (page: number) => void
     onPageSizeChange: (pageSize: number) => void
     canCreate: boolean
+    fetchData: () => Promise<void>; 
 }
 
 const DetailRow: React.FC<DetailRowProps> = ({ label, value, children }) => (
@@ -159,6 +162,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     onPaginationChange,
     onPageSizeChange,
     canCreate,
+    fetchData
 }) => {
     const [selectedCompliance, setSelectedCompliance] =
         useState<DueComplianceDetailData | null>(null)
@@ -173,6 +177,69 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     const [complianceStatus, setComplianceStatus] = useState<string>('')
     const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false)
     const [actualDateOfPayment, setActualDateOfPayment] = useState<string | null>(null);
+    const [downloadingId, setDownloadingId] = useState<number | null>(null);
+
+
+     const handleDownloadDocument = async (complianceId: number) => {
+        try {
+            setDownloadingId(complianceId);
+            
+            const response = await httpClient.get(
+                endpoints.compliance.dueComplianceDocumentDownload(complianceId),
+                { 
+                    responseType: 'blob',
+                    headers: {
+                        'Accept': 'application/pdf'
+                    }
+                }
+            );
+
+            // Extract filename from Content-Disposition header or use the original filename
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = 'document.pdf'; // Default fallback
+            
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="?(.+\.pdf)"?/i);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1].replace(/['"]/g, '');
+                }
+            } else if (selectedCompliance?.original_filename) {
+                filename = selectedCompliance.original_filename;
+            }
+
+            // Create blob with explicit PDF type
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(link);
+            }, 100);
+
+            toast.push(
+                <Notification title="Success" type="success" duration={2500}>
+                    Download started successfully
+                </Notification>
+            );
+        } catch (error) {
+            console.error('Error downloading document:', error);
+            toast.push(
+                <Notification title="Error" type="danger" duration={2500}>
+                    Failed to download document
+                </Notification>
+            );
+        } finally {
+            setDownloadingId(null);
+        }
+    };
 
 
     const getStatusBadge = (status: string) => {
@@ -259,133 +326,6 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
         }
     }
 
-    // const handleUploadConfirm = async () => {
-    //     if (!selectedFile) {
-    //         toast.push(
-    //             <Notification title="Error" type="error">
-    //                 Please select a file
-    //             </Notification>,
-    //         )
-    //         return
-    //     }
-
-    //     if (!selectedCompliance?.id) return
-
-    //     setIsLoading(true)
-
-    //     try {
-    //         const base64String = await new Promise<string>(
-    //             (resolve, reject) => {
-    //                 const reader = new FileReader()
-    //                 reader.onload = () => {
-    //                     const result = reader.result as string
-    //                     resolve(result.split(',')[1])
-    //                 }
-    //                 reader.onerror = reject
-    //                 reader.readAsDataURL(selectedFile)
-    //             },
-    //         )
-
-    //         const payload = {
-    //             document: base64String,
-    //             company_id: selectedCompliance.company_id,
-    //             filename: selectedFile.name,
-    //             mimetype: selectedFile.type,
-    //         }
-
-    //         const response = await httpClient.post(
-    //             endpoints.compliance.dueComplianceDocumentUpload(
-    //                 selectedCompliance.id,
-    //             ),
-    //             payload,
-    //         )
-
-    //         toast.push(
-    //             <Notification title="Success" type="success">
-    //                 Document uploaded
-    //             </Notification>,
-    //         )
-    //         setIsUploadDialogOpen(false)
-    //         setSelectedFile(null)
-    //         setRemark('')
-    //     } catch (error: any) {
-    //         console.error('Upload error:', error)
-    //         toast.push(
-    //             <Notification title="Error" type="error">
-    //                 {error.response?.data?.message || 'Upload failed'}
-    //             </Notification>,
-    //         )
-    //     } finally {
-    //         setIsLoading(false)
-    //     }
-    // }
-
-    // const handleUploadConfirm = async () => {
-    //     if (!selectedFile) {
-    //         toast.push(
-    //             <Notification title="Error" type="error">
-    //                 Please select a file
-    //             </Notification>,
-    //         )
-    //         return
-    //     }
-
-    //     if (!selectedCompliance?.id) return
-
-    //     setIsLoading(true)
-
-    //     try {
-    //         const base64String = await new Promise<string>(
-    //             (resolve, reject) => {
-    //                 const reader = new FileReader()
-    //                 reader.onload = () => {
-    //                     const result = reader.result as string
-    //                     resolve(result.split(',')[1])
-    //                 }
-    //                 reader.onerror = reject
-    //                 reader.readAsDataURL(selectedFile)
-    //             },
-    //         )
-
-    //         const payload = {
-    //             document: base64String,
-    //             company_id: selectedCompliance.company_id,
-    //             filename: selectedFile.name,
-    //             mimetype: selectedFile.type,
-    //             complianceStatus: selectedRole === 'owner' ? complianceStatus : undefined,
-    //             actual_date_of_payment: actualDateOfPayment 
-    //         ? dayjs(actualDateOfPayment).format('YYYY-MM-DD') 
-    //         : undefined,
-    //         }
-
-    //         const response = await httpClient.post(
-    //             endpoints.compliance.dueComplianceDocumentUpload(
-    //                 selectedCompliance.id,
-    //             ),
-    //             payload,
-    //         )
-
-    //         toast.push(
-    //             <Notification title="Success" type="success">
-    //                 Document uploaded
-    //             </Notification>,
-    //         )
-    //         setIsUploadDialogOpen(false)
-    //         setSelectedFile(null)
-    //         setRemark('')
-    //         setComplianceStatus('')
-    //         setActualDateOfPayment(null);
-    //     } catch (error: any) {
-    //         console.error('Upload error:', error)
-    //         toast.push(
-    //             <Notification title="Error" type="error">
-    //                 {error.response?.data?.message || 'Upload failed'}
-    //             </Notification>,
-    //         )
-    //     } finally {
-    //         setIsLoading(false)
-    //     }
-    // }
 
     const handleUploadConfirm = async () => {
     // Check if selectedCompliance is null
@@ -408,7 +348,15 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
         return;
     }
 
-   
+    if (!actualDateOfPayment) {
+        toast.push(
+            <Notification title="Error" type="danger">
+                Actual date of payment is required
+            </Notification>,
+        );
+        return;
+    }
+
 
     setIsLoading(true);
 
@@ -432,9 +380,8 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
             filename: selectedFile?.name,
             mimetype: selectedFile?.type,
             complianceStatus: selectedRole === 'owner' ? complianceStatus : undefined,
-            actual_date_of_payment: actualDateOfPayment 
-                ? dayjs(actualDateOfPayment).format('YYYY-MM-DD') 
-                : undefined,
+            actual_date_of_payment: dayjs(actualDateOfPayment).format('YYYY-MM-DD')
+
         };
 
         const response = await httpClient.post(
@@ -455,6 +402,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
         setRemark('');
         setComplianceStatus('');
         setActualDateOfPayment(null);
+        await fetchData();
     } catch (error: any) {
         console.error('Upload error:', error);
         toast.push(
@@ -467,57 +415,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
     }
 }
 
-    // const handleRejectConfirm = async () => {
-    //     if (!rejectReason) {
-    //         toast.push(
-    //             <Notification title="Error" type="danger">
-    //                 Please enter a rejection reason
-    //             </Notification>,
-    //         )
-    //         return
-    //     }
 
-    //     if (!selectedCompliance?.id) return
-
-    //     try {
-    //         await onReject?.(selectedCompliance.id, rejectReason)
-    //         setIsRejectDialogOpen(false)
-    //         setRejectReason('')
-    //     } catch (error) {
-    //         console.error('Reject error:', error)
-    //     }
-    // }
-
-    //     const handleRejectConfirm = async () => {
-    //   if (!rejectReason) {
-    //     toast.push(
-    //       <Notification title="Error" type="danger">
-    //         Please enter a rejection reason
-    //       </Notification>
-    //     );
-    //     return;
-    //   }
-
-    //   if (!complianceStatus) {
-    //     toast.push(
-    //       <Notification title="Error" type="danger">
-    //         Please select a compliance status
-    //       </Notification>
-    //     );
-    //     return;
-    //   }
-
-    //   if (!selectedCompliance?.id) return;
-
-    //   try {
-    //     await onReject?.(selectedCompliance.id, rejectReason, complianceStatus);
-    //     setIsRejectDialogOpen(false);
-    //     setRejectReason('');
-    //     setComplianceStatus('');
-    //   } catch (error) {
-    //     console.error('Reject error:', error);
-    //   }
-    // };
 
     const handleApproveConfirm = async () => {
         if (!complianceStatus) {
@@ -559,6 +457,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
 
             setIsApproveDialogOpen(false)
             setComplianceStatus('')
+            await fetchData();
 
             // Optionally refresh your data here
         } catch (error: any) {
@@ -623,6 +522,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
             setIsRejectDialogOpen(false)
             setRejectReason('')
             setComplianceStatus('')
+            await fetchData();
 
             // Optionally refresh your data here
         } catch (error: any) {
@@ -797,6 +697,19 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 );
             },
         },
+        {
+            header: 'Actual Payment Date',
+            enableSorting: false,
+            accessorKey: 'actual_date_of_payment', // Ensure this matches your API response field
+            cell: (props) => (
+                <div className="w-32">
+                    {props.getValue() 
+                        ? dayjs(props.getValue() as string).format('DD-MM-YYYY') 
+                        : 'N/A'
+                    }
+                </div>
+            ),
+        },
             {
                 header: 'Rejection Reason',
                 enableSorting: false,
@@ -807,6 +720,30 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                     </div>
                 ),
             },
+            {
+            header: 'Document',
+            enableSorting: false,
+            accessorKey: 'document',
+            cell: ({ row }) => (
+                <div className="w-40 flex items-center justify-center">
+                    {row.original.document ? (
+                        <Button
+                            size="sm"
+                            variant="plain"
+                            icon={<FiFile className="w-5 h-5 text-blue-600 hover:text-blue-800 transition-colors" />}
+                            onClick={() => handleDownloadDocument(row.original.id)}
+                            loading={downloadingId === row.original.id}
+                            disabled={downloadingId === row.original.id}
+                            title="Download Document"
+                        />
+                    ) : (
+                        <span className="text-gray-400">
+                            <FiFile className="w-5 h-5" />
+                        </span>
+                    )}
+                </div>
+            ),
+        },
             {
                 header: 'Actions',
                 id: 'actions',
@@ -948,7 +885,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                 },
             },
         ],
-        [selectedRole, onApprove, onReject],
+        [selectedRole, onApprove, onReject, downloadingId],
     )
 
     if (loading || isLoading) {
@@ -1077,7 +1014,11 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
             }}
             inputFormat="YYYY-MM-DD"
             placeholder="Select payment date"
+            className={!actualDateOfPayment ? 'border-red-500' : ''}
         />
+         {!actualDateOfPayment && (
+        <p className="mt-1 text-sm text-red-600">Actual date of payment is required</p>
+    )}
                         </div>
 
                         <div className="mb-4">
@@ -1123,11 +1064,11 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                             <Button
                                 variant="solid"
                                 onClick={handleUploadConfirm}
-                                disabled={
-                                    !selectedFile ||
-                                    (selectedRole === 'owner' &&
-                                        !complianceStatus)
-                                }
+                                 disabled={
+        !selectedFile ||
+        (selectedRole === 'owner' && !complianceStatus) ||
+        !actualDateOfPayment  // Add this condition
+    }
                             >
                                 Upload
                             </Button>

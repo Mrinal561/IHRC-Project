@@ -441,6 +441,7 @@ useEffect(() => {
         onPaginationChange={handlePaginationChange}
         onPageSizeChange={handlePageSizeChange}
         canCreate={permissions.canCreate}
+        fetchData={fetchData} 
       />
     </AdaptableCard>
   );
