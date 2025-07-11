@@ -87,35 +87,36 @@ const Company: React.FC<CompanyFilterProps> = ({ onFilterChange }) => {
   }
 
   // Load Branches based on selected State and Company
-  const loadBranches = async (stateId: string, companyId: string) => {
-    setIsLoadingBranches(true)
-    try {
-      const { data } = await httpClient.get(endpoints.branch.getAll(), {
-        params: {
-          state_id: stateId,
-          company_id: companyId
-        }
-      })
-
-      if (data.data) {
-        const formattedBranches = data.data.map((branch: any) => ({
-          label: branch.name,
-          value: String(branch.id)
-        }))
-        setBranches(formattedBranches)
+ // In loadBranches function:
+const loadBranches = async (stateId: string, companyId: string) => {
+  setIsLoadingBranches(true);
+  try {
+    const { data } = await httpClient.get(endpoints.branch.getAllBranch(), {
+      params: {
+        'state_id[]': stateId,  // Note the array syntax
+        'company_id[]': companyId  // Note the array syntax
       }
-    } catch (error) {
-      console.error('Failed to load branches:', error)
-      toast.push(
-        <Notification title="Error" type="error">
-          Failed to load branches
-        </Notification>
-      )
-      setBranches([])
-    } finally {
-      setIsLoadingBranches(false)
+    });
+
+    if (data.data) {
+      const formattedBranches = data.data.map((branch: any) => ({
+        label: branch.name,
+        value: String(branch.id)
+      }));
+      setBranches(formattedBranches);
     }
+  } catch (error) {
+    console.error('Failed to load branches:', error);
+    toast.push(
+      <Notification title="Error" type="error">
+        Failed to load branches
+      </Notification>
+    );
+    setBranches([]);
+  } finally {
+    setIsLoadingBranches(false);
   }
+};
 
   // Initial load
   useEffect(() => {

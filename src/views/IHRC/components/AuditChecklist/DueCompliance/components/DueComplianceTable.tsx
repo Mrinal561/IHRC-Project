@@ -1089,6 +1089,7 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
         </label>
         <Input
             type="file"
+             accept=".pdf,application/pdf"
             onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
             className={`${selectedCompliance?.proof_mandatory && !selectedFile ? 'border-red-500' : ''}`}
         />
