@@ -127,7 +127,8 @@ export const endpoints = {
         downloadComplianceHistory: () => api('companyadmin/compliance/checklists/history-checklist'),
         listCertificate: () => api('companyadmin/compliance/checklists/certificate'),
         creteCertificate: () => api('companyadmin/compliance/checklists/compliance-certificate'),
-        downloadCertificate: (id:any) => api(`companyadmin/compliance/checklists/compliance-certificate/download/${id}`)
+        downloadCertificate: (id:any) => api(`companyadmin/compliance/checklists/compliance-certificate/download/${id}`),
+        bulkCustomCompliance: () => api('companyadmin/compliance/checklists/bulk-upload-custom-checklist')
 
     },
     esiSetup: {

@@ -1,14 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Dialog, Input, Notification, toast } from '@/components/ui';
 import { HiDownload, HiUpload } from 'react-icons/hi';
 import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 
-const BulkUpload = () => {
+
+interface BulkUploadProps {
+  onSuccess?: () => void;
+}
+
+
+const BulkUpload = ({ onSuccess }: BulkUploadProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [remark, setRemark] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentGroupId, setCurrentGroupId] = useState<number>(0);
+
+  useEffect(() => {
+    const loadCompanyGroups = async () => {
+      try {
+        const response = await httpClient.get(endpoints.companyGroup.getAll());
+        // Set the first group ID as default if available
+        if (response.data.data.length > 0) {
+          setCurrentGroupId(response.data.data[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to load company groups:', error);
+        toast.push(
+          <Notification title="Error" type="error">
+            Failed to load company groups
+          </Notification>
+        );
+      }
+    };
+
+    loadCompanyGroups();
+  }, []);
 
   const handleUploadClick = () => {
     setIsDialogOpen(true);
@@ -24,17 +52,27 @@ const BulkUpload = () => {
       return;
     }
 
+    if (!currentGroupId) {
+      toast.push(
+        <Notification title="Error" type="error">
+          Company group information is not available
+        </Notification>
+      );
+      return;
+    }
+
     setIsLoading(true);
     
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('companyGroupId', currentGroupId.toString());
       if (remark) {
         formData.append('remark', remark);
       }
 
       const response = await httpClient.post(
-        endpoints.compliance.importCustomChecklist(),
+        endpoints.compliance.bulkCustomCompliance(),
         formData,
         {
           headers: {
@@ -51,6 +89,9 @@ const BulkUpload = () => {
       setIsDialogOpen(false);
       setRemark('');
       setFile(null);
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to import checklists';
       toast.push(
@@ -72,10 +113,22 @@ const BulkUpload = () => {
   const handleDownloadTemplate = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
+      if (!currentGroupId) {
+        toast.push(
+          <Notification title="Error" type="error">
+            Company group information is not available
+          </Notification>
+        );
+        return;
+      }
+
       const response = await httpClient.get(
         endpoints.compliance.downloadCustomChecklistTemplate(),
         {
-          responseType: 'blob'
+          responseType: 'blob',
+          params: {
+            companyGroupId: currentGroupId
+          }
         }
       );
 
@@ -86,7 +139,7 @@ const BulkUpload = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'Custom_Checklist_Template.xlsx'; // or get filename from headers
+      a.download = 'Custom_Checklist_Template.xlsx';
       document.body.appendChild(a);
       a.click();
       
@@ -133,6 +186,7 @@ const BulkUpload = () => {
         shouldCloseOnOverlayClick={false} 
       >
         <h5 className="mb-4">Add Custom Compliances</h5>
+
         <div className="my-4 flex gap-2 items-center">
           <p>Download Template:</p>
           <Button 
@@ -144,6 +198,7 @@ const BulkUpload = () => {
             Download
           </Button>
         </div>
+        
         <div className="flex flex-col gap-2">
           <p>Upload Custom Compliances:</p>
           <Input
@@ -154,6 +209,7 @@ const BulkUpload = () => {
             disabled={isLoading}
           />
         </div>
+        
         <p>Please Enter the Remark:</p>
         <textarea
           className="w-full p-2 border rounded mb-2"
@@ -163,6 +219,7 @@ const BulkUpload = () => {
           onChange={(e) => setRemark(e.target.value)}
           disabled={isLoading}
         />
+        
         <div className="mt-6 text-right">
           <Button
             size="sm"
