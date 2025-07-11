@@ -347,19 +347,308 @@
 // export default HistoryPageTable
 
 
-import React, { useState, useEffect } from 'react';
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState, useEffect } from 'react';
+// import { ColumnDef } from '@/components/shared/DataTable';
+// import DataTable from '@/components/shared/DataTable';
+// import { Button, Tooltip, toast, Notification } from '@/components/ui';
+// import { HiDownload, HiOutlineEye } from 'react-icons/hi';
+// import { RiEyeLine } from 'react-icons/ri';
+// import { useNavigate } from 'react-router-dom';
+// import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json';
+// import Lottie from 'lottie-react';
+// import { HiOutlineViewGrid } from 'react-icons/hi';
+// import { endpoints } from '@/api/endpoint';
+// import httpClient from '@/api/http-client';
+// import store from '@/store';
+
+// interface ComplianceData {
+//     id: number;
+//     uuid: string;
+//     record_id: string;
+//     company: string;
+//     proof_document: string | null;
+//     status: string;
+//     data_status: string;
+//     compliance_detail: {
+//         id: number;
+//         legislation: string;
+//         header: string;
+//         description: string;
+//         category: string;
+//         criticality: string;
+//     };
+//     AssignedComplianceRemark: Array<{
+//         id: number;
+//         remark: string;
+//         created_at: string;
+//     }>;
+// }
+
+// const validatePage = (page: number): number => {
+//   const validatedPage = Math.max(1, Math.floor(Number(page)));
+//   return isNaN(validatedPage) ? 1 : validatedPage;
+// };
+
+// const validatePageSize = (size: number): number => {
+//   const validatedSize = Math.max(1, Math.min(100, Math.floor(Number(size))));
+//   return isNaN(validatedSize) ? 10 : validatedSize;
+// };
+
+// const HistoryPageTable: React.FC = () => {
+//     const navigate = useNavigate();
+//     const [data, setData] = useState<ComplianceData[]>([]);
+//     const [isLoading, setIsLoading] = useState(true);
+//     const [tableData, setTableData] = useState({
+//         total: 0,
+//         pageIndex: 1,
+//         pageSize: 10,
+//         query: '',
+//         sort: { order: '', key: '' },
+//     });
+//     const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+//     const [selectedState, setSelectedState] = useState<string | null>(null);
+//         const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+
+
+//     // Get user info from store
+//     const { login } = store.getState();
+//     const userType = login?.user?.type;
+
+//     useEffect(() => {
+//     // Reset to first page when filters change
+//     setTableData(prev => ({
+//         ...prev,
+//         pageIndex: 1
+//     }));
+//     // Then fetch data will be triggered by the tableData change
+// }, [selectedCompany, selectedState, selectedBranch]);
+
+
+//     // Fetch compliance history data
+//     const fetchComplianceHistory = async () => {
+//         try {
+//             setIsLoading(true);
+//             const params = {
+//                 page: tableData.pageIndex.toString(),
+//                 page_size: tableData.pageSize.toString(),
+//                 search: tableData.query,
+//                 sort_by: tableData.sort.key || 'id',
+//                 sort: tableData.sort.order || 'desc',
+//                company_id: selectedCompany || undefined,  // Send undefined if null
+//             state_id: selectedState || undefined,
+//             branch_id: selectedBranch || undefined,
+//                 status: 'approved_by_auditor' // Always filter by approved status for history
+//             };
+
+//             const { data: response } = await httpClient.get(
+//                 endpoints.compliance.complianceHistoryList(),
+//                 { params }
+//             );
+
+//             // Transform API response to match your table structure
+//             const transformedData = response.data.map((item: any) => ({
+//                 id: item.id,
+//                 uuid: item.uuid,
+//                 record_id: item.record_id || `COMP-${item.id}`,
+//                 company: item.Company?.name || 'N/A',
+//                 proof_document: item.proof_document,
+//                 status: item.status,
+//                 data_status: 'Complied', // You may need to adjust this based on actual data
+//                 compliance_detail: {
+//                     id: item.ComplianceChecklist?.id || 0,
+//                     legislation: item.legislation_act || 'N/A',
+//                     header: item.compliance_header || 'N/A',
+//                     description: item.ComplianceChecklist?.compliance_description || 'N/A',
+//                     category: item.category || 'General',
+//                     criticality: item.criticality || 'Medium'
+//                 },
+//                 AssignedComplianceRemark: item.remarks || []
+//             }));
+
+//             setData(transformedData);
+//             setTableData(prev => ({
+//                 ...prev,
+//                 total: response.paginate_data?.totalResults || 0
+//             }));
+//         } catch (error) {
+//             console.error('Error fetching compliance history:', error);
+//             toast.push(
+//                 <Notification
+//                     title="Error"
+//                     type="danger"
+//                     duration={2500}
+//                 >
+//                     Failed to load compliance history
+//                 </Notification>
+//             );
+//         } finally {
+//             setIsLoading(false);
+//         }
+//     };
+
+//     // Handle download compliance history
+  
+//     // Fetch data on component mount and when filters change
+//     useEffect(() => {
+//         fetchComplianceHistory();
+//     }, [tableData.pageIndex, tableData.pageSize, tableData.query, tableData.sort, selectedCompany, selectedState]);
+
+//     const columns: ColumnDef<ComplianceData>[] = [
+//         // {
+//         //     header: 'Instance ID',
+//         //     enableSorting: false,
+//         //     accessorKey: 'record_id',
+//         //     cell: (props) => (
+//         //         <div className="w-40 text-start">{props.getValue() as string}</div>
+//         //     ),
+//         // },
+//         {
+//             header: 'Company',
+//             enableSorting: false,
+//             accessorKey: 'company',
+//             cell: (props) => (
+//                 <div className="w-40 text-start">{props.getValue() as string}</div>
+//             ),
+//         },
+//         {
+//             header: 'Legislation(Act Name)',
+//             enableSorting: false,
+//             accessorKey: 'compliance_detail.legislation',
+//             cell: (props) => {
+//                 const value = props.getValue() as string;
+//                 return (
+//                     <Tooltip title={value} placement="top">
+//                         <div className="w-64 truncate">{value}</div>
+//                     </Tooltip>
+//                 );
+//             },
+//         },
+//         {
+//             header: 'Header',
+//             enableSorting: false,
+//             accessorKey: 'compliance_detail.header',
+//             cell: (props) => {
+//                 const value = props.getValue() as string;
+//                 return (
+//                     <Tooltip title={value} placement="top">
+//                         <div className="w-64 truncate">{value}</div>
+//                     </Tooltip>
+//                 );
+//             },
+//         },
+//         {
+//             header: 'Actions',
+//             id: 'actions',
+//             cell: ({ row }) => (
+//                 <div className='flex gap-2 items-center'>
+//                     <Tooltip title="View Compliance Detail">
+//                         <Button
+//                             size="sm"
+//                             onClick={() => {
+//                                 navigate(
+//                                     `/app/IHRC/history-list-detail/${row.original.uuid}`,
+//                                     {
+//                                         state: {
+//                                             ...row.original,
+//                                             complianceDetail: row.original.compliance_detail,
+//                                             remarks: row.original.AssignedComplianceRemark,
+//                                         },
+//                                     }
+//                                 );
+//                             }}
+//                             icon={<RiEyeLine />}
+//                         />
+//                     </Tooltip>
+//                     {/* <Tooltip title="Download History">
+//                         <Button
+//                             size="sm"
+//                             icon={<HiDownload />}
+//                             onClick={() => handleDownload()}
+//                         />
+//                     </Tooltip> */}
+//                 </div>
+//             ),
+//         },
+//     ];
+
+//     if (isLoading) {
+//         return (
+//             <div className="flex flex-col items-center justify-center h-96 text-gray-500 rounded-xl">
+//                 <div className="w-28 h-28">
+//                     <Lottie
+//                         animationData={loadingAnimation}
+//                         loop
+//                         className="w-24 h-24"
+//                     />
+//                 </div>
+//                 <p className="text-lg font-semibold">Loading Data...</p>
+//             </div>
+//         );
+//     }
+
+//     return (
+//         <div className="relative">
+//             {data.length === 0 ? (
+//                 <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+//                     <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+//                     <p className="text-center">No Data Available</p>
+//                 </div>
+//             ) : (
+//                 <DataTable
+//                     columns={columns}
+//                     data={data}
+//                     skeletonAvatarColumns={[0]}
+//                     skeletonAvatarProps={{ className: 'rounded-md' }}
+//                     loading={isLoading}
+//                     pagingData={{
+//                         total: tableData.total,
+//                         pageIndex: tableData.pageIndex,
+//                         pageSize: tableData.pageSize,
+//                     }}
+//                     onPaginationChange={(page) => {
+//                         setTableData(prev => ({ ...prev, pageIndex: page }));
+//                     }}
+//                     onPageSizeChange={(size) => {
+//                         setTableData(prev => ({ ...prev, pageSize: size, pageIndex: 1 }));
+//                     }}
+//                     onSort={(sort) => {
+//                         setTableData(prev => ({ ...prev, sort }));
+//                     }}
+//                     stickyHeader={true}
+//                     stickyLastColumn={true}
+//                     stickyFirstColumn={true}
+//                 />
+//             )}
+//         </div>
+//     );
+// };
+
+// export default HistoryPageTable;
+
+
+
+
+
+import React from 'react';
 import { ColumnDef } from '@/components/shared/DataTable';
 import DataTable from '@/components/shared/DataTable';
-import { Button, Tooltip, toast, Notification } from '@/components/ui';
-import { HiDownload, HiOutlineEye } from 'react-icons/hi';
+import { Button, Tooltip } from '@/components/ui';
 import { RiEyeLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json';
 import Lottie from 'lottie-react';
 import { HiOutlineViewGrid } from 'react-icons/hi';
-import { endpoints } from '@/api/endpoint';
-import httpClient from '@/api/http-client';
-import store from '@/store';
 
 interface ComplianceData {
     id: number;
@@ -384,145 +673,114 @@ interface ComplianceData {
     }>;
 }
 
-const validatePage = (page: number): number => {
-  const validatedPage = Math.max(1, Math.floor(Number(page)));
-  return isNaN(validatedPage) ? 1 : validatedPage;
-};
-
-const validatePageSize = (size: number): number => {
-  const validatedSize = Math.max(1, Math.min(100, Math.floor(Number(size))));
-  return isNaN(validatedSize) ? 10 : validatedSize;
-};
-
-const HistoryPageTable: React.FC = () => {
-    const navigate = useNavigate();
-    const [data, setData] = useState<ComplianceData[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [tableData, setTableData] = useState({
-        total: 0,
-        pageIndex: 1,
-        pageSize: 10,
-        query: '',
-        sort: { order: '', key: '' },
-    });
-    const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
-    const [selectedState, setSelectedState] = useState<string | null>(null);
-
-    // Get user info from store
-    const { login } = store.getState();
-    const userType = login?.user?.type;
-
-    // Fetch compliance history data
-    const fetchComplianceHistory = async () => {
-        try {
-            setIsLoading(true);
-            const params = {
-                page: tableData.pageIndex.toString(),
-                page_size: tableData.pageSize.toString(),
-                search: tableData.query,
-                sort_by: tableData.sort.key || 'id',
-                sort: tableData.sort.order || 'desc',
-                company_id: selectedCompany,
-                state_id: selectedState,
-                status: 'approved_by_auditor' // Always filter by approved status for history
-            };
-
-            const { data: response } = await httpClient.get(
-                endpoints.compliance.complianceHistoryList(),
-                { params }
-            );
-
-            // Transform API response to match your table structure
-            const transformedData = response.data.map((item: any) => ({
-                id: item.id,
-                uuid: item.uuid,
-                record_id: item.record_id || `COMP-${item.id}`,
-                company: item.Company?.name || 'N/A',
-                proof_document: item.proof_document,
-                status: item.status,
-                data_status: 'Complied', // You may need to adjust this based on actual data
-                compliance_detail: {
-                    id: item.ComplianceChecklist?.id || 0,
-                    legislation: item.legislation_act || 'N/A',
-                    header: item.compliance_header || 'N/A',
-                    description: item.ComplianceChecklist?.compliance_description || 'N/A',
-                    category: item.category || 'General',
-                    criticality: item.criticality || 'Medium'
-                },
-                AssignedComplianceRemark: item.remarks || []
-            }));
-
-            setData(transformedData);
-            setTableData(prev => ({
-                ...prev,
-                total: response.paginate_data?.totalResults || 0
-            }));
-        } catch (error) {
-            console.error('Error fetching compliance history:', error);
-            toast.push(
-                <Notification
-                    title="Error"
-                    type="danger"
-                    duration={2500}
-                >
-                    Failed to load compliance history
-                </Notification>
-            );
-        } finally {
-            setIsLoading(false);
-        }
+interface HistoryPageTableProps {
+    data: ComplianceData[];
+    isLoading: boolean;
+    tableData: {
+        total: number;
+        pageIndex: number;
+        pageSize: number;
+        query: string;
+        sort: { order: string; key: string };
     };
+    onTableDataChange: (data: any) => void;
+}
 
-    // Handle download compliance history
-  
-    // Fetch data on component mount and when filters change
-    useEffect(() => {
-        fetchComplianceHistory();
-    }, [tableData.pageIndex, tableData.pageSize, tableData.query, tableData.sort, selectedCompany, selectedState]);
+const HistoryPageTable: React.FC<HistoryPageTableProps> = ({
+    data,
+    isLoading,
+    tableData,
+    onTableDataChange
+}) => {
+    const navigate = useNavigate();
 
     const columns: ColumnDef<ComplianceData>[] = [
-        // {
-        //     header: 'Instance ID',
-        //     enableSorting: false,
-        //     accessorKey: 'record_id',
-        //     cell: (props) => (
-        //         <div className="w-40 text-start">{props.getValue() as string}</div>
-        //     ),
-        // },
         {
-            header: 'Company',
-            enableSorting: false,
-            accessorKey: 'company',
-            cell: (props) => (
-                <div className="w-40 text-start">{props.getValue() as string}</div>
-            ),
-        },
-        {
-            header: 'Legislation(Act Name)',
-            enableSorting: false,
-            accessorKey: 'compliance_detail.legislation',
-            cell: (props) => {
-                const value = props.getValue() as string;
-                return (
-                    <Tooltip title={value} placement="top">
-                        <div className="w-64 truncate">{value}</div>
-                    </Tooltip>
-                );
-            },
-        },
-        {
-            header: 'Header',
-            enableSorting: false,
-            accessorKey: 'compliance_detail.header',
-            cell: (props) => {
-                const value = props.getValue() as string;
-                return (
-                    <Tooltip title={value} placement="top">
-                        <div className="w-64 truncate">{value}</div>
-                    </Tooltip>
-                );
-            },
-        },
+        header: 'Company',
+        enableSorting: false,
+        accessorKey: 'company',
+        cell: (props) => (
+            <div className="w-40 text-start">{props.getValue() as string}</div>
+        ),
+    },
+    {
+        header: 'State',
+        enableSorting: false,
+        accessorKey: 'state',
+        cell: (props) => (
+            <div className="w-40 text-start">{props.getValue() as string}</div>
+        ),
+    },
+    {
+        header: 'Branch',
+        enableSorting: false,
+        accessorKey: 'branch',
+        cell: (props) => (
+            <div className="w-40 text-start">{props.getValue() as string}</div>
+        ),
+    },
+    {
+        header: 'Legislation',
+        enableSorting: false,
+        accessorKey: 'compliance_detail.legislation',
+        cell: (props) => (
+            <Tooltip title={props.getValue() as string} placement="top">
+                <div className="w-64 truncate">{props.getValue() as string}</div>
+            </Tooltip>
+        ),
+    },
+    {
+        header: 'Header',
+        enableSorting: false,
+        accessorKey: 'compliance_detail.header',
+        cell: (props) => (
+            <Tooltip title={props.getValue() as string} placement="top">
+                <div className="w-64 truncate">{props.getValue() as string}</div>
+            </Tooltip>
+        ),
+    },
+    {
+        header: 'Description',
+        enableSorting: false,
+        accessorKey: 'compliance_detail.description',
+        cell: (props) => (
+            <Tooltip title={props.getValue() as string} placement="top">
+                <div className="w-64 truncate">{props.getValue() as string}</div>
+            </Tooltip>
+        ),
+    },
+    {
+        header: 'Category',
+        enableSorting: false,
+        accessorKey: 'compliance_detail.category',
+        cell: (props) => (
+            <div className="w-40">{props.getValue() as string}</div>
+        ),
+    },
+    {
+        header: 'Criticality',
+        enableSorting: false,
+        accessorKey: 'compliance_detail.criticality',
+        cell: (props) => (
+            <div className="w-32 capitalize">{props.getValue() as string}</div>
+        ),
+    },
+    {
+        header: 'Status',
+        enableSorting: false,
+        accessorKey: 'data_status',
+        cell: (props) => (
+            <div className="w-32">
+                <span className={`px-2 py-1 rounded-full text-xs ${
+                    props.getValue() === 'Complied' 
+                        ? 'bg-emerald-100 text-emerald-600' 
+                        : 'bg-amber-100 text-amber-600'
+                }`}>
+                    {props.getValue() as string}
+                </span>
+            </div>
+        ),
+    },
         {
             header: 'Actions',
             id: 'actions',
@@ -546,13 +804,6 @@ const HistoryPageTable: React.FC = () => {
                             icon={<RiEyeLine />}
                         />
                     </Tooltip>
-                    {/* <Tooltip title="Download History">
-                        <Button
-                            size="sm"
-                            icon={<HiDownload />}
-                            onClick={() => handleDownload()}
-                        />
-                    </Tooltip> */}
                 </div>
             ),
         },
@@ -593,13 +844,13 @@ const HistoryPageTable: React.FC = () => {
                         pageSize: tableData.pageSize,
                     }}
                     onPaginationChange={(page) => {
-                        setTableData(prev => ({ ...prev, pageIndex: page }));
+                        onTableDataChange({ ...tableData, pageIndex: page });
                     }}
                     onPageSizeChange={(size) => {
-                        setTableData(prev => ({ ...prev, pageSize: size, pageIndex: 1 }));
+                        onTableDataChange({ ...tableData, pageSize: size, pageIndex: 1 });
                     }}
                     onSort={(sort) => {
-                        setTableData(prev => ({ ...prev, sort }));
+                        onTableDataChange({ ...tableData, sort });
                     }}
                     stickyHeader={true}
                     stickyLastColumn={true}
