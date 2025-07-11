@@ -236,7 +236,7 @@ const ReturnTrackerTable = ({
                 header: 'Branch',
                 enableSorting: false,
                 accessorKey: 'branch_name',
-                cell: ({ row }) => <div className="w-40 truncate">{row.original.branch_name}</div>,
+                cell: ({ row }) => <div className="w-40 truncate">{row.original.branch.name}</div>,
             },
             {
             header: 'Frequency',
