@@ -76,7 +76,7 @@ const ComplianceCertificateTool: React.FC<ComplianceCertificateToolProps> = ({
         <>
             <div className="flex gap-2 items-center">
                 {/* Company Dropdown */}
-                <div className="min-w-[150px]">
+                <div className="min-w-[200px]">
                     <OutlinedSelect
                         options={companies}
                         value={selectedCompany ? 
@@ -90,7 +90,7 @@ const ComplianceCertificateTool: React.FC<ComplianceCertificateToolProps> = ({
                 </div>
 
                 {/* Month Dropdown */}
-                <div className="min-w-[120px]">
+                <div className="min-w-[180px]">
                     <OutlinedSelect
                         options={monthOptions}
                         value={selectedMonth ? 
@@ -103,7 +103,7 @@ const ComplianceCertificateTool: React.FC<ComplianceCertificateToolProps> = ({
                 </div>
 
                 {/* Year Dropdown */}
-                <div className="min-w-[100px]">
+                <div className="min-w-[120px]">
                     <OutlinedSelect
                         options={yearOptions}
                         value={selectedYear ? 
