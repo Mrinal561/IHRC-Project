@@ -411,34 +411,39 @@ const DueCompliance = () => {
     const handleDownload = async () => {
         try {
             // Use filteredData for download
-            const dataToExport = filteredData.length > 0 ? filteredData : allData;
+           const response = await httpClient.get(
+                   endpoints.compliance.downloadComplianceHistory(),
+                   {
+                     responseType: 'blob'
+                   }
+                 );
             
-            // Implement your download logic here
-            // This is a simplified example - you might need to adjust
-            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'compliance_history.json');
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-
-            toast.push(
-                <Notification title="Success" type="success" duration={2500}>
-                    Download started successfully
-                </Notification>
-            );
-        } catch (error) {
-            console.error('Error downloading compliance history:', error);
-            toast.push(
-                <Notification title="Error" type="danger" duration={2500}>
-                    Failed to download compliance history
-                </Notification>
-            );
-        }
-    };
-
+           const blob = new Blob([response.data], { type: response.headers['content-type'] });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'History_Export.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+          
+                toast.push(
+                  <Notification title="Success" type="success">
+                    Data exported successfully
+                  </Notification>
+                );
+              } catch (error) {
+                console.error('Export failed:', error);
+                toast.push(
+                  <Notification title="Error" type="error">
+                    Failed to export data
+                  </Notification>
+                );
+              }
+            };
+          
     return (
         <AdaptableCard className="h-full" bodyClass="h-full">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-10">
