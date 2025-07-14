@@ -1066,6 +1066,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
                                   date ? date.toISOString() : ''
                                 );
                               }}
+                              inputFormat='DD-MM-YYYY'
                             />
                           )}
                         </Field>
