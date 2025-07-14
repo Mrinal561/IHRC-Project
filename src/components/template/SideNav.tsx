@@ -3124,25 +3124,25 @@ const adminnav: NavigationTree[] = [
                 ],
             },
             {
-                key: 'registerClient.collapse',
-                path: '',
+                key: 'registerClient.collapse.clientRegister',
+                path: '/registers',
                 title: 'Register For Client',
-                translateKey: 'nav.registerClient.collapse',
+                translateKey: 'nav.registerClient.collapse.clientRegister',
                 icon: '',
                 type: NAV_ITEM_TYPE_COLLAPSE,
                 authority: [],
                 subMenu: [
-                    {
-                        key: 'registerClient.collapse.clientRegister',
-                        path: '/registers',
-                        title: 'Registers',
-                        translateKey:
-                            'nav.registerClient.collapse.clientRegister',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
+                    // {
+                    //     key: 'registerClient.collapse.clientRegister',
+                    //     path: '/registers',
+                    //     title: 'Registers',
+                    //     translateKey:
+                    //         'nav.registerClient.collapse.clientRegister',
+                    //     icon: '',
+                    //     type: NAV_ITEM_TYPE_ITEM,
+                    //     authority: [],
+                    //     subMenu: [],
+                    // },
                     // {
                     //     key: 'registerClient.collapse.clientRegister',
                     //     path: '/attendance-register',
