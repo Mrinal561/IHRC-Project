@@ -567,67 +567,82 @@ const fetchData = async () => {
         }
     }
 
-    const handleBulkUpload = async () => {
-        if (!file || !bulkUploadCompany) {
-            toast.push(
-                <Notification title="Warning" type="warning">
-                    Please select a file and company
-                </Notification>
-            )
-            return
+   const handleBulkUpload = async () => {
+    if (!file || !bulkUploadCompany) {
+        toast.push(
+            <Notification title="Warning" type="warning">
+                Please select a file and company
+            </Notification>
+        );
+        return;
+    }
+
+    setIsUploading(true);
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('company_id', bulkUploadCompany.value);
+        formData.append('group_id', bulkUploadCompany.group_id.toString());
+
+        const response = await httpClient.post(
+            endpoints.compliance.bulkUploadCompliance(),
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+
+        toast.push(
+            <Notification title="Success" type="success">
+                File uploaded successfully
+            </Notification>
+        );
+        setIsDialogOpen(false);
+        fetchData(); // Refresh data after upload
+    } catch (error: any) {
+        console.error('Upload error:', error);
+        
+        // Extract error messages
+        let errorMessages: string[] = [];
+        
+        if (error.response?.data?.message) {
+            errorMessages = Array.isArray(error.response.data.message) 
+                ? error.response.data.message
+                : [error.response.data.message];
+        } else if (error.response?.data?.errors) {
+            errorMessages = error.response.data.errors.flatMap((err: any) => 
+                err.messages.map((msg: string) => `Row ${err.row}: ${msg}`)
+            );
+        } else {
+            errorMessages = ['Failed to import checklists'];
         }
 
-        setIsUploading(true)
-        try {
-            const formData = new FormData()
-            formData.append('file', file)
-            formData.append('company_id', bulkUploadCompany.value)
-            formData.append('group_id', bulkUploadCompany.group_id.toString())
-
-            await httpClient.post(
-                endpoints.compliance.bulkUploadCompliance(),
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            )
-
-            toast.push(
-                <Notification title="Success" type="success">
-                    File uploaded successfully
-                </Notification>
-            )
-            setIsDialogOpen(false)
-            fetchData() // Refresh data after upload
-        } catch (error: any) {
-          let errorMessage = 'Failed to import checklists';
-          
-          // Check if the error has response data with messages
-          if (error.response?.data?.message) {
-            // If it's an array of messages, join them with line breaks
-            if (Array.isArray(error.response.data.message)) {
-              errorMessage = error.response.data.message.join('\n');
-            } else {
-              errorMessage = error.response.data.message;
-            }
-          } else if (error.response?.data?.errors) {
-            // If there are individual error objects with row numbers
-            errorMessage = error.response.data.errors
-              .map((err: any) => `Row ${err.row}: ${err.messages.join(', ')}`)
-              .join('\n');
-          }
+        // Show the first 3 error messages (or all if less than 3)
+        const messagesToShow = errorMessages.slice(0, 3);
+        const remainingCount = Math.max(0, errorMessages.length - 3);
         
-          toast.push(
-            <Notification title="Error" type="error">
-              {errorMessage}
+        const notificationMessage = (
+            <div className="max-h-60 overflow-y-auto">
+                {messagesToShow.map((msg, index) => (
+                    <p key={index} className="mb-1">{msg}</p>
+                ))}
+                {remainingCount > 0 && (
+                    <p className="text-gray-500">+ {remainingCount} more errors...</p>
+                )}
+            </div>
+        );
+
+        toast.push(
+            <Notification title="Error" type="error" duration={5000}>
+                {notificationMessage}
             </Notification>
-          );
-        }finally {
-              setIsUploading(false);
-            }
+        );
+    } finally {
+        setIsUploading(false);
     }
+};
 
 
     const handleDownloadData = async () => {
