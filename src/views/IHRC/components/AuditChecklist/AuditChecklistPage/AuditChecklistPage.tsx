@@ -601,16 +601,32 @@ const fetchData = async () => {
             )
             setIsDialogOpen(false)
             fetchData() // Refresh data after upload
-        } catch (error) {
-            console.error('Error uploading file:', error)
-            toast.push(
-                <Notification title="Error" type="error">
-                    Failed to upload file
-                </Notification>
-            )
-        } finally {
-            setIsUploading(false)
-        }
+        } catch (error: any) {
+          let errorMessage = 'Failed to import checklists';
+          
+          // Check if the error has response data with messages
+          if (error.response?.data?.message) {
+            // If it's an array of messages, join them with line breaks
+            if (Array.isArray(error.response.data.message)) {
+              errorMessage = error.response.data.message.join('\n');
+            } else {
+              errorMessage = error.response.data.message;
+            }
+          } else if (error.response?.data?.errors) {
+            // If there are individual error objects with row numbers
+            errorMessage = error.response.data.errors
+              .map((err: any) => `Row ${err.row}: ${err.messages.join(', ')}`)
+              .join('\n');
+          }
+        
+          toast.push(
+            <Notification title="Error" type="error">
+              {errorMessage}
+            </Notification>
+          );
+        }finally {
+              setIsUploading(false);
+            }
     }
 
 
