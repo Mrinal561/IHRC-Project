@@ -22,6 +22,13 @@ interface SalaryRegisterBulkUploadProps {
 const FINANCIAL_YEAR_KEY = 'selectedFinancialYear';
 const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged';
 
+const REGISTER_TYPE_OPTIONS = [
+  { value: 'Salary Register', label: 'Salary Register' },
+  { value: 'Bonus Register Form A', label: 'Bonus Register Form A' },
+  { value: 'Bonus Register Form B', label: 'Bonus Register Form B' },
+  { value: 'Bonus Register Form C', label: 'Bonus Register Form C' },
+];
+
 const generateMonthOptions = (financialYear: string | null) => {
   if (!financialYear) return [];
 
@@ -55,6 +62,7 @@ const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [selectedCompany, setSelectedCompany] = useState<SelectOption | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<SelectOption | null>(null);
+  const [selectedRegisterType, setSelectedRegisterType] = useState<SelectOption | null>(null);
   const [companies, setCompanies] = useState<SelectOption[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const auth = useAuth();
@@ -65,6 +73,9 @@ const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
     () => generateMonthOptions(financialYear),
     [financialYear]
   );
+
+    const showMonthField = selectedRegisterType?.value === 'Salary Register';
+
 
   useEffect(() => {
     const handleFinancialYearChange = (event: CustomEvent) => {
@@ -112,32 +123,48 @@ const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
   };
 
   const handleDownloadTemplate = async () => {
-    if (!selectedCompany || !selectedMonth) {
+    if (!selectedCompany || (!selectedMonth && showMonthField)) {
       toast.push(
         <Notification title="Warning" type="warning" closable>
-          Please select company and month first
+          Please select company and {showMonthField ? 'month' : 'year'} first
         </Notification>
       );
       return;
     }
 
     try {
+      const params: Record<string, any> = {
+        company_id: Number(selectedCompany.value),
+        register_type: selectedRegisterType?.value || 'Salary Register'
+      };
+
+      // Only add month if it's a salary register
+      if (showMonthField && selectedMonth) {
+        params.month = selectedMonth.value.toString();
+      }
+
+      // Add year for bonus registers
+      if (!showMonthField && financialYear) {
+        params.year = financialYear.split('-')[0];
+      }
+
       const response = await httpClient.get(
         endpoints.register.downloadSalaryRegisterTemplate(),
         {
-          params: {
-            company_id: Number(selectedCompany.value),
-            month: selectedMonth.value.toString(),
-            register_type: 'Salary Register'
-          },
+          params,
           responseType: 'blob'
         }
       );
       
+        const registerTypeName = selectedRegisterType?.value || 'Salary_Register';
+      const sanitizedFilename = registerTypeName.replace(/\s+/g, '_'); // Replace spaces with underscores
+      const filename = `${sanitizedFilename}-template.xlsx`;
+
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `salary-register-template-${selectedMonth.value}.xlsx`);
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -152,10 +179,11 @@ const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
   };
 
   const handleUpload = async () => {
-    if (!file || !selectedCompany || !selectedMonth || !financialYear) {
+     if (!file || !selectedCompany || !selectedRegisterType || 
+        (showMonthField && !selectedMonth) || !financialYear) {
       toast.push(
         <Notification title="Warning" type="warning" closable>
-          Please fill all fields and select a file
+          Please fill all required fields and select a file
         </Notification>
       );
       return;
@@ -167,9 +195,15 @@ const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
       const formData = new FormData();
       formData.append('file', file);
       formData.append('company_id', selectedCompany.value);
-      formData.append('register_type', 'Salary Register');
-      formData.append('month', selectedMonth.value);
-      formData.append('year', financialYear.split('-')[0]); // Extract first year (2025 from 2025-26)
+      formData.append('register_type', selectedRegisterType.value);
+      
+      // Only add month for salary register
+      if (showMonthField && selectedMonth) {
+        formData.append('month', selectedMonth.value);
+      }
+      
+      // Always add year
+      formData.append('year', financialYear.split('-')[0]);
 
       const response = await httpClient.post(
         endpoints.register.createSalaryRegister(),
@@ -235,7 +269,9 @@ const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
       
       <div className="grid gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Select Company</label>
+          <label className="block text-sm font-medium mb-2">Select Company <span className="text-red-500">
+                                                *
+                                            </span></label>
           <OutlinedSelect
             options={companies}
             value={selectedCompany}
@@ -244,15 +280,29 @@ const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Select Month</label>
+         <div>
+          <label className="block text-sm font-medium mb-2">Register Type <span className="text-red-500">
+                                                *
+                                            </span></label>
           <OutlinedSelect
-            options={monthOptions}
-            value={selectedMonth}
-            onChange={handleMonthChange}
-            label="Select Month"
+            options={REGISTER_TYPE_OPTIONS}
+            value={selectedRegisterType}
+            onChange={(selectedOption) => setSelectedRegisterType(selectedOption)}
+            label="Select Register Type"
           />
         </div>
+
+       {showMonthField && (
+  <div>
+    <label className="block text-sm font-medium mb-2">Select Month</label>
+    <OutlinedSelect
+      options={monthOptions}
+      value={selectedMonth}
+      onChange={handleMonthChange}
+      label="Select Month"
+    />
+  </div>
+)}
 
         <div className="my-4 flex gap-2 items-center">
           <p>Download Template:</p>
@@ -260,24 +310,24 @@ const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
             size="xs"
             icon={<HiDownload />}
             onClick={handleDownloadTemplate}
-            disabled={!selectedCompany || !selectedMonth}
+            disabled={!selectedCompany || (showMonthField && !selectedMonth)}
           >
             Download
           </Button>
         </div>
 
         <div className="flex flex-col gap-2 mb-4">
-          <p>Upload Salary Register File:</p>
-          {!selectedMonth || !selectedCompany && (
+          <p>Upload Register File:</p>
+         {(!selectedRegisterType || !selectedCompany || (showMonthField && !selectedMonth)) && (
             <p className="text-sm text-red-500 mb-2">
-              Please select a comapany & month first to enable file upload
+              Please select all required fields first to enable file upload
             </p>
           )}
           <Input
             type="file"
             onChange={handleFileChange}
             accept=".xlsx,.xls,.csv"
-            disabled={!selectedMonth || !selectedCompany}
+            disabled={!selectedRegisterType || !selectedCompany || (showMonthField && !selectedMonth)}
             
           />
         </div>
@@ -293,8 +343,13 @@ const RegisterBulkUpload: React.FC<SalaryRegisterBulkUploadProps> = ({
           <Button
             variant="solid"
             onClick={handleUpload}
-            disabled={!file || !selectedCompany || !selectedMonth || isUploading}
-            loading={isUploading}
+ disabled={
+              !file || 
+              !selectedRegisterType || 
+              !selectedCompany || 
+              (showMonthField && !selectedMonth) || 
+              isUploading
+            }            loading={isUploading}
           >
             {isUploading ? 'Uploading...' : 'Confirm'}
           </Button>
