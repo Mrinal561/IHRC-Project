@@ -25,6 +25,12 @@ const SalaryRegister = () => {
         return fy.split('-')[0]; // Returns the first part (2025 from 2025-26)
     };
 
+    const [pagination, setPagination] = useState({
+    pageIndex: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
     useEffect(() => {
         const handleFinancialYearChange = (event: CustomEvent) => {
             const newFinancialYear = event.detail
@@ -51,10 +57,10 @@ const SalaryRegister = () => {
         try {
             const year = getYearFromFinancialYear(financialYear);
             const response = await httpClient.get(endpoints.register.listSalaryRegister(), {
-                params: {
-                    // register_type: 'Salary Register',
-                    // year: year // Pass the extracted year instead of financial_year
-                }
+                 params: {
+          page: pagination.pageIndex,
+          page_size: pagination.pageSize,
+        },
             })
             setData(response.data.data)
         } catch (error) {
@@ -68,11 +74,20 @@ const SalaryRegister = () => {
         if (financialYear) {
             fetchSalaryRegisterData()
         }
-    }, [financialYear, tableKey])
+    }, [financialYear, tableKey, pagination.pageIndex, pagination.pageSize])
 
     const handleRefresh = () => {
         setTableKey(Date.now())
     }
+
+     const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, pageIndex: page }));
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPagination(prev => ({ ...prev, pageSize: size, pageIndex: 1 }));
+  };
+
 
     return (
         <AdaptableCard className="h-full" bodyClass="h-full">
@@ -92,7 +107,9 @@ const SalaryRegister = () => {
                     </div>
                 </div>
             ) : (
-                <RegisterTable data={data} />
+                <RegisterTable data={data}  pagination={pagination}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange} />
             )}
         </AdaptableCard>
     )

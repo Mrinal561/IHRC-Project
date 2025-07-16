@@ -5,7 +5,23 @@ import { Button } from '@/components/ui'
 import { HiDownload } from 'react-icons/hi'
 import GenerateRegisterDialog from './GenerateRegisterDialog' // Adjust the import path
 
-const RegisterTable = ({ data }: { data: any[] }) => {
+
+interface RegisterTableProps {
+    data: any[];
+     pagination: {
+        total: number;
+        pageIndex: number;
+        pageSize: number;
+      };
+  onPaginationChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
+}
+const RegisterTable = ({
+  data,
+  pagination,
+   onPaginationChange,
+    onPageSizeChange,
+}: RegisterTableProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [selectedRow, setSelectedRow] = useState<any>(null)
 
@@ -51,11 +67,13 @@ const RegisterTable = ({ data }: { data: any[] }) => {
             <DataTable
                 columns={columns}
                 data={data}
-                pagingData={{
-                    total: data.length,
-                    pageIndex: 1,
-                    pageSize: 10
-                }}
+                 pagingData={{
+                        total: pagination.total,
+                        pageIndex: pagination.pageIndex,
+                        pageSize: pagination.pageSize,
+                      }}
+                      onPaginationChange={onPaginationChange}
+                      onSelectChange={onPageSizeChange}
             />
             
             <GenerateRegisterDialog 
