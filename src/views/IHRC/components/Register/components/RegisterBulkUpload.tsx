@@ -778,7 +778,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         <div className="flex justify-end gap-2 mt-6">
           <Button
             variant="plain"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isUploading}
           >
             Cancel
