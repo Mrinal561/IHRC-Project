@@ -423,7 +423,7 @@ const REGISTER_TYPE_OPTIONS = [
   { value: 'Bonus Register Form A', label: 'Bonus Register Form A' },
   { value: 'Bonus Register Form B', label: 'Bonus Register Form B' },
   { value: 'Bonus Register Form C', label: 'Bonus Register Form C' },
-  { value: 'Cla Form A', label: 'CLA Form A' },
+  { value: 'CLA Form A', label: 'CLA Form A' },
 ];
 
 const generateMonthOptions = (financialYear: string | null) => {
