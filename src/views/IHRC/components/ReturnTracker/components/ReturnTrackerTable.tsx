@@ -28,6 +28,9 @@ interface ReturnTrackerData {
     return_copy: string | null;
     not_applicable_reason: string | null;
     is_delayed: boolean;
+     due_dates: {
+        first_due_date: string
+    },
     state?: {
         id: number;
         name: string;
@@ -255,6 +258,12 @@ const ReturnTrackerTable = ({
                 enableSorting: false,
                 accessorKey: 'year',
                 cell: ({ row }) => <div className="w-40 truncate">{row.original.year}</div>,
+            },
+            {
+                header: 'Due Date',
+                enableSorting: false,
+                accessorKey: 'due_dates',
+                cell: ({row}) => <div className="w-40">{row.original.due_dates.first_due_date}</div>
             },
             {
             header: 'Submission Status',

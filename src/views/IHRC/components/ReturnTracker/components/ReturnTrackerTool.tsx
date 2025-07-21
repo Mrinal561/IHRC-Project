@@ -34,6 +34,9 @@ interface ReturnTrackerItem {
     return_copy: string | null;
     not_applicable_reason: string | null;
     is_delayed: boolean;
+    due_dates?: {
+        first_due_date: string
+    },
     state?: {
         id: number;
         name: string;
