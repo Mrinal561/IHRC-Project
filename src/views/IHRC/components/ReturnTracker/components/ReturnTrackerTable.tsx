@@ -85,36 +85,7 @@ const ReturnTrackerTable = ({
         pageIndex: 1,
         pageSize: 10,
     });
-    // const [returns, setReturns] = useState<ReturnTrackerData[]>([]);
-
-    // useEffect(() => {
-    //     fetchReturns();
-    // }, [tableData.pageIndex, tableData.pageSize]); // Add dependencies for pagination
-
-    // const fetchReturns = async () => {
-    //     // setLoading(true);
-    //     try {
-    //         const response = await httpClient.get(endpoints.return.list(), {
-    //             params: {
-    //                 page: tableData.pageIndex,
-    //                 limit: tableData.pageSize
-    //             }
-    //         });
-            
-    //         // Correctly access the data from the response
-    //         // setReturns(response.data.data || []);
-    //         setTableData(prev => ({
-    //             ...prev,
-    //             total: response.data.meta?.totalResults || 0
-    //         }));
-    //     } catch (error) {
-    //         console.error('Error fetching returns:', error);
-    //         // setReturns([]); // Ensure returns is always an array
-    //     } finally {
-    //         // setLoading(false);
-    //     }
-    // };
-
+   
 
     const handleDownloadDocument = async (returnId: string) => {
     try {

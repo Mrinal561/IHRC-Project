@@ -201,7 +201,8 @@ interface BranchOption extends SelectOption {
 // });
 
 
-const validationSchema = Yup.object().shape({
+const getValidationSchema  = (superadminReturns: SuperadminReturn[]) => {
+return Yup.object().shape({
   company_id: Yup.number().required('Company is required').min(1, 'Please select a company'),
   act_name: Yup.string().required('Act Name is required'),
   return_name: Yup.string().required('Return Name is required'),
@@ -252,13 +253,64 @@ const validationSchema = Yup.object().shape({
   .max(12, 'Month must be between 1 and 12'),
 
   
-  submission_date: Yup.string().when('return_submission', {
-    is: 'applicable',
-    then: (schema) => schema.required('Submission Date is required'),
-  }),
+submission_date: Yup.string()
+    .when('return_submission', {
+      is: 'applicable',
+      then: (schema) => schema
+        .required('Submission Date is required')
+        .test(
+          'is-valid-date',
+          'Invalid submission date',
+          function (value) {
+            if (!value) return false;
+            return !isNaN(new Date(value).getTime());
+          }
+        ),
+    }),
   
   // Updated delay reason validation - required when submission_date is provided and return is delayed
- delay_reason: Yup.string().nullable(),
+delay_reason: Yup.string()
+      .when(['return_submission', 'submission_date'], {
+        is: (return_submission: string, submission_date: string) => 
+          return_submission === 'applicable' && submission_date,
+        then: (schema) => schema.test(
+          'is-delayed',
+          function (value) {
+            const { parent, createError } = this;
+            const superadminReturn = superadminReturns.find(
+              ret => 
+                ret.act_name === parent.act_name.split('||')[0] && 
+                ret.return_name === parent.return_name &&
+                (ret.applicable === 'CENTRAL' || 
+                 ret.applicable === 'ALL_STATES' || 
+                 (ret.applicable === 'STATE' && ret.state_id === Number(parent.act_name.split('||')[1])))
+            );
+            
+            if (!superadminReturn || !superadminReturn.due_dates || !parent.submission_date) {
+              return true;
+            }
+
+            const parseDueDate = (dateStr: string) => {
+              const [day, month, year] = dateStr.split('-').map(Number);
+              const fullYear = year < 100 ? 2000 + year : year;
+              return new Date(fullYear, month - 1, day);
+            };
+
+            const dueDate = parseDueDate(superadminReturn.due_dates.first_due_date);
+            const submissionDate = new Date(parent.submission_date);
+
+            if (submissionDate > dueDate) {
+              if (!value) {
+                return createError({
+                  message: 'Delay reason is required for delayed submissions',
+                  path: this.path
+                });
+              }
+            }
+            return true;
+          }
+        ),
+      }),
   
   not_applicable_reason: Yup.string().when('return_submission', {
     is: 'not_applicable',
@@ -288,6 +340,7 @@ const validationSchema = Yup.object().shape({
     otherwise: (schema) => schema.nullable()
   }),
 });
+}
 
 
 const ReturnTrackerAddForm = () => {
@@ -319,6 +372,8 @@ const ReturnTrackerAddForm = () => {
       </Notification>
     );
   };
+
+
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -601,14 +656,13 @@ const ReturnTrackerAddForm = () => {
   };
  
   // Generate year options (current year and past 4 years)
-  const yearOptions = Array.from({ length: 5 }, (_, i) => {
-    const year = new Date().getFullYear() - i;
-    return {
-      label: String(year),
-      value: year,
-    };
-  });
-
+const yearOptions = Array.from({ length: 5 }, (_, i) => {
+  const year = new Date().getFullYear() - 1 - i; // Subtract 1 to exclude current year
+  return {
+    label: String(year),
+    value: year,
+  };
+});
   const formatFrequencyDisplay = (frequency: string) => {
     if (!frequency) return '--';
     
@@ -637,7 +691,7 @@ const ReturnTrackerAddForm = () => {
 
       <Formik
         initialValues={initialValues}
-        validationSchema={validationSchema}
+         validationSchema={getValidationSchema(superadminReturns)} 
         onSubmit={handleSubmit}
         validateOnBlur={true}
         validateOnChange={true}
@@ -651,6 +705,7 @@ const ReturnTrackerAddForm = () => {
           handleSubmit,
           isValid,
           isSubmitting,
+          validateField
         }) => {
           // Parse act_name and state_id from values.act_name
           const [selectedActName, selectedStateId] = values.act_name ? values.act_name.split('||') : ['', ''];
@@ -667,51 +722,23 @@ const ReturnTrackerAddForm = () => {
                (ret.applicable === 'STATE' && ret.state_id === Number(selectedStateId)))
           );
 
-          const isDelayed = (() => {
-            if (!superadminReturn || !values.submission_date || values.return_submission !== 'applicable') {
-              return false;
-            }
+         const isDelayed = (() => {
+  if (!superadminReturn || !values.submission_date || values.return_submission !== 'applicable') {
+    return false;
+  }
 
-            const dueDates = superadminReturn.due_dates;
-            if (!dueDates) return false;
+  const parseDueDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split('-').map(Number);
+    const fullYear = year < 100 ? 2000 + year : year;
+    return new Date(fullYear, month - 1, day);
+  };
 
-            const submissionDate = new Date(values.submission_date);
-            let dueDate: Date | null = null;
+  const dueDate = parseDueDate(superadminReturn.due_dates.first_due_date);
+  const submissionDate = new Date(values.submission_date);
 
-            switch (values.frequency) {
-              case 'monthly':
-                dueDate = new Date(dueDates.first_due_date);
-                break;
-              case 'quarterly':
-                if (values.month) {
-                  if (values.month >= 1 && values.month <= 3) {
-                    dueDate = new Date(dueDates.first_due_date);
-                  } else if (values.month >= 4 && values.month <= 6) {
-                    dueDate = new Date(dueDates.second_due_date);
-                  } else if (values.month >= 7 && values.month <= 9) {
-                    dueDate = new Date(dueDates.third_due_date);
-                  } else {
-                    dueDate = new Date(dueDates.last_due_date);
-                  }
-                }
-                break;
-              case 'half_yearly':
-                if (values.month && values.month <= 6) {
-                  dueDate = new Date(dueDates.first_due_date);
-                } else {
-                  dueDate = new Date(dueDates.last_due_date);
-                }
-                break;
-              case 'yearly':
-                dueDate = new Date(dueDates.first_due_date);
-                break;
-              case 'bi_annual':
-                dueDate = new Date(dueDates.bi_annual_due_date);
-                break;
-            }
+  return submissionDate > dueDate;
+})();
 
-            return dueDate && submissionDate > dueDate;
-          })();
 
           useEffect(() => {
             if (values.location_id && allBranches.length > 0) {
@@ -1017,12 +1044,12 @@ const ReturnTrackerAddForm = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
-                      Year <span className="text-red-500">*</span>
+                     Return Year <span className="text-red-500">*</span>
                     </label>
                     <Field name="year">
                       {({ field }: any) => (
                         <OutlinedSelect
-                          label="Select Year"
+                          label="Select Return Year"
                           options={yearOptions}
                           value={yearOptions.find(
                             (option) => option.value === values.year
@@ -1120,18 +1147,24 @@ const ReturnTrackerAddForm = () => {
                       </label>
                       <Field name="submission_date">
                         {({ field }: any) => (
-                          <DatePicker
-                            placeholder="Select submission date"
-                            value={values.submission_date ? new Date(values.submission_date) : null}
-                            onChange={(date: Date | null) => {
-                              setFieldValue(
-                                'submission_date',
-                                date ? date.toISOString() : ''
-                              );
-                            }}
-                            inputFormat='DD-MM-YYYY'
-                            onBlur={() => setFieldTouched('submission_date', true)}
-                          />
+                        <DatePicker
+  placeholder="Select submission date"
+  value={values.submission_date ? new Date(values.submission_date) : null}
+  onChange={(date: Date | null) => {
+    setFieldValue('submission_date', date ? date.toISOString() : '');
+    // Trigger validation for both submission_date and delay_reason
+    setTimeout(() => {
+      setFieldTouched('submission_date', true);
+      setFieldTouched('delay_reason', true);
+    }, 100);
+  }}
+  inputFormat='DD-MM-YYYY'
+  onBlur={() => {
+    setFieldTouched('submission_date', true);
+    setFieldTouched('delay_reason', true);
+  }}
+  maxDate={new Date()} // This prevents selecting future dates
+/>
                         )}
                       </Field>
                       {errors.submission_date && touched.submission_date && (
@@ -1192,27 +1225,28 @@ const ReturnTrackerAddForm = () => {
                           <p className="text-red-500 text-xs">{errors.return_copy}</p>
                         )}
                       </div>
-                      {values.return_submission === 'applicable' && (
+                      {values.return_submission === 'applicable' && isDelayed && (
   <div className="space-y-2">
     <label className="text-sm font-medium">
-      Delay Reason 
-      {/* <span className="text-red-500">*</span> */}
+      Delay Reason <span className="text-red-500">*</span>
     </label>
     <Field name="delay_reason">
-      {({ field }: any) => (
-        <OutlinedInput
-          label="Enter Delay Reason"
-          value={values.delay_reason || ''}
-          onChange={(value: string) => {
-            setFieldValue('delay_reason', value);
-          }}
-          onBlur={() => setFieldTouched('delay_reason', true)}
-        />
+      {({ field, form, meta }: any) => (
+        <div>
+          <OutlinedInput
+            label="Enter Delay Reason"
+            value={values.delay_reason || ''}
+            onChange={(value: string) => {
+              form.setFieldValue('delay_reason', value);
+            }}
+            onBlur={() => form.setFieldTouched('delay_reason', true)}
+          />
+          {meta.touched && meta.error && (
+            <p className="text-red-500 text-xs">{meta.error}</p>
+          )}
+        </div>
       )}
     </Field>
-    {errors.delay_reason && touched.delay_reason && (
-      <p className="text-red-500 text-xs">{errors.delay_reason}</p>
-    )}
   </div>
 )}
                     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui';
 import { HiDownload, HiPlusCircle } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,9 @@ import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 
 
+
+const FINANCIAL_YEAR_KEY = 'selectedFinancialYear'
+const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged';
 
 interface ReturnTrackerItem {
     id: string;
@@ -64,8 +67,19 @@ const ReturnTrackerTool = () => {
     const auth = useAuth();
     const userId = auth?.user?.id || 0;
     const navigate = useNavigate();
-    const currentFinancialYear = useAppSelector((state: any) => state.common?.currentFinancialYear || '');
+  const currentFinancialYear = useAppSelector((state: any) => state.common?.currentFinancialYear || '');
     
+const financialYearParts = currentFinancialYear ? parseInt(currentFinancialYear.split('-')[0]) : new Date().getFullYear();
+//   const baseYear = financialYearParts.length > 0 ? parseInt(financialYearParts[0]) : new Date().getFullYear();
+  
+// Extract the base year from currentFinancialYear (e.g., "2024-25" → 2024)
+// Calculate baseYear whenever currentFinancialYear changes
+const baseYear = useMemo(() => {
+  return currentFinancialYear ? 
+    parseInt(currentFinancialYear.split('-')[0], 10) : 
+    new Date().getFullYear();
+}, [currentFinancialYear]);
+
     const [filters, setFilters] = useState({
         company_id: '',
         state_id: '',
@@ -76,6 +90,8 @@ const ReturnTrackerTool = () => {
         sort_by: 'id'
     });
 
+       const [financialYear, setFinancialYear] = useState(sessionStorage.getItem(FINANCIAL_YEAR_KEY));
+    
 const [tableData, setTableData] = useState<ReturnTrackerItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState({
@@ -84,6 +100,26 @@ const [tableData, setTableData] = useState<ReturnTrackerItem[]>([]);
             pageSize: 10,
         });
     
+        useEffect(() => {
+          const handleFinancialYearChange = (event: CustomEvent) => {
+            const newFinancialYear = event.detail;
+            setFinancialYear(newFinancialYear);
+            sessionStorage.setItem(FINANCIAL_YEAR_KEY, newFinancialYear);
+          };
+        
+          window.addEventListener(
+            FINANCIAL_YEAR_CHANGE_EVENT, 
+            handleFinancialYearChange as EventListener
+          );
+        
+          return () => {
+            window.removeEventListener(
+              FINANCIAL_YEAR_CHANGE_EVENT, 
+              handleFinancialYearChange as EventListener
+            );
+          };
+        }, []);
+
 
    // In your ReturnTrackerTool component
 const fetchReturns = async () => {
@@ -92,10 +128,7 @@ const fetchReturns = async () => {
         const params: any = {
             page: filters.page,
             page_size: filters.page_size,
-            sort: filters.sort,
-            sort_by: filters.sort_by,
-            created_by: userId,
-            financial_year: currentFinancialYear
+            year: financialYear ? parseInt(financialYear.split('-')[0]) : new Date().getFullYear()
         };
 
         // Only add filters if they have values
@@ -152,7 +185,7 @@ const handlePaginationChange = (page: number) => {
             console.log('Fetching returns...', { filters, pagination });
 
         fetchReturns();
-}, [filters, pagination.pageIndex, pagination.pageSize, currentFinancialYear, userId]);
+}, [filters, pagination.pageIndex, pagination.pageSize, financialYear, baseYear, userId]);
 
     const handleDownloadAllData = async () => {
         try {
