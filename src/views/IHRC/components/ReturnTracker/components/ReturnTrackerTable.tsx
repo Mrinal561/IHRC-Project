@@ -152,11 +152,29 @@ const ReturnTrackerTable = ({
 
 
 
-    const formatDate = (dateString: string) => {
-        if (!dateString) return '-';
+const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    
+    // Check if the date is already in DD-MM-YYYY format
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
+        return dateString;
+    }
+    
+    try {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB');
-    };
+        // Handle invalid dates
+        if (isNaN(date.getTime())) return '-';
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${day}-${month}-${year}`;
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return '-';
+    }
+};
 
     const columns = useMemo(
         () => [
@@ -210,7 +228,7 @@ const ReturnTrackerTable = ({
                 header: 'Branch',
                 enableSorting: false,
                 accessorKey: 'branch_name',
-                cell: ({ row }) => <div className="w-40 truncate">{row.original.branch?.name}</div>,
+                cell: ({ row }) => <div className="w-40 truncate">{row.original.branch?.name || '--'}</div>,
             },
             {
             header: 'Frequency',
@@ -260,11 +278,11 @@ const ReturnTrackerTable = ({
                 cell: ({ row }) => <div className="w-40 truncate">{row.original.year}</div>,
             },
             {
-                header: 'Due Date',
-                enableSorting: false,
-                accessorKey: 'due_dates',
-                cell: ({row}) => <div className="w-40">{row.original.due_dates.first_due_date}</div>
-            },
+    header: 'Due Date',
+    enableSorting: false,
+    accessorKey: 'due_dates',
+    cell: ({row}) => <div className="w-40">{formatDate(row.original.due_dates.first_due_date)}</div>
+},
             {
             header: 'Submission Status',
             enableSorting: false,
@@ -293,23 +311,23 @@ const ReturnTrackerTable = ({
                 enableSorting: false,
                 accessorKey: 'not_applicable_reason',
                 cell: ({ row }) => (
-                    <div className="w-40 truncate">{row.original.not_applicable_reason || '-'}</div>
+                    <div className="w-40 truncate">{row.original.not_applicable_reason || '--'}</div>
                 ),
             },
-            {
-                header: 'Submission Date',
-                enableSorting: false,
-                accessorKey: 'submission_date',
-                cell: ({ row }) => (
-                    <div className="w-40 truncate">{formatDate(row.original.submission_date)}</div>
-                ),
-            },
+           {
+    header: 'Submission Date',
+    enableSorting: false,
+    accessorKey: 'submission_date',
+    cell: ({ row }) => (
+        <div className="w-40 truncate">{formatDate(row.original.submission_date)}</div>
+    ),
+},
             {
                 header: 'Delay Reason',
                 enableSorting: false,
                 accessorKey: 'delay_reason',
                 cell: ({ row }) => (
-                    <div className="w-40 truncate">{row.original.delay_reason || '-'}</div>
+                    <div className="w-40 truncate">{row.original.delay_reason || '--'}</div>
                 ),
             },
            {
