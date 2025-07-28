@@ -3420,7 +3420,7 @@ const auditornav: NavigationTree[] = [
             {
                 key: 'dueCompliance.item4',
                 path: '/due-compliance',
-                title: 'Due Compliances',
+                title: 'Due Compliance',
                 translateKey: 'nav.collapseMenu.collapse.item5',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
