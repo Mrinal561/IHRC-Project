@@ -40,7 +40,7 @@ const Bu: React.FC<BulkUploadProps> = ({ onUploadSuccess }) => {
             formData.append('remark', remark)
 
             const res = await httpClient.post(
-                endpoints.user.bulkCreate(),
+                endpoints.auditor.auditorBulkUpload(),
                 formData,
                 {
                     headers: {

@@ -145,10 +145,10 @@ return Yup.object().shape({
         return allowedTypes.includes(file.type);
       }),
   }),
-  month: Yup.number().when('frequency', {
-    is: (frequency: string) => ['monthly', 'quarterly', 'half_yearly'].includes(frequency),
-    then: (schema) => schema.required('Month is required').min(1, 'Invalid month').max(12, 'Invalid month'),
-  }),
+  // month: Yup.number().when('frequency', {
+  //   is: (frequency: string) => ['monthly', 'quarterly', 'half_yearly'].includes(frequency),
+  //   then: (schema) => schema.required('Month is required').min(1, 'Invalid month').max(12, 'Invalid month'),
+  // }),
 });
 }
 const ReturnTrackerEditForm = () => {
@@ -369,7 +369,7 @@ const loadInitialData = async () => {
   branch_id: returnData.branch_id || undefined,
   frequency: returnData.frequency,
   year: returnData.year,
-  month: returnData.month || undefined,
+  // month: returnData.month || undefined,
   return_submission: returnData.return_submission,
   submission_date: returnData.submission_date || undefined,
   delay_reason: returnData.delay_reason || undefined,
@@ -494,70 +494,6 @@ const loadInitialData = async () => {
     return returnData?.frequency || '';
   };
 
-// const handleSubmit = async (values: ReturnFormValues) => {
-//     try {
-//       setLoading(true);
-//       console.log('Submitting values:', values); 
-
-//       // Convert file to base64 if a new file was selected
-//       let returnCopyBase64 = '';
-//       if (values.return_copy && typeof values.return_copy !== 'string') {
-//         returnCopyBase64 = await new Promise<string>((resolve, reject) => {
-//           const reader = new FileReader();
-//           reader.onload = () => {
-//             const result = reader.result as string;
-//             resolve(result.split(',')[1]);
-//           };
-//           reader.onerror = (error) => {
-//             reject(error);
-//           };
-//           reader.readAsDataURL(values.return_copy as Blob);
-//         });
-//       } else if (values.return_copy && typeof values.return_copy === 'string') {
-//         // Keep the existing file URL if no new file was uploaded
-//         returnCopyBase64 = values.return_copy;
-//       }
-
-//       // Split act_name to remove state ID
-//       const [actName] = values.act_name.split('||');
-
-//       // Prepare the submission data
-//       const submissionData = {
-//         ...values,
-//         act_name: actName, // Use only the act name part
-//         company_group_id: currentGroupId,
-//         company_id: Number(values.company_id),
-//         state_id: values.state_id ? Number(values.state_id) : undefined,
-//         district_id: values.district_id ? Number(values.district_id) : undefined,
-//         location_id: values.location_id ? Number(values.location_id) : undefined,
-//         branch_id: values.branch_id ? Number(values.branch_id) : undefined,
-//         year: Number(values.year),
-//         month: values.month ? Number(values.month) : undefined,
-//         return_copy: returnCopyBase64 || undefined,
-//         return_submission: values.return_submission,
-//         submission_date: values.submission_date,
-//         delay_reason: values.delay_reason,
-//         not_applicable_reason: values.not_applicable_reason
-//       };
-
-//       // Make the API call to update
-//       const response = await httpClient.put(
-//         endpoints.return.update(returnTrackerId),
-//         submissionData
-//       );
-
-//       showNotification('success', 'Return updated successfully');
-//       navigate('/return-tracker');
-//     } catch (error: any) {
-//       console.error('Failed to update return:', error);
-//       const errorMessage = error.response?.data?.message || 'Failed to update return';
-//       showNotification('error', errorMessage);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-
 
 const handleSubmit = async (values: ReturnFormValues) => {
   try {
@@ -592,7 +528,7 @@ const handleSubmit = async (values: ReturnFormValues) => {
     if (changedValues.location_id) submissionData.location_id = Number(changedValues.location_id);
     if (changedValues.branch_id) submissionData.branch_id = Number(changedValues.branch_id);
     if (changedValues.year) submissionData.year = Number(changedValues.year);
-    if (changedValues.month) submissionData.month = Number(changedValues.month);
+    // if (changedValues.month) submissionData.month = Number(changedValues.month);
 
     // Make the API call to update
     const response = await httpClient.put(
@@ -655,7 +591,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
 
   // Generate year options (current year and past 4 years)
   const yearOptions = Array.from({ length: 5 }, (_, i) => {
-    const year = new Date().getFullYear() - i;
+    const year = new Date().getFullYear()- i;
     return {
       label: String(year),
       value: year,
@@ -948,7 +884,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
                       )}
                     </div>
 
-                    {['monthly', 'quarterly', 'half_yearly'].includes(values.frequency) && (
+                    {/* {['monthly', 'quarterly', 'half_yearly'].includes(values.frequency) && (
                       <div className="space-y-2">
                         <label className="text-sm font-medium">
                           Month <span className="text-red-500">*</span>
@@ -968,7 +904,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
                           <p className="text-red-500 text-xs">{errors.month}</p>
                         )}
                       </div>
-                    )}
+                    )} */}
                   </div>
 
                   {/* 6th Row: Return File Submission */}

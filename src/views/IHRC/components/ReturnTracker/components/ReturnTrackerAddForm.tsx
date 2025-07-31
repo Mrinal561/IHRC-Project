@@ -55,151 +55,6 @@ interface BranchOption extends SelectOption {
   location_id: number;
 }
 
-// const validationSchema = Yup.object().shape({
-//   company_id: Yup.number().required('Company is required').min(1, 'Please select a company'),
-//   act_name: Yup.string().required('Act Name is required'),
-//   return_name: Yup.string().required('Return Name is required'),
-//   // frequency: Yup.string().required('Frequency is required'),
-//   year: Yup.number().required('Year is required').min(2000, 'Invalid year').max(2100, 'Invalid year'),
-//   return_submission: Yup.string().required('Return Submission is required'),
-  
-//   state_id: Yup.number().when('act_name', {
-//     is: (act_name: string) => {
-//       if (!act_name) return false;
-//       const [, stateId] = act_name.split('||');
-//       return stateId !== 'CENTRAL';
-//     },
-//     then: (schema) => schema.required('State is required'),
-//   }),
-  
-//   district_id: Yup.number().when('act_name', {
-//     is: (act_name: string) => {
-//       if (!act_name) return false;
-//       const [, stateId] = act_name.split('||');
-//       return stateId !== 'CENTRAL';
-//     },
-//     then: (schema) => schema.required('District is required'),
-//   }),
-  
-//   location_id: Yup.number().when('act_name', {
-//     is: (act_name: string) => {
-//       if (!act_name) return false;
-//       const [, stateId] = act_name.split('||');
-//       return stateId !== 'CENTRAL';
-//     },
-//     then: (schema) => schema.required('Location is required'),
-//   }),
-  
-//   branch_id: Yup.number().when('act_name', {
-//     is: (act_name: string) => {
-//       if (!act_name) return false;
-//       const [, stateId] = act_name.split('||');
-//       return stateId !== 'CENTRAL';
-//     },
-//     then: (schema) => schema.required('Branch is required'),
-//   }),
-  
-//   submission_date: Yup.string().when('return_submission', {
-//     is: 'applicable',
-//     then: (schema) => schema.required('Submission Date is required'),
-//   }),
-  
-//   delay_reason: Yup.string().when(['return_submission', 'submission_date'], {
-//     is: (return_submission: string, submission_date: string) => 
-//       return_submission === 'applicable' && submission_date,
-//     then: (schema) => schema.test(
-//       'is-delayed',
-//       'Delay reason is required for delayed returns',
-//       function (value) {
-//         const { parent } = this;
-//         const superadminReturn = parent._superadminReturn;
-        
-//         if (!superadminReturn || !superadminReturn.due_dates || !parent.submission_date) {
-//           return true;
-//         }
-
-//         const dueDates = superadminReturn.due_dates;
-//         let dueDate: Date | null = null;
-//         const submissionDate = new Date(parent.submission_date);
-
-//         switch (parent.frequency) {
-//           case 'monthly':
-//             dueDate = new Date(dueDates.first_due_date);
-//             break;
-//           case 'quarterly':
-//             if (parent.month) {
-//               if (parent.month >= 1 && parent.month <= 3) {
-//                 dueDate = new Date(dueDates.first_due_date);
-//               } else if (parent.month >= 4 && parent.month <= 6) {
-//                 dueDate = new Date(dueDates.second_due_date);
-//               } else if (parent.month >= 7 && parent.month <= 9) {
-//                 dueDate = new Date(dueDates.third_due_date);
-//               } else {
-//                 dueDate = new Date(dueDates.last_due_date);
-//               }
-//             }
-//             break;
-//           case 'half_yearly':
-//             if (parent.month && parent.month <= 6) {
-//               dueDate = new Date(dueDates.first_due_date);
-//             } else {
-//               dueDate = new Date(dueDates.last_due_date);
-//             }
-//             break;
-//           case 'yearly':
-//             dueDate = new Date(dueDates.first_due_date);
-//             break;
-//           case 'bi_annual':
-//             dueDate = new Date(dueDates.bi_annual_due_date);
-//             break;
-//         }
-
-//         if (dueDate && submissionDate > dueDate) {
-//           return !!value;
-//         }
-//         return true;
-//       }
-//     ),
-//   }),
-  
-//   not_applicable_reason: Yup.string().when('return_submission', {
-//     is: 'not_applicable',
-//     then: (schema) => schema.required('Not Applicable Reason is required'),
-//   }),
-  
-//   return_copy: Yup.mixed().when('return_submission', {
-//     is: 'applicable',
-//     then: (schema) => schema
-//       .required('Return copy is required')
-//       .test('fileSize', 'File size must be less than 20MB', (value) => {
-//         if (!value) return false;
-//         return (value as File).size <= 20 * 1024 * 1024;
-//       })
-//       .test('fileType', 'Only PDF, Excel, and image files are allowed', (value) => {
-//         if (!value) return false;
-//         const file = value as File;
-//         const allowedTypes = [
-//           'application/pdf',
-//           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-//           'application/vnd.ms-excel',
-//           'image/jpeg',
-//           'image/png'
-//         ];
-//         return allowedTypes.includes(file.type);
-//       }),
-//     otherwise: (schema) => schema.nullable()
-//   }),
-  
-//   month: Yup.number().when('frequency', {
-//   is: (frequency: string) => ['monthly', 'quarterly', 'half_yearly'].includes(frequency),
-//   then: (schema) => schema
-//     .required('Month is required')
-//     .min(1, 'Month must be between 1 and 12')
-//     .max(12, 'Month must be between 1 and 12'),
-//   otherwise: (schema) => schema.nullable()
-// }),
-// });
-
 
 const getValidationSchema  = (superadminReturns: SuperadminReturn[]) => {
 return Yup.object().shape({
@@ -657,7 +512,7 @@ const ReturnTrackerAddForm = () => {
  
   // Generate year options (current year and past 4 years)
 const yearOptions = Array.from({ length: 5 }, (_, i) => {
-  const year = new Date().getFullYear() - 1 - i; // Subtract 1 to exclude current year
+  const year = new Date().getFullYear() - i; // Subtract 1 to exclude current year
   return {
     label: String(year),
     value: year,
@@ -1070,10 +925,9 @@ const yearOptions = Array.from({ length: 5 }, (_, i) => {
                   </div>
 
                   {/* {['monthly', 'quarterly', 'half_yearly', 'yearly'].includes(values.frequency) && ( */}
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <label className="text-sm font-medium">
                         Month 
-                        {/* <span className="text-red-500">*</span> */}
                       </label>
                       <Field name="month">
                         {({ field }: any) => (
@@ -1091,7 +945,7 @@ const yearOptions = Array.from({ length: 5 }, (_, i) => {
                       {errors.month && touched.month && (
                         <p className="text-red-500 text-xs">{errors.month}</p>
                       )}
-                    </div>
+                    </div> */}
                   {/* // )} */}
                 </div>
 

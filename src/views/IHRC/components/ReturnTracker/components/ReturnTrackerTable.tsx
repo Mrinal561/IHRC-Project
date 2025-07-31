@@ -29,7 +29,10 @@ interface ReturnTrackerData {
     not_applicable_reason: string | null;
     is_delayed: boolean;
      due_dates: {
-        first_due_date: string
+        first_due_date: string;
+        second_due_date?: string;
+        third_due_date?: string;
+        last_due_date?: string;
     },
     state?: {
         id: number;
@@ -176,6 +179,38 @@ const formatDate = (dateString: string | null) => {
     }
 };
 
+const formatDateToDDMMYYYY = (dateString: string | null) => {
+    if (!dateString) return '--';
+    
+    // If already in DD-MM-YYYY format, return as is
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
+        return dateString;
+    }
+    
+    // If in DD-MM-YY format, convert to DD-MM-YYYY
+    if (/^\d{2}-\d{2}-\d{2}$/.test(dateString)) {
+        const [day, month, year] = dateString.split('-');
+        // Assuming years 00-29 are 2000-2029 and 30-99 are 1930-1999
+        const fullYear = parseInt(year) < 30 ? `20${year}` : `19${year}`;
+        return `${day}-${month}-${fullYear}`;
+    }
+    
+    // For other formats (like ISO), parse and format
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '--';
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${day}-${month}-${year}`;
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return '--';
+    }
+};
+
     const columns = useMemo(
         () => [
             {
@@ -246,7 +281,7 @@ const formatDate = (dateString: string | null) => {
                         case 'quarterly':
                             return 'Quarterly';
                         case 'bi_annual':
-                            return 'Binneial';
+                            return 'Biennial ';
                         default:
                             return frequency;
                     }
@@ -259,18 +294,18 @@ const formatDate = (dateString: string | null) => {
                 );
             },
         },
-            {
-                header: 'Month',
-                enableSorting: false,
-                accessorKey: 'month',
-                cell: ({ row }) => {
-                    const monthNames = [
-                        'January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'
-                    ];
-                    return <div className="w-40 truncate">{monthNames[row.original.month - 1] || '-'}</div>;
-                },
-            },
+            // {
+            //     header: 'Month',
+            //     enableSorting: false,
+            //     accessorKey: 'month',
+            //     cell: ({ row }) => {
+            //         const monthNames = [
+            //             'January', 'February', 'March', 'April', 'May', 'June',
+            //             'July', 'August', 'September', 'October', 'November', 'December'
+            //         ];
+            //         return <div className="w-40 truncate">{monthNames[row.original.month - 1] || '-'}</div>;
+            //     },
+            // },
             {
                 header: 'Year',
                 enableSorting: false,
@@ -278,11 +313,54 @@ const formatDate = (dateString: string | null) => {
                 cell: ({ row }) => <div className="w-40 truncate">{row.original.year}</div>,
             },
             {
-    header: 'Due Date',
-    enableSorting: false,
-    accessorKey: 'due_dates',
-    cell: ({row}) => <div className="w-40">{formatDate(row.original.due_dates.first_due_date)}</div>
-},
+            header: 'First Due Date',
+            enableSorting: false,
+            accessorKey: 'due_dates.first_due_date',
+            cell: ({row}) => (
+                <div className="w-40">
+                    {row.original.due_dates?.first_due_date 
+                        ? formatDateToDDMMYYYY(row.original.due_dates.first_due_date) 
+                        : '--'}
+                </div>
+            )
+        },
+        {
+            header: 'Second Due Date',
+            enableSorting: false,
+            accessorKey: 'due_dates.second_due_date',
+            cell: ({row}) => (
+                <div className="w-40">
+                    {row.original.due_dates?.second_due_date 
+                        ? formatDateToDDMMYYYY(row.original.due_dates.second_due_date) 
+                        : '--'}
+                </div>
+            )
+        },
+        {
+            header: 'Third Due Date',
+            enableSorting: false,
+            accessorKey: 'due_dates.third_due_date',
+            cell: ({row}) => (
+                <div className="w-40">
+                    {row.original.due_dates?.third_due_date 
+                        ? formatDateToDDMMYYYY(row.original.due_dates.third_due_date) 
+                        : '--'}
+                </div>
+            )
+        },
+        {
+            header: 'Last Due Date',
+            enableSorting: false,
+            accessorKey: 'due_dates.last_due_date',
+            cell: ({row}) => (
+                <div className="w-40">
+                    {row.original.due_dates?.last_due_date 
+                        ? formatDateToDDMMYYYY(row.original.due_dates.last_due_date) 
+                        : '--'}
+                </div>
+            )
+        },
+        
             {
             header: 'Submission Status',
             enableSorting: false,

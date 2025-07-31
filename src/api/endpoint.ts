@@ -57,7 +57,8 @@ export const endpoints = {
         auditorCreate: () => api('companyadmin/auditor'),
         auditorDelete: (id:any) => api(`companyadmin/auditor/${id}`),
         downloadFormat: () => api('companyadmin/auditor/template/download'),
-        auditorExport: () => api('companyadmin/auditor/export/data')
+        auditorExport: () => api('companyadmin/auditor/export/data'),
+        auditorBulkUpload: () => api('companyadmin/auditor/bulk-upload')
 
     },
     complianceSuperadmin: {
