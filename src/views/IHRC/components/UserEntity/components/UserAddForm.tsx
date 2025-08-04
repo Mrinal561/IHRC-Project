@@ -560,6 +560,7 @@ const UserAddForm = () => {
                                 }
                                 placeholder="Select Joining Date"
                                 error={touched.joining_date && errors.joining_date}
+                                inputFormat='DD-MM-YYYY'
                             />
                         )}
                     />

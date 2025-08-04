@@ -30,13 +30,13 @@ const AuditorTool: React.FC<{ onUploadSuccess?: () => void }> = ({ onUploadSucce
         }
 
         try {
-            const params = new URLSearchParams()
-            params.append('group_id[]', companyDetails.group_id.toString())
+            // const params = new URLSearchParams()
+            // params.append('group_id[]', companyDetails.group_id.toString())
 
             const response = await httpClient.get(
                 endpoints.auditor.auditorExport(), 
                 {
-                    params,
+                    // params,
                     responseType: 'blob'
                 }
             )

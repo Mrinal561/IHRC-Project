@@ -44,9 +44,9 @@ const DueComplianceTableTool: React.FC<DueComplianceTableToolProps> = ({
   // Define role options based on user type
   const filteredRoleOptions = useMemo(() => {
     const allOptions = [
-      { value: 'owner', label: 'As a Owner' },
-      { value: 'approver', label: 'As a Approver' },
-      { value: 'auditor', label: 'As a Auditor' },
+      { value: 'owner', label: 'As an Owner' },
+      { value: 'approver', label: 'As an Approver' },
+      { value: 'auditor', label: 'As an Auditor' },
     ];
 
     // Admin can see all options

@@ -2371,6 +2371,7 @@ const AssignCustomFormPage = () => {
                                                         true,
                                                     )
                                                 }}
+                                                 inputFormat='DD-MM-YYYY'
                                             />
                                             {errors.due_dates
                                                 ?.first_due_date && (
@@ -2405,6 +2406,7 @@ const AssignCustomFormPage = () => {
                                                             true,
                                                         )
                                                     }}
+                                                     inputFormat='DD-MM-YYYY'
                                                 />
                                                 {errors.due_dates
                                                     ?.second_due_date && (
@@ -2446,6 +2448,7 @@ const AssignCustomFormPage = () => {
                                                             true,
                                                         )
                                                     }}
+                                                     inputFormat='DD-MM-YYYY'
                                                 />
                                                 {errors.due_dates
                                                     ?.third_due_date && (
@@ -2488,6 +2491,7 @@ const AssignCustomFormPage = () => {
                                                             true,
                                                         )
                                                     }}
+                                                     inputFormat='DD-MM-YYYY'
                                                 />
                                                 {errors.due_dates
                                                     ?.last_due_date && (
