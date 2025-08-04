@@ -25,7 +25,7 @@ interface LocationState {
 }
 
 interface AuditorFormData {
-    group_id: number
+    // group_id: number
     company_id: number
     firm_name: string
     name: string
@@ -80,7 +80,7 @@ const AuditorEditForm = () => {
     const [companies, setCompanies] = useState<SelectOption[]>([])
     const [selectedCompany, setSelectedCompany] = useState<SelectOption | null>(null)
     const [editedData, setEditedData] = useState<AuditorFormData>({
-        group_id: 0,
+        // group_id: 0,
         company_id: 0,
         firm_name: '',
         name: '',
@@ -128,7 +128,7 @@ const AuditorEditForm = () => {
         );
 
         setEditedData({
-            group_id: response.data.group_id || 0,
+            // group_id: response.data.group_id || 0,
             company_id: response.data.company_id || 0,
             firm_name: response.data.firm_name || '',
             name: response.data.name || '',
@@ -162,7 +162,7 @@ const AuditorEditForm = () => {
             endpoints.auditor.auditorUpdate(auditorId),
             {
                 ...values,
-                group_id: Number(groupId),
+                // group_id: Number(groupId),
                 company_id: Number(values.company_id)
             }
         );
@@ -227,7 +227,7 @@ const AuditorEditForm = () => {
                     <Form>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 my-8">
                             {/* Company (Read-only) */}
-                            <div className="flex flex-col gap-2">
+                            {/* <div className="flex flex-col gap-2">
                                 <p className="mb-2">Company</p>
                                 <input
                                     type="text"
@@ -235,7 +235,7 @@ const AuditorEditForm = () => {
                                     disabled
                                     className="p-2 border rounded"
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Select Company */}
                             <div className="flex flex-col gap-2">

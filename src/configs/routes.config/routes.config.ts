@@ -221,6 +221,17 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'auditorEntity.edit',
+        path: `/edit-auditor`,
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Auditor/components/AuditorEditForm'
+                ),
+        ),
+        authority: [],
+    },
+    {
         key: 'pfSetup.edit',
         path: `/pfsetup-edit`,
         component: lazy(
