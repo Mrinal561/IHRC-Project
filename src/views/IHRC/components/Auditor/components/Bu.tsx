@@ -36,7 +36,7 @@ const Bu: React.FC<BulkUploadProps> = ({ onUploadSuccess }) => {
             }
 
             const formData = new FormData()
-            formData.append('document', file)
+            formData.append('file', file)
             formData.append('remark', remark)
 
             const res = await httpClient.post(
@@ -92,7 +92,7 @@ const Bu: React.FC<BulkUploadProps> = ({ onUploadSuccess }) => {
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', 'Users_Template.xlsx')
+            link.setAttribute('download', 'Auditor_Template.xlsx')
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)

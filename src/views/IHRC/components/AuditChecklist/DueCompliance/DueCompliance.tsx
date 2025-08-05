@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { fetchAuthUser } from '@/store/slices/login';
 import { Loading } from '@/components/shared';
 import store from '@/store';
+import Company from './components/Company';
 
 interface Permissions {
   canList: boolean;
@@ -18,6 +19,18 @@ interface Permissions {
   canEdit: boolean;
   canDelete: boolean;
 }
+
+interface SelectOption {
+    value: string
+    label: string
+}
+
+interface BranchOption {
+    label: string
+    value: string
+}
+
+
 
 const getPermissions = (menuItem: any): Permissions => {
   const permissionsObject = menuItem?.permissions || menuItem?.access || {};
@@ -63,8 +76,7 @@ const DueCompliance = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [permissionCheckComplete, setPermissionCheckComplete] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'owner' | 'approver' | 'auditor'>('owner');
-
-  // Initialize auth and permissions
+  
  // Initialize auth and permissions
 useEffect(() => {
   const initializeAuth = async () => {
@@ -144,6 +156,22 @@ useEffect(() => {
   }
 }, [dispatch, isInitialized, navigate]);
 
+
+    const [filters, setFilters] = useState({
+          company_id: '',
+          state_id: '',
+          branch_id: ''
+      })
+  
+
+  
+    const handleFilterChange = (newFilters: any) => {
+        setFilters(newFilters)
+        // Reset to first page when filters change
+        setPagination(prev => ({ ...prev, pageIndex: 1 }))
+    }
+
+
   // Set default role based on user type - only run once after permissions are checked
   useEffect(() => {
     if (permissionCheckComplete && permissions.canList) {
@@ -198,17 +226,18 @@ useEffect(() => {
       const page = validatePage(pagination.pageIndex);
       const page_size = validatePageSize(pagination.pageSize);
 
-      console.log('Making API call to:', endpoint, 'with params:', { page, page_size });
+     const params: any = {
+        page: validatePage(pagination.pageIndex),
+        page_size: validatePageSize(pagination.pageSize),
+        search: searchTerm,
+      };
 
-      const response = await httpClient.get(endpoint, {
-        params: {
-          page: page.toString(),
-          page_size: page_size.toString() ,
-          search: searchTerm,
-        },
-      });
+      // Add filters if they exist
+      if (filters.company_id) params.company_id = filters.company_id;
+      if (filters.state_id) params.state_id = filters.state_id;
+      if (filters.branch_id) params.branch_id = filters.branch_id;
 
-      console.log('API Response:', response?.data);
+      const response = await httpClient.get(endpoint, { params });
 
       if (response?.data?.data) {
         setData(response.data.data);
@@ -230,7 +259,7 @@ useEffect(() => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedRole, pagination.pageIndex, pagination.pageSize, permissionCheckComplete, permissions.canList, searchTerm,]);
+  }, [selectedRole, pagination.pageIndex, pagination.pageSize, permissionCheckComplete, permissions.canList, searchTerm, filters]);
 
 
   const handleSearch = (term: string) => {
@@ -410,6 +439,8 @@ useEffect(() => {
     return null;
   }
 
+
+
   return (
     <AdaptableCard className="h-full" bodyClass="h-full">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-10">
@@ -429,6 +460,10 @@ useEffect(() => {
           />
         </div>
       </div>
+       <div className="mb-8">
+                                    <Company onFilterChange={handleFilterChange} />
+
+            </div>
       <DueComplianceTable 
         data={data} 
         loading={isLoading}
