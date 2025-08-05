@@ -132,9 +132,9 @@ const AuditChecklistEditOwnershipDialog: React.FC<AuditChecklistEditOwnershipDia
             // isLoading={isLoading}
             isDisabled={isSubmitting}
           />
-          {selectedOwner && (
+          {/* {selectedOwner && (
             <p className="text-xs text-gray-500 mt-1">{selectedOwner.email}</p>
-          )}
+          )} */}
         </div>
 
         <div>
@@ -147,9 +147,9 @@ const AuditChecklistEditOwnershipDialog: React.FC<AuditChecklistEditOwnershipDia
             // isLoading={isLoading}
             isDisabled={isSubmitting}
           />
-          {selectedApprover && (
-            <p className="text-xs text-gray-500 mt-1">{selectedApprover.email}</p>
-          )}
+          {/* {selectedApprover && (
+            <p className="text-xs text-gray-500 mt-1">Approver Email: {selectedApprover.email}</p>
+          )} */}
         </div>
       </div>
 
