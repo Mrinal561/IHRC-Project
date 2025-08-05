@@ -10,6 +10,7 @@ import httpClient from '@/api/http-client'
 import { endpoints } from '@/api/endpoint'
 import AuditChecklistDetailDialog from './AuditChecklistDetailDialog'
 import AuditChecklistEditDialog from './AuditChecklistEditDialog'
+import AuditChecklistEditOwnershipDialog from './AuditChecklistEditOwnershipDialog'
 
 export type AuditChecklistData = {
     id: number
@@ -93,6 +94,8 @@ const AuditChecklistTable: React.FC<AuditChecklistTableProps> = ({
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [selectedItem, setSelectedItem] = useState<AuditChecklistData | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [editOwnershipDialogOpen, setEditOwnershipDialogOpen] = useState(false);
+
 
     const handleViewDetail = (item: AuditChecklistData) => {
         setSelectedItem(item)
@@ -314,22 +317,17 @@ const AuditChecklistTable: React.FC<AuditChecklistTableProps> = ({
                 id: 'actions',
                 cell: ({ row }) => (
                     <div className="flex space-x-2">
-                        {/* <Tooltip title="View Details" placement="top">
-                            <Button
-                                onClick={() => handleViewDetail(row.original)}
-                                icon={<RiEyeLine />}
-                                size='sm'
-                                className='hover:bg-transparent'
-                            />
-                        </Tooltip> */}
-                        {/* <Tooltip title="Edit" placement="top">
-                            <Button
-                                onClick={() => handleEdit(row.original)}
-                                icon={<MdEdit />}
-                                size='sm'
-                                className='hover:bg-transparent'
-                            />
-                        </Tooltip> */}
+                        <Tooltip title="Change Ownership" placement="top">
+        <Button
+          onClick={() => {
+            setSelectedItem(row.original);
+            setEditOwnershipDialogOpen(true);
+          }}
+          icon={<MdEdit />}
+          size='sm'
+          className='hover:bg-transparent'
+        />
+      </Tooltip>
                         <Tooltip title="Delete" placement="top">
                             <Button
                                 onClick={() => handleDelete(row.original)}
@@ -389,14 +387,14 @@ const AuditChecklistTable: React.FC<AuditChecklistTableProps> = ({
                     )}
 
                     {/* Edit Dialog */}
-                    {selectedItem && (
-                        <AuditChecklistEditDialog
-                            isOpen={editDialogOpen}
-                            onClose={() => setEditDialogOpen(false)}
-                            checklist={selectedItem}
-                            onSuccess={onRefresh}
-                        />
-                    )}
+                   {selectedItem && (
+  <AuditChecklistEditOwnershipDialog
+    isOpen={editOwnershipDialogOpen}
+    onClose={() => setEditOwnershipDialogOpen(false)}
+    checklist={selectedItem}
+    onSuccess={onRefresh}
+  />
+)}
 
                     {/* Delete Confirmation Dialog */}
                     <Dialog

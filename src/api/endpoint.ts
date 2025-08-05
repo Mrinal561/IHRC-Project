@@ -130,7 +130,8 @@ export const endpoints = {
         creteCertificate: () => api('companyadmin/compliance/checklists/compliance-certificate'),
         downloadCertificate: (id:any) => api(`companyadmin/compliance/checklists/compliance-certificate/download/${id}`),
         bulkCustomCompliance: () => api('companyadmin/compliance/checklists/bulk-upload-custom-checklist'),
-        dueComplianceDocumentDownload: (id:any) => api(`/companyadmin/compliance/checklists/due-compliance-document/${id}`)
+        dueComplianceDocumentDownload: (id:any) => api(`/companyadmin/compliance/checklists/due-compliance-document/${id}`),
+        updateComplianceOwnership: (id:any) => api(`companyadmin/compliance/checklists/update-ownership/${id}`)
     },
     esiSetup: {
         getAll: () => api('companyadmin/esisetup'),
