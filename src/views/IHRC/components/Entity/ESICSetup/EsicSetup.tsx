@@ -267,7 +267,7 @@ const CompanyESISetupPage: React.FC = () => {
                         className="mr-2"
                     ></Button>
                     <h1 className="text-2xl font-bold">
-                        {actualCompanyName}- ESI Setup
+                        {actualCompanyName}- ESI Setup1
                     </h1>
                 </div>
                 <div className='flex gap-2'>
