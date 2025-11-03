@@ -192,12 +192,12 @@ const UserAddForm = () => {
     const loadCompanies = async (groupId: string[] | number[]) => {
         try {
             console.log('Loading companies for group:', groupId)
-            const { data } = await httpClient.get(endpoints.company.getAll(), {
+            const { data } = await httpClient.get(endpoints.company.companyList(), {
                 params: {
                     'group_id[]': Array.isArray(groupId) ? groupId : [groupId],
                 },
             })
-            const formattedCompanies = data?.data?.map((company: any) => ({
+            const formattedCompanies = data?.map((company: any) => ({
                 label: company.name,
                 value: String(company.id),
             }))
@@ -631,14 +631,14 @@ const UserAddForm = () => {
 <div className="flex flex-col gap-2">
     <p className="mb-2">PAN</p>
     <Field
-        name="pan"
+        name="pan_card"
         render={({ field }) => (
             <OutlinedInput
                 {...field}
                 label="Enter PAN"
                 value={values.pan_card}
                 onChange={(value: string) =>
-                    setFieldValue('pan', value)
+                    setFieldValue('pan_card', value)
                 }
                 error={touched.pan_card && errors.pan_card}
             />
