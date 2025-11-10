@@ -174,7 +174,7 @@ const AssignChecklistButton = ({
  
     return (
         <>
-        {canCreate && (
+        {/* {canCreate && ( */}
             <Button
                 variant="solid"
                 size="sm"
@@ -184,7 +184,7 @@ const AssignChecklistButton = ({
             >
                Assign Checklist
             </Button>
-        )}
+        {/* )} */}
             <Dialog
                 isOpen={isDialogOpen}
                 onClose={handleCancel}

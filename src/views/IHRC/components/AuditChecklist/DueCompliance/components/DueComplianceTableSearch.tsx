@@ -1,17 +1,30 @@
-import Input from '@/components/ui/Input'
-import { HiOutlineSearch } from 'react-icons/hi'
+import React, { useState } from 'react';
+import { Input } from '@/components/ui';
+import { HiOutlineSearch } from 'react-icons/hi';
 
-
-const DueComplianceTableSearch = () => {
-
-    return (
-        <Input
-            className="max-w-md md:w-52 md:mb-0 mb-4"
-            size="sm"
-            placeholder="Search compliance"
-            prefix={<HiOutlineSearch className="text-lg" />}
-        />
-    )
+interface DueComplianceTableSearchProps {
+  onSearch: (searchTerm: string) => void;
 }
 
-export default DueComplianceTableSearch
+const DueComplianceTableSearch: React.FC<DueComplianceTableSearchProps> = ({ onSearch }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    onSearch(value);
+  };
+
+  return (
+    <div className="w-52">
+      <Input
+        placeholder="Search compliance"
+        value={searchTerm}
+        onChange={handleSearch}
+        prefix={<HiOutlineSearch className="text-lg" />}
+      />
+    </div>
+  );
+};
+
+export default DueComplianceTableSearch;

@@ -16,9 +16,45 @@ import { fetchAuthUser } from '@/store/slices/login'
 import { Loading } from '@/components/shared'
 import { useDispatch } from 'react-redux'
 
+// Define all your interfaces at the top of the file
+interface MasterCompliance {
+    id: number
+    uuid: string
+    record_id?: string  // Added this since your table uses MasterCompliance.record_id
+    legislation: string
+    header: string
+    criticality: string
+    description: string
+    scheduled_frequency?: string
+    default_due_date: {
+        first_date: string
+        last_date: string
+    }
+}
+
+interface Owner {
+    id: number
+    name: string
+    email: string
+}
+
+interface ComplianceData {
+    id: number
+    branch_id: number
+    mst_compliance_id: number
+    owner_id: number | null
+    approver_id: number | null
+    status: boolean
+    MasterCompliance: MasterCompliance
+    Owner: Owner | null
+    Approver: Owner | null
+    customized_frequency: string
+    due_date: string
+}
+
 interface SelectOption {
-    label: string
     value: string
+    label: string
 }
 
 interface BranchOption {
@@ -32,7 +68,6 @@ interface Permissions {
     canEdit: boolean
     canDelete: boolean
 }
-
 const getPermissions = (menuItem: any): Permissions => {
     const permissionsObject = menuItem?.permissions || menuItem?.access || {}
     return {
@@ -43,195 +78,168 @@ const getPermissions = (menuItem: any): Permissions => {
     }
 }
 
+const dummyComplianceData: ComplianceData[] = [
+    {
+        id: 1,
+        branch_id: 1,
+        mst_compliance_id: 101,
+        owner_id: 201,
+        approver_id: 301,
+        status: true,
+        customized_frequency: 'monthly',
+        due_date: '2023-12-15',
+        MasterCompliance: {
+            id: 101,
+            uuid: 'comp-001',
+            legislation: 'Environmental Protection Act',
+            header: 'Annual Environmental Report',
+            criticality: 'high',
+            description: 'Submission of annual environmental impact report',
+            scheduled_frequency: 'yearly',
+            default_due_date: {
+                first_date: '2023-12-31',
+                last_date: '2023-12-31'
+            }
+        },
+        Owner: {
+            id: 201,
+            name: 'John Doe',
+            email: 'john.doe@example.com'
+        },
+        Approver: {
+            id: 301,
+            name: 'Jane Smith',
+            email: 'jane.smith@example.com'
+        }
+    },
+    {
+        id: 2,
+        branch_id: 1,
+        mst_compliance_id: 102,
+        owner_id: 202,
+        approver_id: 302,
+        status: true,
+        customized_frequency: 'quarterly',
+        due_date: '2023-09-30',
+        MasterCompliance: {
+            id: 102,
+            uuid: 'comp-002',
+            legislation: 'Labor Standards Regulation',
+            header: 'Quarterly Safety Inspection',
+            criticality: 'medium',
+            description: 'Workplace safety inspection report',
+            scheduled_frequency: 'quarterly',
+            default_due_date: {
+                first_date: '2023-09-30',
+                last_date: '2023-09-30'
+            }
+        },
+        Owner: {
+            id: 202,
+            name: 'Robert Johnson',
+            email: 'robert.j@example.com'
+        },
+        Approver: {
+            id: 302,
+            name: 'Emily Davis',
+            email: 'emily.d@example.com'
+        }
+    },
+    {
+        id: 3,
+        branch_id: 2,
+        mst_compliance_id: 103,
+        owner_id: null,
+        approver_id: null,
+        status: false,
+        customized_frequency: '',
+        due_date: '',
+        MasterCompliance: {
+            id: 103,
+            uuid: 'comp-003',
+            legislation: 'Financial Compliance Act',
+            header: 'Annual Financial Audit',
+            criticality: 'high',
+            description: 'Submission of audited financial statements',
+            scheduled_frequency: 'yearly',
+            default_due_date: {
+                first_date: '2023-12-31',
+                last_date: '2023-12-31'
+            }
+        },
+        Owner: null,
+        Approver: null
+    },
+    {
+        id: 4,
+        branch_id: 2,
+        mst_compliance_id: 104,
+        owner_id: 203,
+        approver_id: 303,
+        status: true,
+        customized_frequency: 'half_yearly',
+        due_date: '2023-06-30',
+        MasterCompliance: {
+            id: 104,
+            uuid: 'comp-004',
+            legislation: 'Health and Safety Regulations',
+            header: 'Bi-annual Safety Training',
+            criticality: 'medium',
+            description: 'Employee safety training certification',
+            scheduled_frequency: 'half_yearly',
+            default_due_date: {
+                first_date: '2023-06-30',
+                last_date: '2023-12-31'
+            }
+        },
+        Owner: {
+            id: 203,
+            name: 'Sarah Williams',
+            email: 'sarah.w@example.com'
+        },
+        Approver: {
+            id: 303,
+            name: 'Michael Brown',
+            email: 'michael.b@example.com'
+        }
+    }
+];
+
+const dummyUserOptions: SelectOption[] = [
+    { value: '201', label: 'John Doe' },
+    { value: '202', label: 'Robert Johnson' },
+    { value: '203', label: 'Sarah Williams' },
+    { value: '301', label: 'Jane Smith' },
+    { value: '302', label: 'Emily Davis' },
+    { value: '303', label: 'Michael Brown' }
+];
+
 const AssignChecklist = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const [isLoading, setIsLoading] = useState(false)
-    const [assignedData, setAssignedData] = useState([])
+    const [assignedData, setAssignedData] = useState<ComplianceData[]>(dummyComplianceData)
     const [tableKey, setTableKey] = useState(0)
-    const [selectedBranch, setSelectedBranch] = useState<BranchOption | null>(
-        null,
-    )
+    const [selectedBranch, setSelectedBranch] = useState<BranchOption | null>(null)
     const [selectedIds, setSelectedIds] = useState<number[]>([])
-    const [selectedCompanyGroup, setSelectedCompanyGroup] =
-        useState<SelectOption | null>(null)
-    const [selectedCompany, setSelectedCompany] = useState<SelectOption | null>(
-        null,
-    )
-    const [selectedState, setSelectedState] = useState<SelectOption | null>(
-        null,
-    )
-    const [selectedDistrict, setSelectedDistrict] =
-        useState<SelectOption | null>(null)
-    const [selectedLocation, setSelectedLocation] =
-        useState<SelectOption | null>(null)
+    const [selectedCompanyGroup, setSelectedCompanyGroup] = useState<SelectOption | null>(null)
+    const [selectedCompany, setSelectedCompany] = useState<SelectOption | null>(null)
+    const [selectedState, setSelectedState] = useState<SelectOption | null>(null)
+    const [selectedDistrict, setSelectedDistrict] = useState<SelectOption | null>(null)
+    const [selectedLocation, setSelectedLocation] = useState<SelectOption | null>(null)
 
     const [pagination, setPagination] = useState({
-        total: 0,
+        total: dummyComplianceData.length,
         pageIndex: 1,
         pageSize: 10,
     })
 
     const [permissions, setPermissions] = useState<Permissions>({
-        canList: false,
-        canCreate: false,
-        canEdit: false,
-        canDelete: false,
+        canList: true,
+        canCreate: true,
+        canEdit: true,
+        canDelete: true,
     })
-    const [isInitialized, setIsInitialized] = useState(false)
-    const [permissionCheckComplete, setPermissionCheckComplete] =
-        useState(false)
-
-    //permission check section
-    useEffect(() => {
-        const initializeAuth = async () => {
-            try {
-                const response = await dispatch(fetchAuthUser())
-
-                // Check if moduleAccess exists in response
-                if (!response.payload?.moduleAccess) {
-                    toast.push(
-                        <Notification title="Permission" type="danger">
-                            You don't have access to any modules
-                        </Notification>,
-                    )
-                    navigate('/home')
-                    setPermissionCheckComplete(true)
-                    setIsInitialized(true)
-                    return
-                }
-
-                // Find Remittance Tracker module
-                const remittanceModule = response.payload.moduleAccess?.find(
-                    (module: any) => module.id === 2,
-                )
-
-                if (!remittanceModule) {
-                    toast.push(
-                        <Notification title="Permission" type="danger">
-                            You don't have access to this module
-                        </Notification>,
-                    )
-                    navigate('/home')
-                    setPermissionCheckComplete(true)
-                    setIsInitialized(true)
-                    return
-                }
-
-                // Find PF Tracker menu item
-                const recommendedMenu = remittanceModule.menus?.find(
-                    (menu: any) => menu.id === 10,
-                )
-
-                if (!recommendedMenu) {
-                    toast.push(
-                        <Notification title="Permission" type="danger">
-                            You don't have access to this menu
-                        </Notification>,
-                    )
-                    navigate('/home')
-                    setPermissionCheckComplete(true)
-                    setIsInitialized(true)
-                    return
-                }
-
-                // Get and set permissions only once
-                const newPermissions = getPermissions(recommendedMenu)
-                setPermissions(newPermissions)
-                setIsInitialized(true)
-
-                // If no list permission, show notification and redirect
-                if (!newPermissions.canList) {
-                    toast.push(
-                        <Notification title="Permission" type="danger">
-                            You don't have permission to view the Assigned List
-                        </Notification>,
-                    )
-                    navigate('/home')
-                }
-                setPermissionCheckComplete(true)
-            } catch (error) {
-                console.error('Error fetching auth user:', error)
-                toast.push(
-                    <Notification title="Error" type="danger">
-                        Failed to check permissions. Please try again later.
-                    </Notification>,
-                )
-                navigate('/home')
-                setIsInitialized(true)
-                setPermissionCheckComplete(true)
-            }
-        }
-
-        if (!isInitialized) {
-            initializeAuth()
-        }
-    }, [dispatch, isInitialized, navigate])
-
-    const fetchAssignedData = useCallback(
-        async (page: number = 1, pageSize: number = 10) => {
-            setIsLoading(true)
-
-            try {
-                const params: any = {
-                    page,
-                    page_size: pageSize,
-                    'branch_id[]': selectedBranch?.value,
-                    'group_id[]': selectedCompanyGroup?.value,
-                    'company_id[]': selectedCompany?.value,
-                    'tate_id[]': selectedState?.value,
-                    'district_id[]': selectedDistrict?.value,
-                    'location_id[]': selectedLocation?.value,
-                }
-
-                Object.keys(params).forEach((key) => {
-                    if (!params[key]) {
-                        delete params[key]
-                    }
-                })
-
-                const response = await httpClient.get(
-                    endpoints.assign.getAll(),
-                    {
-                        params,
-                    },
-                )
-
-                if (response?.data?.data) {
-                    setAssignedData(response.data.data)
-                    setPagination((prev) => ({
-                        ...prev,
-                        total: response.data.paginate_data.totalResults,
-                    }))
-                } else {
-                    console.log(
-                        'No data in API response or unexpected response structure',
-                    )
-                }
-            } catch (error) {
-                console.error('Error fetching assigned data:', error)
-                toast.push(
-                    <Notification title="Error" closable={true} type="danger">
-                        Failed to fetch assigned checklist data
-                    </Notification>,
-                )
-            } finally {
-                setIsLoading(false)
-            }
-        },
-        [
-            selectedBranch,
-            selectedCompanyGroup,
-            selectedCompany,
-            selectedState,
-            selectedDistrict,
-            selectedLocation,
-        ],
-    )
-
-    useEffect(() => {
-        fetchAssignedData(pagination.pageIndex, pagination.pageSize)
-    }, [fetchAssignedData, pagination.pageIndex, pagination.pageSize])
 
     const handleSelectedIdsChange = (ids: number[]) => {
         console.log('Selected IDs:', ids)
@@ -239,7 +247,6 @@ const AssignChecklist = () => {
     }
 
     const refreshTableAndReset = () => {
-        fetchAssignedData()
         setSelectedIds([])
         setTableKey((prevKey) => prevKey + 1)
     }
@@ -259,25 +266,6 @@ const AssignChecklist = () => {
             pageSize: newPageSize,
             pageIndex: 1,
         }))
-    }
-
-    console.log('Rendering AssignChecklist component', {
-        isLoading,
-        tableKey,
-        dataLength: assignedData.length,
-    })
-
-    if (!isInitialized || !permissionCheckComplete) {
-        return (
-            <Loading loading={true} type="default">
-                <div className="h-full" />
-            </Loading>
-        )
-    }
-
-    // Only render if we have list permission
-    if (!permissions.canList) {
-        return null
     }
 
     return (

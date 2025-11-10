@@ -215,7 +215,7 @@ const ViewDetailsButton = ({
                     onClick={handleViewDetails}
                 />
             </Tooltip>
-            {canCreate&&(
+            {/* {canCreate&&( */}
             <Tooltip title="Assign Compliance">
                 <Button
                     size="sm"
@@ -223,7 +223,7 @@ const ViewDetailsButton = ({
                     icon={<RiCheckLine />}
                 />
             </Tooltip>
-            )}
+            {/* )} */}
         </div>
     );
 };
@@ -256,6 +256,157 @@ const RecommendedTable = ({
         query: '',
         sort: { order: '', key: '' },
     })
+
+    const dummyData: ComplianceData[] = [
+        {
+            id: '1',
+            uuid: 'dummy-1',
+            legislation: 'Labour Act',
+            category: 'Employment',
+            header: 'Minimum Wage Compliance',
+            description: 'Ensure all employees are paid at least the minimum wage',
+            penalty_description: 'Fine up to ₹50,000',
+            applicablility: 'All industries',
+            bare_act_text: 'Section 4 of Labour Act',
+            caluse: '4.1.2',
+            type: 'Monthly',
+            frequency: 'Monthly',
+            scope: 'National',
+            state_id: 1,
+            statutory_auth: 'Labour Department',
+            approval_required: false,
+            criticality: 'high',
+            penalty_type: 'Monetary',
+            default_due_date: {
+                first_date: '2023-06-01',
+                second_date: '2023-06-15',
+                third_date: '2023-06-20',
+                last_date: '2023-06-30',
+            },
+            proof_mandatory: true,
+            created_type: 'System',
+            created_at: '2023-01-01',
+        },
+        {
+            id: '2',
+            uuid: 'dummy-2',
+            legislation: 'Factory Act',
+            category: 'Safety',
+            header: 'Fire Safety Compliance',
+            description: 'Install and maintain fire safety equipment',
+            penalty_description: 'Fine up to ₹1,00,000',
+            applicablility: 'Manufacturing',
+            bare_act_text: 'Section 38 of Factory Act',
+            caluse: '38.5',
+            type: 'Quarterly',
+            frequency: 'Quarterly',
+            scope: 'State',
+            state_id: 2,
+            statutory_auth: 'Factory Inspectorate',
+            approval_required: true,
+            criticality: 'medium',
+            penalty_type: 'Monetary',
+            default_due_date: {
+                first_date: '2023-03-01',
+                second_date: '2023-03-15',
+                third_date: '2023-03-20',
+                last_date: '2023-03-31',
+            },
+            proof_mandatory: true,
+            created_type: 'System',
+            created_at: '2023-01-01',
+        },
+        {
+            id: '3',
+            uuid: 'dummy-3',
+            legislation: 'Environmental Protection Act',
+            category: 'Environment',
+            header: 'Waste Disposal Compliance',
+            description: 'Proper disposal of hazardous waste materials',
+            penalty_description: 'Fine up to ₹2,00,000',
+            applicablility: 'All industries',
+            bare_act_text: 'Section 12 of EPA',
+            caluse: '12.3.1',
+            type: 'Annual',
+            frequency: 'Annual',
+            scope: 'National',
+            state_id: 3,
+            statutory_auth: 'Pollution Control Board',
+            approval_required: true,
+            criticality: 'high',
+            penalty_type: 'Monetary',
+            default_due_date: {
+                first_date: '2023-12-01',
+                second_date: '2023-12-15',
+                third_date: '2023-12-20',
+                last_date: '2023-12-31',
+            },
+            proof_mandatory: false,
+            created_type: 'System',
+            created_at: '2023-01-01',
+        },
+        {
+            id: '4',
+            uuid: 'dummy-4',
+            legislation: 'Shops and Establishments Act',
+            category: 'Operations',
+            header: 'Working Hours Compliance',
+            description: 'Maintain proper working hours records',
+            penalty_description: 'Fine up to ₹25,000',
+            applicablility: 'Retail',
+            bare_act_text: 'Section 8 of S&E Act',
+            caluse: '8.2',
+            type: 'Monthly',
+            frequency: 'Monthly',
+            scope: 'State',
+            state_id: 4,
+            statutory_auth: 'Labour Department',
+            approval_required: false,
+            criticality: 'low',
+            penalty_type: 'Monetary',
+            default_due_date: {
+                first_date: '2023-05-01',
+                second_date: '2023-05-15',
+                third_date: '2023-05-20',
+                last_date: '2023-05-31',
+            },
+            proof_mandatory: true,
+            created_type: 'System',
+            created_at: '2023-01-01',
+        },
+        {
+            id: '5',
+            uuid: 'dummy-5',
+            legislation: 'Employee Provident Fund',
+            category: 'Benefits',
+            header: 'PF Contribution Compliance',
+            description: 'Timely deposit of employee PF contributions',
+            penalty_description: 'Fine up to ₹10,000 per month delay',
+            applicablility: 'All organizations with 20+ employees',
+            bare_act_text: 'EPF Act Section 6',
+            caluse: '6.1',
+            type: 'Monthly',
+            frequency: 'Monthly',
+            scope: 'National',
+            state_id: 5,
+            statutory_auth: 'EPFO',
+            approval_required: false,
+            criticality: 'high',
+            penalty_type: 'Monetary',
+            default_due_date: {
+                first_date: '2023-04-15',
+                second_date: '2023-04-20',
+                third_date: '2023-04-25',
+                last_date: '2023-04-30',
+            },
+            proof_mandatory: true,
+            created_type: 'System',
+            created_at: '2023-01-01',
+        }
+    ];
+
+    // Use dummy data if no real data is provided
+    const displayData = data.length > 0 ? data : dummyData;
  
     useEffect(() => {
         setSelectedItems(new Set());
@@ -340,15 +491,15 @@ const RecommendedTable = ({
                     </div>
                 ),
             },
-            {
-                header: 'ID',
-                accessorKey: 'record_id',
-                cell: (props) => (
-                    <Tooltip title={`ID: ${props.getValue()}`} placement="top">
-                        <div className="w-24 truncate">{props.getValue()}</div>
-                    </Tooltip>
-                ),
-            },
+            // {
+            //     header: 'ID',
+            //     accessorKey: 'record_id',
+            //     cell: (props) => (
+            //         <Tooltip title={`ID: ${props.getValue()}`} placement="top">
+            //             <div className="w-24 truncate">{props.getValue()}</div>
+            //         </Tooltip>
+            //     ),
+            // },
             {
                 header: 'Scope',
                 accessorKey: 'scope',
@@ -510,7 +661,7 @@ const RecommendedTable = ({
             ) : (
             <DataTable
                 columns={columns}
-                data={data}
+                data={displayData}
                 skeletonAvatarColumns={[0]}
                 skeletonAvatarProps={{ className: 'rounded-md' }}
                 loading={loading}

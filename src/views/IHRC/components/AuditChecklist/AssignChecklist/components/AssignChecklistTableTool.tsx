@@ -885,12 +885,12 @@ const AssignChecklistTableTool: React.FC<AssignChecklistTableToolProps> = ({
             </div>
             <div className="flex items-center gap-3">
                 <BulkAlertButton />
-                {canCreate && (
+                {/* {canCreate && (/ */}
                     <BulkSetOwnerApproverButton
                         selectedIds={selectedIds}
                         refreshTable={refreshTable}
                     />
-                )}
+                {/* )} */}
             </div>
         </div>
     )

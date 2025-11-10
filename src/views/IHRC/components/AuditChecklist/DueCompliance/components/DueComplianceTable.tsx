@@ -8,97 +8,121 @@ import {
     Input,
     toast,
     Notification,
+    Badge,
+    DatePicker,
 } from '@/components/ui'
 import { RiEyeLine } from 'react-icons/ri'
-import { MdEdit } from 'react-icons/md'
-import { HiDocumentDownload } from 'react-icons/hi'
-import OutlinedSelect from '@/components/ui/Outlined'
-import { updateStatus } from '@/store/slices/dueCompliance/statusUpdateSlice'
-import { useDispatch } from 'react-redux'
-import { StatusRequest } from '@/@types/status'
+import { HiUpload, HiCheck, HiX } from 'react-icons/hi'
 import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json'
 import Lottie from 'lottie-react'
 import { HiOutlineViewGrid } from 'react-icons/hi'
+import httpClient from '@/api/http-client'
+import { endpoints } from '@/api/endpoint'
+import OutlinedSelect from '@/components/ui/Outlined/Outlined'
+import dayjs from 'dayjs'
+import { FiFile } from 'react-icons/fi'
+
+interface DetailRowProps {
+    label: string
+    value?: React.ReactNode
+    children?: React.ReactNode
+}
 
 export type DueComplianceDetailData = {
     id: number
     uuid: string
-    ac_compliance_id: number
-    proof_document: string | null
-    status: 'pending' | 'completed' | 'due' | 'overdue'
-    compliance_detail: {
-        id: number
-        uuid: string
-        legislation: string
-        category: string
-        penalty_type: string
-        default_due_date: {
-            first_date: string
-            last_date: string
-        }
-        scheduled_frequency: string
-        proof_mandatory: boolean
-        header: string
-        description: string
-        penalty_description: string
-        applicability: string
-        bare_act_text: string
-        type: string
-        clause: string
-        frequency: string
-        statutory_auth: string
-        approval_required: boolean
-        criticality: string
-        created_type: string
-        created_at: string
-        updated_at: string
+    compliance_id: number
+    group_id: number
+    company_id: number
+    branch_id: number
+    state_id: number
+    status:
+        | 'pending'
+        | 'submitted'
+        | 'approved_by_approver'
+        | 'rejected_by_approver'
+        | 'approved_by_auditor'
+        | 'rejected_by_auditor'
+    compliance_header: string
+    compliance_description: string
+    applicable: string
+    legislation_act: string
+    compliance_categorization: string
+    penalty_type: string
+    penalty_description: string
+    compliance_applicability: string
+    compliance_reference: string
+    compliance_type: string
+    compliance_frequency: string
+    criticality: string
+    actual_date_of_payment: string | null; 
+    due_date_frequency: string
+    due_dates: {
+        first_due_date: string | null
+        second_due_date: string | null
+        third_due_date: string | null
+        last_due_date: string | null
     }
-    upload_date: string | null
-    first_due_date: string | null
-    due_date: string
-    data_status: string
-    uploaded_by: number | null
-    approved_by: number | null
+    owner_id: number
+    approver_id: number
+    rejection_reason: string | null
+    document: string | null
+    month: string
     created_by: number
     created_at: string
     updated_at: string
-    UploadBy: {
+    original_filename: string | null
+    mime_type: string | null
+    uploaded_at: string | null
+    uploaded_by: number | null
+    proof_mandatory: boolean
+    ComplianceChecklist: {
         id: number
-        first_name: string
-        last_name: string
-        email: string
-        mobile: number
-    } | null
-    ApprovedBy: {
+        compliance_header: string
+        compliance_description: string
+        legislation_act: string
+        is_active: boolean
+    }
+    CompanyGroup: {
         id: number
         name: string
-    } | null
-    AssignedComplianceRemark: Array<{
+    }
+    Company: {
         id: number
-        remark: string
-        created_by: number
-        created_at: string
-        updated_at: string
-    }>
-}
-const StatusOption = {
-    statusOption: [
-        { value: 'complied', label: 'Complied' },
-        { value: 'not_complied', label: 'Not Complied' },
-        { value: 'not_applicable', label: 'Not Applicable' },
-    ],
+        name: string
+    }
+    Branch: {
+        id: number
+        name: string
+    }
+    State: {
+        id: number
+        name: string
+    }
+    owner: {
+        id: number
+        name: string
+        email: string
+    }
+    approver: {
+        id: number
+        name: string
+        email: string
+    }
 }
 
 interface ComplianceDetailTableProps {
     data: DueComplianceDetailData[]
     loading?: boolean
-    onViewDetail?: (compliance: DueComplianceDetailData) => void
-    onUpdateStatus?: (
-        id: number,
-        status: DueComplianceDetailData['status'],
+    selectedRole: 'owner' | 'approver' | 'auditor'
+    onUploadSingle?: (complianceId: number, file: File, remark: string) => void
+    onApprove?: (complianceId: number, complianceStatus: string) => void
+    onReject?: (
+        complianceId: number,
+        reason: string,
+        complianceStatus: string,
     ) => void
-    onDownloadProof?: (documentUrl: string) => void
-    onDataUpdate?: () => void
+    onViewDetails?: (complianceId: number) => Promise<any>
     pagination: {
         total: number
         pageIndex: number
@@ -107,298 +131,766 @@ interface ComplianceDetailTableProps {
     onPaginationChange: (page: number) => void
     onPageSizeChange: (pageSize: number) => void
     canCreate: boolean
+    fetchData: () => Promise<void>; 
+}
+
+const DetailRow: React.FC<DetailRowProps> = ({ label, value, children }) => (
+    <div className="grid grid-cols-3 gap-2">
+        <span className="text-gray-600 font-medium">{label}:</span>
+        <span className="col-span-2">
+            {value || children || (
+                <span className="text-gray-400">Not available</span>
+            )}
+        </span>
+    </div>
+)
+
+const capitalizeFirstLetter = (str?: string) => {
+    if (!str) return ''
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }
 
 const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
-    data,
+    data = [],
     loading,
-    onViewDetail,
-    onUpdateStatus,
-    onDownloadProof,
-    onDataUpdate,
+    selectedRole,
+    onUploadSingle,
+    onApprove,
+    onReject,
+    onViewDetails,
     pagination,
     onPaginationChange,
     onPageSizeChange,
     canCreate,
+    fetchData
 }) => {
-    const [tableData, setTableData] = useState({
-        total: data.length,
-        pageIndex: 1,
-        pageSize: 10,
-        query: '',
-        sort: { order: '', key: '' },
-    })
-
     const [selectedCompliance, setSelectedCompliance] =
         useState<DueComplianceDetailData | null>(null)
-    const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
-    const [selectedStatus, setSelectedStatus] = useState<StatusOption | null>(
-        null,
-    )
+    const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
+    const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
+    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+    const [complianceDetails, setComplianceDetails] = useState<any>(null)
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [remark, setRemark] = useState('')
-    const [dialogIsOpen, setDialogIsOpen] = useState(false)
-    const dispatch = useDispatch()
+    const [rejectReason, setRejectReason] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [complianceStatus, setComplianceStatus] = useState<string>('')
+    const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false)
+    const [actualDateOfPayment, setActualDateOfPayment] = useState<string | null>(null);
+    const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
-    const onDialogClose = useCallback(() => {
-        setDialogIsOpen(false)
-        setSelectedFile(null)
-        setSelectedCompliance(null)
-        setSelectedStatus(null)
-        setRemark('')
-    }, [])
 
-    const handleStatusUpdate = (compliance: DueComplianceDetailData) => {
-        setSelectedCompliance(compliance)
-        setIsStatusDialogOpen(true)
-    }
-    const onStatusChange = useCallback((value: StatusOption) => {
-        console.log('Status changed to:', value)
-        setSelectedStatus(value)
-    }, [])
-
-    const handleUpdateStatus = async () => {
-        // if (!selectedCompliance || !selectedStatus) {
-        //   toast.push(
-        //     <Notification title="Error" closable={true} type="danger">
-        //       Please select a status and provide a remark.
-        //     </Notification>
-        //   );
-        //   return;
-        // }
-
-        const formData = new FormData()
-        formData.append('status', selectedStatus.value)
-        formData.append('remark', remark)
-
-        if (selectedCompliance?.compliance_detail.proof_mandatory) {
-            if (!selectedFile) {
-                toast.push(
-                    <Notification title="Error" closable={true} type="danger">
-                        Please upload the proof of compliance.
-                    </Notification>,
-                )
-                return
-            }
-            formData.append('document', selectedFile)
-        } else if (selectedFile) {
-            formData.append('document', selectedFile)
-        }
-
+     const handleDownloadDocument = async (complianceId: number) => {
         try {
-            console.log(selectedFile)
-            const res = await dispatch(
-                updateStatus({
-                    id: selectedCompliance.id.toString(),
-                    data: formData,
-                }),
-            )
-                .unwrap()
-                .catch((error: any) => {
-                    error.map((v: string) =>
-                        toast.push(
-                            <Notification
-                                title="Error"
-                                closable={true}
-                                type="danger"
-                            >
-                                {v}
-                            </Notification>,
-                        ),
-                    )
-                })
-            if (res) {
-                setIsStatusDialogOpen(false)
-                onDialogClose()
-                toast.push(
-                    <Notification title="Success" type="success">
-                        Status updated successfully.
-                    </Notification>,
-                )
+            setDownloadingId(complianceId);
+            
+            const response = await httpClient.get(
+                endpoints.compliance.dueComplianceDocumentDownload(complianceId),
+                { 
+                    responseType: 'blob',
+                    headers: {
+                        'Accept': 'application/pdf'
+                    }
+                }
+            );
+
+            // Extract filename from Content-Disposition header or use the original filename
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = 'document.pdf'; // Default fallback
+            
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="?(.+\.pdf)"?/i);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1].replace(/['"]/g, '');
+                }
+            } else if (selectedCompliance?.original_filename) {
+                filename = selectedCompliance.original_filename;
             }
 
-            if (onDataUpdate) {
-                onDataUpdate()
+            // Create blob with explicit PDF type
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(link);
+            }, 100);
+
+            toast.push(
+                <Notification title="Success" type="success" duration={2500}>
+                    Download started successfully
+                </Notification>
+            );
+        } catch (error) {
+            console.error('Error downloading document:', error);
+            toast.push(
+                <Notification title="Error" type="danger" duration={2500}>
+                    Failed to download document
+                </Notification>
+            );
+        } finally {
+            setDownloadingId(null);
+        }
+    };
+
+
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case 'pending':
+                return (
+                    <Badge className="bg-yellow-100 text-yellow-800">
+                        Pending
+                    </Badge>
+                )
+            case 'submitted':
+                return (
+                    <Badge className="bg-blue-100 text-blue-800">
+                        Submitted
+                    </Badge>
+                )
+            case 'approved_by_approver':
+                return (
+                    <Badge className="bg-green-100 text-green-800">
+                        Approved (Approver)
+                    </Badge>
+                )
+            case 'rejected_by_approver':
+                return (
+                    <Badge className="bg-red-100 text-red-800">
+                        Rejected (Approver)
+                    </Badge>
+                )
+            case 'approved_by_auditor':
+                return (
+                    <Badge className="bg-green-100 text-green-800">
+                        Approved (Auditor)
+                    </Badge>
+                )
+            case 'rejected_by_auditor':
+                return (
+                    <Badge className="bg-red-100 text-red-800">
+                        Rejected (Auditor)
+                    </Badge>
+                )
+            default:
+                return (
+                    <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>
+                )
+        }
+    }
+
+    const ownerStatusOptions = [
+        { label: 'Complied', value: 'complied' },
+        { label: 'Not Complied', value: 'not_complied' },
+        { label: 'Not Applicable', value: 'not_applicable' },
+    ]
+
+    const approverStatusOptions = [
+        { label: 'Complied', value: 'approver_complied' },
+        { label: 'Not Complied', value: 'approver_not_complied' },
+        { label: 'Not Applicable', value: 'approver_not_applicable' },
+    ]
+
+    const auditorStatusOptions = [
+        { label: 'Review & Complied', value: 'review_complied' },
+        { label: 'Review & Not Complied', value: 'review_not_complied' },
+        { label: 'Review & Not Applicable', value: 'review_not_applicable' },
+    ]
+
+    const handleViewDetails = async (compliance: DueComplianceDetailData) => {
+        if (!compliance?.id) return
+
+        setIsLoading(true)
+        try {
+            const details = await onViewDetails?.(compliance.id)
+            if (details) {
+                setComplianceDetails(details)
+                setIsViewDialogOpen(true)
             }
         } catch (error) {
-            console.error('Error updating status:', error)
-            setIsStatusDialogOpen(false)
             toast.push(
-                <Notification title="Error" closable={true} type="danger">
-                    Error updating status.
+                <Notification title="Error" type="danger">
+                    Failed to fetch compliance details
+                </Notification>,
+            )
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+
+    const handleUploadConfirm = async () => {
+    // Check if selectedCompliance is null
+    if (!selectedCompliance) {
+        toast.push(
+            <Notification title="Error" type="danger">
+                No compliance selected
+            </Notification>,
+        );
+        return;
+    }
+
+    // Validate proof mandatory field
+    if (selectedCompliance.proof_mandatory && !selectedFile) {
+        toast.push(
+            <Notification title="Error" type="danger">
+                Document is required for this compliance
+            </Notification>,
+        );
+        return;
+    }
+
+    if (!actualDateOfPayment) {
+        toast.push(
+            <Notification title="Error" type="danger">
+                Actual date of payment is required
+            </Notification>,
+        );
+        return;
+    }
+
+
+    setIsLoading(true);
+
+    try {
+        let base64String = '';
+        if (selectedFile) {
+            base64String = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const result = reader.result as string;
+                    resolve(result.split(',')[1]);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(selectedFile);
+            });
+        }
+
+        const payload = {
+            document: selectedFile ? base64String : undefined,
+            company_id: selectedCompliance.company_id,
+            filename: selectedFile?.name,
+            mimetype: selectedFile?.type,
+            complianceStatus: selectedRole === 'owner' ? complianceStatus : undefined,
+            actual_date_of_payment: dayjs(actualDateOfPayment).format('YYYY-MM-DD')
+
+        };
+
+        const response = await httpClient.post(
+            endpoints.compliance.dueComplianceDocumentUpload(
+                selectedCompliance.id,
+            ),
+            payload,
+        );
+
+        toast.push(
+            <Notification title="Success" type="success">
+                {selectedFile ? 'Document uploaded' : 'Status updated'}
+            </Notification>,
+        );
+        
+        setIsUploadDialogOpen(false);
+        setSelectedFile(null);
+        setRemark('');
+        setComplianceStatus('');
+        setActualDateOfPayment(null);
+        await fetchData();
+    } catch (error: any) {
+        console.error('Upload error:', error);
+        toast.push(
+            <Notification title="Error" type="error">
+                {error.response?.data?.message || 'Operation failed'}
+            </Notification>,
+        );
+    } finally {
+        setIsLoading(false);
+    }
+}
+
+
+
+    const handleApproveConfirm = async () => {
+        if (!complianceStatus) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    Please select a compliance status
+                </Notification>,
+            )
+            return
+        }
+
+        if (!selectedCompliance?.id) return
+
+        try {
+            let endpoint
+            if (selectedRole === 'approver') {
+                endpoint = endpoints.compliance.approveOwnerCompliance(
+                    selectedCompliance.id,
+                )
+            } else if (selectedRole === 'auditor') {
+                endpoint = endpoints.compliance.approveApproverCompliance(
+                    selectedCompliance.id,
+                )
+            } else {
+                throw new Error('Invalid role for approval')
+            }
+
+            const payload = {
+                complianceStatus: complianceStatus,
+            }
+
+            await httpClient.post(endpoint, payload)
+
+            toast.push(
+                <Notification title="Success" type="success">
+                    Compliance approved successfully
+                </Notification>,
+            )
+
+            setIsApproveDialogOpen(false)
+            setComplianceStatus('')
+            await fetchData();
+
+            // Optionally refresh your data here
+        } catch (error: any) {
+            console.error('Approve error:', error)
+            toast.push(
+                <Notification title="Error" type="error">
+                    {error.response?.data?.message ||
+                        'Failed to approve compliance'}
                 </Notification>,
             )
         }
     }
 
-    const getStatusBadgeColor = (status: DueComplianceDetailData['status']) => {
-        switch (status) {
-            case 'completed':
-                return 'text-green-500'
-            case 'pending':
-                return 'text-yellow-500'
-            case 'due':
-                return 'text-blue-500'
-            case 'overdue':
-                return 'text-red-500'
-            default:
-                return 'text-gray-500'
+    const handleRejectConfirm = async () => {
+        if (!rejectReason) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    Please enter a rejection reason
+                </Notification>,
+            )
+            return
+        }
+
+        if (!complianceStatus) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    Please select a compliance status
+                </Notification>,
+            )
+            return
+        }
+
+        if (!selectedCompliance?.id) return
+
+        try {
+            let endpoint
+            if (selectedRole === 'approver') {
+                endpoint = endpoints.compliance.rejectOwnerCompliance(
+                    selectedCompliance.id,
+                )
+            } else if (selectedRole === 'auditor') {
+                endpoint = endpoints.compliance.rejectApproverCompliance(
+                    selectedCompliance.id,
+                )
+            } else {
+                throw new Error('Invalid role for rejection')
+            }
+
+            const payload = {
+                complianceStatus: complianceStatus,
+                rejectionReason: rejectReason,
+            }
+
+            await httpClient.post(endpoint, payload)
+
+            toast.push(
+                <Notification title="Success" type="success">
+                    Compliance rejected successfully
+                </Notification>,
+            )
+
+            setIsRejectDialogOpen(false)
+            setRejectReason('')
+            setComplianceStatus('')
+            await fetchData();
+
+            // Optionally refresh your data here
+        } catch (error: any) {
+            console.error('Reject error:', error)
+            toast.push(
+                <Notification title="Error" type="error">
+                    {error.response?.data?.message ||
+                        'Failed to reject compliance'}
+                </Notification>,
+            )
         }
     }
+
+   const calculateCurrentDueDate = (dueDate: string, frequency: string): string => {
+    if (!dueDate) return 'N/A';
+    
+    const originalDate = new Date(dueDate);
+    const currentDate = new Date();
+    const originalMonth = originalDate.getMonth();
+    const currentMonth = currentDate.getMonth();
+    
+    switch (frequency.toLowerCase()) {
+        case 'monthly':
+            // For monthly, keep the day but use current month and year
+            return new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth(),
+                originalDate.getDate()
+            ).toLocaleDateString();
+            
+        case 'yearly':
+            // For yearly, keep the day and month but use current year
+            return new Date(
+                currentDate.getFullYear(),
+                originalMonth,
+                originalDate.getDate()
+            ).toLocaleDateString();
+            
+        case 'half-yearly':
+            // For half-yearly, we need to determine which half we're in
+            // First half is Jan-Jun, second is Jul-Dec
+            const isFirstHalf = currentMonth < 6;
+            const targetMonth = isFirstHalf ? originalMonth : originalMonth + 6;
+            
+            return new Date(
+                currentDate.getFullYear(),
+                targetMonth,
+                originalDate.getDate()
+            ).toLocaleDateString();
+            
+        case 'quarterly':
+            // For quarterly, we need to determine which quarter we're in
+            const quarter = Math.floor(currentMonth / 3);
+            const targetMonthQuarterly = originalMonth + (quarter * 3);
+            
+            return new Date(
+                currentDate.getFullYear(),
+                targetMonthQuarterly,
+                originalDate.getDate()
+            ).toLocaleDateString();
+            
+        default:
+            // For one-time or unknown frequencies, return the original date
+            return originalDate.toLocaleDateString();
+    }
+}
 
     const columns: ColumnDef<DueComplianceDetailData>[] = useMemo(
         () => [
             {
                 header: 'Compliance ID',
-                accessorKey: 'compliance_detail.record_id',
+                enableSorting: false,
+                accessorKey: 'uuid',
                 cell: (props) => (
-                    <div className="w-24 text-start">{props.getValue()}</div>
+                    <div className="w-40 text-start">
+                        {props.getValue() as string}
+                    </div>
+                ),
+            },
+            {
+                header: 'Header',
+                enableSorting: false,
+                accessorKey: 'compliance_header',
+                cell: (props) => (
+                    <Tooltip title={props.getValue() as string}>
+                        <div className="w-48 truncate">
+                            {capitalizeFirstLetter(props.getValue() as string)}
+                        </div>
+                    </Tooltip>
                 ),
             },
             {
                 header: 'Legislation',
-                accessorFn: (row) => row.compliance_detail.legislation,
+                enableSorting: false,
+                accessorKey: 'legislation_act',
                 cell: (props) => (
-                    <Tooltip title={props.getValue() as string} placement="top">
-                        <div className="w-32 truncate">
-                            {((props.getValue() as string) || '').length > 20
-                                ? `${(props.getValue() as string).substring(0, 20)}...`
-                                : props.getValue()}
+                    <Tooltip title={props.getValue() as string}>
+                        <div className="w-48 truncate">
+                            {capitalizeFirstLetter(props.getValue() as string)}
                         </div>
                     </Tooltip>
                 ),
             },
             {
-                header: 'Criticality',
-                accessorFn: (row) => row.compliance_detail.criticality,
-                cell: (props) => {
-                    const criticality = props.getValue() as string
+                header: 'Category',
+                enableSorting: false,
+                accessorKey: 'compliance_categorization',
+                cell: (props) => (
+                    <Tooltip title={props.getValue() as string} placement="top">
+                        <div className="w-40 truncate">
+                            {capitalizeFirstLetter(props.getValue() as string)}
+                        </div>
+                    </Tooltip>
+                ),
+            },
+            {
+                header: 'Company',
+                enableSorting: false,
+                accessorFn: (row) => row.Company?.name || '--',
+                cell: (props) => (
+                    <div className="w-40">
+                        {capitalizeFirstLetter(props.getValue() as string)}
+                    </div>
+                ),
+            },
+            {
+                header: 'Branch',
+                enableSorting: false,
+                accessorFn: (row) => row.Branch?.name || '--',
+                cell: (props) => (
+                    <div className="w-40">
+                        {capitalizeFirstLetter(props.getValue() as string)}
+                    </div>
+                ),
+            },
+            {
+                header: 'State',
+                enableSorting: false,
+                accessorFn: (row) => row.State?.name || '--',
+                cell: (props) => (
+                    <div className="w-32">
+                        {capitalizeFirstLetter(props.getValue() as string)}
+                    </div>
+                ),
+            },
+            {
+                header: 'Frequency',
+                enableSorting: false,
+                accessorKey: 'compliance_frequency',
+                cell: (props) => (
+                    <div className="w-24">
+                        {capitalizeFirstLetter(props.getValue() as string)}
+                    </div>
+                ),
+            },
+            {
+            header: 'Due Date',
+            enableSorting: false,
+            accessorFn: (row) => row.due_dates?.first_due_date || null,
+            cell: (props) => {
+                const dueDate = props.getValue() as string | null;
+                const frequency = props.row.original.due_date_frequency;
+                
+                const calculatedDueDate = dueDate 
+                    ? calculateCurrentDueDate(dueDate, frequency)
+                    : 'N/A';
+                
+                return (
+                    <div className="w-32">
+                        {calculatedDueDate}
+                    </div>
+                );
+            },
+        },
+        {
+            header: 'Actual Payment Date',
+            enableSorting: false,
+            accessorKey: 'actual_date_of_payment', // Ensure this matches your API response field
+            cell: (props) => (
+                <div className="w-32">
+                    {props.getValue() 
+                        ? dayjs(props.getValue() as string).format('DD-MM-YYYY') 
+                        : 'N/A'
+                    }
+                </div>
+            ),
+        },
+            {
+                header: 'Rejection Reason',
+                enableSorting: false,
+                accessorKey: 'rejection_reason',
+                cell: (props) => (
+                    <div className="w-24">
+                        {capitalizeFirstLetter(props.getValue() as string)}
+                    </div>
+                ),
+            },
+            {
+            header: 'Document',
+            enableSorting: false,
+            accessorKey: 'document',
+            cell: ({ row }) => (
+                <div className="w-40 flex items-center justify-center">
+                    {row.original.document ? (
+                        <Button
+                            size="sm"
+                            variant="plain"
+                            icon={<FiFile className="w-5 h-5 text-blue-600 hover:text-blue-800 transition-colors" />}
+                            onClick={() => handleDownloadDocument(row.original.id)}
+                            loading={downloadingId === row.original.id}
+                            disabled={downloadingId === row.original.id}
+                            title="Download Document"
+                        />
+                    ) : (
+                        <span className="text-gray-400">
+                            <FiFile className="w-5 h-5" />
+                        </span>
+                    )}
+                </div>
+            ),
+        },
+            {
+                header: 'Actions',
+                id: 'actions',
+                cell: ({ row }) => {
+                    const status = row.original.status
+
                     return (
-                        <div className="w-24 font-semibold truncate">
-                            {criticality.toLowerCase() === 'high' ? (
-                                <span className="text-red-500">High</span>
-                            ) : criticality.toLowerCase() === 'medium' ? (
-                                <span className="text-yellow-500">Medium</span>
-                            ) : (
-                                <span className="text-green-500">Low</span>
-                            )}
+                        <div className="flex space-x-2">
+                            <Tooltip title="View Details" placement="top">
+                                <Button
+                                    size="sm"
+                                    onClick={() =>
+                                        handleViewDetails(row.original)
+                                    }
+                                    icon={<RiEyeLine />}
+                                    className="hover:bg-transparent"
+                                />
+                            </Tooltip>
+
+                            {selectedRole === 'owner' &&
+                                status === 'pending' && (
+                                    <Tooltip
+                                        title="Upload Document"
+                                        placement="top"
+                                    >
+                                        <Button
+                                            size="sm"
+                                            onClick={() => {
+                                                setSelectedCompliance(
+                                                    row.original,
+                                                )
+                                                setIsUploadDialogOpen(true)
+                                            }}
+                                            icon={<HiUpload />}
+                                            className="hover:bg-transparent"
+                                        />
+                                    </Tooltip>
+                                )}
+
+                            {selectedRole === 'approver' &&
+                                status === 'submitted' && (
+                                    <>
+                                        <Tooltip
+                                            title="Approve"
+                                            placement="top"
+                                        >
+                                            <Button
+                                                size="sm"
+                                                onClick={() => {
+                                                    setSelectedCompliance(
+                                                        row.original,
+                                                    )
+                                                    setIsApproveDialogOpen(true)
+                                                }}
+                                                icon={<HiCheck />}
+                                                className="hover:bg-transparent text-green-500"
+                                            />
+                                        </Tooltip>
+                                        <Tooltip title="Reject" placement="top">
+                                            <Button
+                                                size="sm"
+                                                onClick={() => {
+                                                    setSelectedCompliance(
+                                                        row.original,
+                                                    )
+                                                    setIsRejectDialogOpen(true)
+                                                }}
+                                                icon={<HiX />}
+                                                className="hover:bg-transparent text-red-500"
+                                            />
+                                        </Tooltip>
+                                    </>
+                                )}
+
+                            {selectedRole === 'auditor' &&
+                                status === 'approved_by_approver' && (
+                                    <>
+                                        <Tooltip
+                                            title="Approve"
+                                            placement="top"
+                                        >
+                                            <Button
+                                                size="sm"
+                                                onClick={() => {
+                                                    setSelectedCompliance(
+                                                        row.original,
+                                                    )
+                                                    setIsApproveDialogOpen(true)
+                                                }}
+                                                icon={<HiCheck />}
+                                                className="hover:bg-transparent text-green-500"
+                                            />
+                                        </Tooltip>
+                                        <Tooltip title="Reject" placement="top">
+                                            <Button
+                                                size="sm"
+                                                onClick={() => {
+                                                    setSelectedCompliance(
+                                                        row.original,
+                                                    )
+                                                    setIsRejectDialogOpen(true)
+                                                }}
+                                                icon={<HiX />}
+                                                className="hover:bg-transparent text-red-500"
+                                            />
+                                        </Tooltip>
+                                    </>
+                                )}
+
+                            {/* {(selectedRole === 'approver' && status === 'submitted') || 
+         (selectedRole === 'auditor' && status === 'approved_by_approver') && (
+          <>
+            <Tooltip title="Approve" placement="top">
+              <Button
+                size="sm"
+                onClick={() => {
+                  setSelectedCompliance(row.original);
+                  setIsApproveDialogOpen(true);
+                }}
+                icon={<HiCheck />}
+                className="hover:bg-transparent text-green-500"
+              />
+            </Tooltip>
+            <Tooltip title="Reject" placement="top">
+              <Button
+                size="sm"
+                onClick={() => {
+                  setSelectedCompliance(row.original);
+                  setIsRejectDialogOpen(true);
+                }}
+                icon={<HiX />}
+                className="hover:bg-transparent text-red-500"
+              />
+            </Tooltip>
+          </>
+        )} */}
                         </div>
                     )
                 },
             },
-            {
-                header: 'Category',
-                accessorFn: (row) => row.compliance_detail.category,
-                cell: (props) => (
-                    <Tooltip title={props.getValue() as string} placement="top">
-                        <div className="w-32 truncate">{props.getValue()}</div>
-                    </Tooltip>
-                ),
-            },
-            {
-                header: 'Due Date',
-                accessorKey: 'due_date',
-                cell: (props) => (
-                    <div className="w-28">
-                        {new Date(
-                            props.getValue() as string,
-                        ).toLocaleDateString()}
-                    </div>
-                ),
-            },
-            {
-                header: 'Status',
-                accessorKey: 'data_status',
-                cell: (props) => (
-                    <div
-                        className={`w-24 font-semibold ${getStatusBadgeColor(props.getValue() as DueComplianceDetailData['status'])}`}
-                    >
-                        {(props.getValue() as string).charAt(0).toUpperCase() +
-                            (props.getValue() as string).slice(1)}
-                    </div>
-                ),
-            },
-            {
-                header: 'Uploaded By',
-                accessorFn: (row) =>
-                    `${row.UploadBy?.first_name || ''} ${row.UploadBy?.last_name || ''}`.trim(),
-                cell: (props) => (
-                    <div className="w-32">{props.getValue() || '--'}</div>
-                ),
-            },
-
-            {
-                header: 'Approved By',
-                accessorFn: (row) => row.ApprovedBy?.name,
-                cell: (props) => (
-                    <div className="w-32">{props.getValue() || '--'}</div>
-                ),
-            },
-            {
-                header: 'Actions',
-                id: 'actions',
-                cell: ({ row }) => (
-                    <div className="flex space-x-2">
-                        {/* <Tooltip title="View Details" placement="top">
-              <Button
-                size="sm"
-                onClick={() => onViewDetail?.(row.original)}
-                icon={<RiEyeLine />}
-                className="hover:bg-transparent"
-              />
-            </Tooltip> */}
-                        {canCreate && (
-                            <Tooltip title="Update Status" placement="top">
-                                <Button
-                                    size="sm"
-                                    onClick={() =>
-                                        handleStatusUpdate(row.original)
-                                    }
-                                    icon={<MdEdit />}
-                                    className="hover:bg-transparent"
-                                />
-                            </Tooltip>
-                        )}
-                        {row.original.proof_document && (
-                            <Tooltip title="Download Proof" placement="top">
-                                <Button
-                                    size="sm"
-                                    onClick={() =>
-                                        onDownloadProof?.(
-                                            row.original
-                                                .proof_document as string,
-                                        )
-                                    }
-                                    icon={<HiDocumentDownload />}
-                                    className="hover:bg-transparent"
-                                />
-                            </Tooltip>
-                        )}
-                    </div>
-                ),
-            },
         ],
-        [onViewDetail, onDownloadProof],
+        [selectedRole, onApprove, onReject, downloadingId],
     )
 
-    const handlePageChange = (page: number) => {
-        setTableData((prev) => ({ ...prev, pageIndex: page }))
-    }
-
-    const handlePageSizeChange = (pageSize: number) => {
-        setTableData((prev) => ({
-            ...prev,
-            pageSize: Number(pageSize),
-            pageIndex: 1,
-        }))
-    }
-
-    if (loading) {
-        console.log('Loading....................')
-
+    if (loading || isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center h-96 text-gray-500  rounded-xl">
+            <div className="flex flex-col items-center justify-center h-96 text-gray-500 rounded-xl">
                 <div className="w-28 h-28">
                     <Lottie
                         animationData={loadingAnimation}
@@ -419,95 +911,560 @@ const ComplianceDetailTable: React.FC<ComplianceDetailTableProps> = ({
                     <p className="text-center">No Data Available</p>
                 </div>
             ) : (
-                <DataTable
-                    columns={columns}
-                    data={data}
-                    skeletonAvatarColumns={[0]}
-                    skeletonAvatarProps={{ className: 'rounded-md' }}
-                    loading={loading}
-                    pagingData={{
-                        total: pagination.total,
-                        pageIndex: pagination.pageIndex,
-                        pageSize: pagination.pageSize,
-                    }}
-                    // Pass the pagination handlers
-                    onPaginationChange={onPaginationChange}
-                    onSelectChange={onPageSizeChange}
-                    stickyHeader={true}
-                    stickyFirstColumn={true}
-                    stickyLastColumn={true}
-                />
-            )}
-            <Dialog
-                isOpen={isStatusDialogOpen}
-                onClose={() => setIsStatusDialogOpen(false)}
-                shouldCloseOnOverlayClick={false}
-            >
-                <h5 className="mb-4">Change Compliance Status</h5>
-                <div className="flex items-center gap-3 mb-4">
-                    <p className="font-semibold">
-                        Select the Compliance status
-                    </p>
-                    <div className="w-40">
-                        <OutlinedSelect
-                            label="Set Status"
-                            options={StatusOption.statusOption.map(
-                                (option) => ({
-                                    value: option.value,
-                                    label: option.label,
-                                }),
-                            )}
-                            value={selectedStatus}
-                            onChange={onStatusChange}
-                        />
-                    </div>
-                </div>
-
                 <>
-                    {selectedCompliance?.compliance_detail.proof_mandatory ? (
-                        <label className="text-red-500">
-                            *Please Upload The Proof Of Compliance:
-                        </label>
-                    ) : (
-                        <label>Please Upload The Proof Of Compliance:</label>
-                    )}
-                    <Input
-                        type="file"
-                        onChange={(e) => {
-                            const file = e.target.files?.[0] || null
-                            console.log('File selected:', file?.name)
-                            setSelectedFile(file)
+                    <DataTable
+                        columns={columns}
+                        data={data}
+                        skeletonAvatarColumns={[0]}
+                        skeletonAvatarProps={{ className: 'rounded-md' }}
+                        loading={loading}
+                        pagingData={{
+                            total: pagination.total,
+                            pageIndex: pagination.pageIndex,
+                            pageSize: pagination.pageSize,
                         }}
-                        className="mb-4 mt-4"
+                        onPaginationChange={onPaginationChange}
+                        onSelectChange={onPageSizeChange}
+                        stickyHeader={true}
+                        stickyFirstColumn={true}
+                        stickyLastColumn={true}
                     />
-                </>
-                <label className="mb-2">Please Enter the Remark:</label>
-                <Input
-                    placeholder="Remarks"
-                    textArea
-                    value={remark}
-                    onChange={(e) => setRemark(e.target.value)}
-                    className="mb-4"
-                />
-
-                <div className="text-right mt-6">
-                    <Button
-                        className="ltr:mr-2 rtl:ml-2"
-                        variant="plain"
-                        onClick={() => {
-                            setIsStatusDialogOpen(false)
-                            onDialogClose()
-                        }}
+                    {/* <Dialog
+            isOpen={isUploadDialogOpen}
+            onClose={() => setIsUploadDialogOpen(false)}
+            width={500}
+          >
+            <h5 className="mb-4">Upload Compliance Document</h5>
+            <div className="mb-4">
+              <p className="font-semibold">Compliance:</p>
+              <p>{selectedCompliance?.compliance_header || 'N/A'}</p>
+            </div>
+            <Input
+              type="file"
+              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              className="mb-4"
+            />
+            <Input
+              textArea
+              rows={3}
+              placeholder="Enter remark"
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              className="mb-4"
+            />
+            <div className="text-right mt-6">
+              <Button
+                className="mr-2"
+                variant="plain"
+                onClick={() => setIsUploadDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="solid"
+                onClick={handleUploadConfirm}
+              >
+                Upload
+              </Button>
+            </div>
+          </Dialog> */}
+                    <Dialog
+                        isOpen={isUploadDialogOpen}
+                        onClose={() => setIsUploadDialogOpen(false)}
+                        width={500}
                     >
-                        Cancel
-                    </Button>
-                    <Button variant="solid" onClick={handleUpdateStatus}>
-                        {' '}
-                        {/*  onClick={onSubmit} */}
-                        Confirm
-                    </Button>
-                </div>
-            </Dialog>
+                        <h5 className="mb-4">Upload Compliance Document</h5>
+
+                        <div className="mb-4 flex gap-2 items-center">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Set Compliance Status:
+                            </label>
+                            <div className="w-1/2">
+                                {' '}
+                                {/* This wrapper will control the width */}
+                                {selectedRole === 'owner' && (
+                                    <OutlinedSelect
+                                        label="Select compliance status"
+                                        options={ownerStatusOptions}
+                                        value={ownerStatusOptions.find(
+                                            (opt) =>
+                                                opt.value === complianceStatus,
+                                        )}
+                                        onChange={(option) =>
+                                            setComplianceStatus(
+                                                option?.value || '',
+                                            )
+                                        }
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+            Actual Date of Payment:
+        </label>
+       <DatePicker
+            inputtable
+            clearable
+            size="sm"
+            value={actualDateOfPayment ? new Date(actualDateOfPayment) : null}
+            onChange={(date) => {
+                setActualDateOfPayment(date ? dayjs(date).format('YYYY-MM-DD') : null);
+            }}
+            inputFormat="YYYY-MM-DD"
+            placeholder="Select payment date"
+            className={!actualDateOfPayment ? 'border-red-500' : ''}
+        />
+         {!actualDateOfPayment && (
+        <p className="mt-1 text-sm text-red-600">Actual date of payment is required</p>
+    )}
+                        </div>
+
+                        <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+            Upload the document:
+            {selectedCompliance?.proof_mandatory && (
+                <span className="text-red-500 ml-1">*</span>
+            )}
+        </label>
+        <Input
+            type="file"
+             accept=".pdf,application/pdf"
+            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            className={`${selectedCompliance?.proof_mandatory && !selectedFile ? 'border-red-500' : ''}`}
+        />
+        {selectedCompliance?.proof_mandatory && !selectedFile && (
+            <p className="mt-1 text-sm text-red-600">Document is required</p>
+        )}
+    </div>
+
+                        <div className="mb-4">
+                            <Input
+                                textArea
+                                rows={3}
+                                placeholder="Enter remark"
+                                value={remark}
+                                onChange={(e) => setRemark(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="text-right mt-6">
+                            <Button
+                                className="mr-2"
+                                variant="plain"
+                                onClick={() => {
+                                    setIsUploadDialogOpen(false)
+                                    setComplianceStatus('')
+                                    setActualDateOfPayment(null);
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="solid"
+                                onClick={handleUploadConfirm}
+                                 disabled={
+        !selectedFile ||
+        (selectedRole === 'owner' && !complianceStatus) ||
+        !actualDateOfPayment  // Add this condition
+    }
+                            >
+                                Upload
+                            </Button>
+                        </div>
+                    </Dialog>
+                    {/* <Dialog
+                        isOpen={isApproveDialogOpen}
+                        onClose={() => {
+                            setIsApproveDialogOpen(false)
+                            setComplianceStatus('')
+                        }}
+                        width={500}
+                    >
+                        <h5 className="mb-4">Approve Compliance</h5>
+
+                        <div className="mb-4 flex gap-2 items-center">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Set Compliance Status:
+                            </label>
+
+                            <div className="w-1/2">
+                                <OutlinedSelect
+                                    // className="mb-4"
+                                    label="Select compliance status"
+                                    options={
+                                        selectedRole === 'approver'
+                                            ? approverStatusOptions
+                                            : auditorStatusOptions
+                                    }
+                                    value={(selectedRole === 'approver'
+                                        ? approverStatusOptions
+                                        : auditorStatusOptions
+                                    ).find(
+                                        (opt) => opt.value === complianceStatus,
+                                    )}
+                                    onChange={(option) =>
+                                        setComplianceStatus(option?.value || '')
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className="text-right mt-6">
+                            <Button
+                                className="mr-2"
+                                variant="plain"
+                                onClick={() => {
+                                    setIsApproveDialogOpen(false)
+                                    setComplianceStatus('')
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="solid"
+                                onClick={() => {
+                                    if (
+                                        selectedCompliance?.id &&
+                                        complianceStatus
+                                    ) {
+                                        onApprove?.(
+                                            selectedCompliance.id,
+                                            complianceStatus,
+                                        )
+                                        setIsApproveDialogOpen(false)
+                                    }
+                                }}
+                                disabled={!complianceStatus}
+                            >
+                                Confirm Approval
+                            </Button>
+                        </div>
+                    </Dialog> */}
+
+                    <Dialog
+  isOpen={isApproveDialogOpen}
+  onClose={() => {
+    setIsApproveDialogOpen(false);
+    setComplianceStatus('');
+  }}
+  width={500}
+>
+  <h5 className="mb-4">Approve Compliance</h5>
+  
+  <div className="mb-4 flex gap-2 items-center">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Compliance Status:
+    </label>
+    <div className="w-1/2">
+      <OutlinedSelect
+        label="Select status"
+        options={
+          selectedRole === 'approver' 
+            ? approverStatusOptions 
+            : auditorStatusOptions
+        }
+        value={
+          (selectedRole === 'approver' 
+            ? approverStatusOptions 
+            : auditorStatusOptions
+          ).find(opt => opt.value === complianceStatus)
+        }
+        onChange={(option) => setComplianceStatus(option?.value || '')}
+      />
+    </div>
+  </div>
+
+  <div className="text-right mt-6">
+    <Button
+      className="mr-2"
+      variant="plain"
+      onClick={() => {
+        setIsApproveDialogOpen(false);
+        setComplianceStatus('');
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+      variant="solid"
+      onClick={handleApproveConfirm}
+      disabled={!complianceStatus}
+    >
+      Confirm Approval
+    </Button>
+  </div>
+</Dialog>
+                    {/* <Dialog
+                        isOpen={isRejectDialogOpen}
+                        onClose={() => setIsRejectDialogOpen(false)}
+                        width={500}
+                    >
+                        <h5 className="mb-4">Reject Compliance</h5>
+                        <div className="mb-4">
+                            <p className="font-semibold">Compliance:</p>
+                            <p>
+                                {selectedCompliance?.compliance_header || 'N/A'}
+                            </p>
+                        </div>
+                        <Input
+                            textArea
+                            rows={3}
+                            placeholder="Enter rejection reason"
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            className="mb-4"
+                        />
+                        <div className="text-right mt-6">
+                            <Button
+                                className="mr-2"
+                                variant="plain"
+                                onClick={() => {
+                                    setIsRejectDialogOpen(false)
+                                    setRejectReason('')
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="solid"
+                                onClick={handleRejectConfirm}
+                                disabled={!rejectReason.trim()}
+                            >
+                                Confirm Rejection
+                            </Button>
+                        </div>
+                    </Dialog> */}
+                   <Dialog
+  isOpen={isRejectDialogOpen}
+  onClose={() => {
+    setIsRejectDialogOpen(false);
+    setComplianceStatus('');
+  }}
+  width={500}
+>
+  <h5 className="mb-4">Reject Compliance</h5>
+  
+  <div className="mb-4 flex gap-2 items-center">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Compliance Status:
+    </label>
+    <div className="w-1/2">
+      <OutlinedSelect
+        label="Select status"
+        options={
+          selectedRole === 'approver' 
+            ? approverStatusOptions 
+            : auditorStatusOptions
+        }
+        value={
+          (selectedRole === 'approver' 
+            ? approverStatusOptions 
+            : auditorStatusOptions
+          ).find(opt => opt.value === complianceStatus)
+        }
+        onChange={(option) => setComplianceStatus(option?.value || '')}
+      />
+    </div>
+  </div>
+
+  <div className="mb-4">
+    <Input
+      textArea
+      rows={3}
+      placeholder="Enter rejection reason"
+      value={rejectReason}
+      onChange={(e) => setRejectReason(e.target.value)}
+    />
+  </div>
+
+  <div className="text-right mt-6">
+    <Button
+      className="mr-2"
+      variant="plain"
+      onClick={() => {
+        setIsRejectDialogOpen(false);
+        setRejectReason('');
+        setComplianceStatus('');
+      }}
+    >
+      Cancel
+    </Button>
+    <Button
+      variant="solid"
+      onClick={handleRejectConfirm}
+      disabled={!rejectReason.trim() || !complianceStatus}
+    >
+      Confirm Rejection
+    </Button>
+  </div>
+</Dialog>
+                    <Dialog
+                        isOpen={isViewDialogOpen}
+                        onClose={() => setIsViewDialogOpen(false)}
+                        width={1000}
+                    >
+                        <h5 className="mb-4">Compliance Details</h5>
+                        {complianceDetails && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <h6 className="font-semibold text-gray-700">
+                                        Basic Information
+                                    </h6>
+                                    <DetailRow
+                                        label="Compliance ID"
+                                        value={complianceDetails.uuid}
+                                    />
+                                    <DetailRow
+                                        label="Compliance Header"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.compliance_header,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Description"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.compliance_description,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Status"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.status,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Due Date"
+                                        value={
+                                            complianceDetails.due_dates
+                                                ?.first_due_date
+                                                ? new Date(
+                                                      complianceDetails.due_dates.first_due_date,
+                                                  ).toLocaleDateString()
+                                                : 'N/A'
+                                        }
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h6 className="font-semibold text-gray-700">
+                                        Legislation & Category
+                                    </h6>
+                                    <DetailRow
+                                        label="Legislation Act"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.legislation_act,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Category"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.compliance_categorization,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Applicable"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.applicable,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Frequency"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.compliance_frequency,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Criticality"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.criticality,
+                                        )}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h6 className="font-semibold text-gray-700">
+                                        Company Information
+                                    </h6>
+                                    <DetailRow
+                                        label="Company Group"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.CompanyGroup
+                                                ?.name,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Company"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.Company?.name,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Branch"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.Branch?.name,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="State"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.State?.name,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Created By"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.CompanyAdmin
+                                                ?.name,
+                                        )}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h6 className="font-semibold text-gray-700">
+                                        Compliance Details
+                                    </h6>
+                                    <DetailRow
+                                        label="Penalty Type"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.penalty_type,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Penalty Description"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.penalty_description,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Applicability"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.compliance_applicability,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Reference"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.compliance_reference,
+                                        )}
+                                    />
+                                    <DetailRow
+                                        label="Type"
+                                        value={capitalizeFirstLetter(
+                                            complianceDetails.compliance_type,
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        <div className="mt-6 text-right">
+                            <Button onClick={() => setIsViewDialogOpen(false)}>
+                                Close
+                            </Button>
+                        </div>
+                    </Dialog>
+                </>
+            )}
         </div>
     )
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dropdown } from '@/components/ui/dropdown';
-import Company from '../../AssignChecklist/components/Company';
+// import Company from '../../AssignChecklist/components/Company';
 
 const CompanyLocationDropdowns = () => {
   const [selectedCompany, setSelectedCompany] = useState('Company');

@@ -38,6 +38,8 @@ const ConfigDropdown: React.FC<ConfigDropdownProps> = ({
     { key: 'ESI', label: 'ESI Setup' },
     { key: 'PT', label: 'PT Setup' },
     { key: 'LWF', label: 'LWF Setup' },
+    {key: 'posh', label: 'POSH Setup'},
+    // {key: 'register', label: 'Register Setup'},
   ];
 
   useEffect(() => {

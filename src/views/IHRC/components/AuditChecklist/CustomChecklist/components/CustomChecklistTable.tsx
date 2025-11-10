@@ -1,216 +1,908 @@
+// import React, { useMemo, useState, useEffect } from 'react';
+// import DataTable from '@/components/shared/DataTable';
+// import { Tooltip, Button, Dialog, Notification, toast } from '@/components/ui';
+// import { useNavigate } from 'react-router-dom';
+// import { MdEdit } from 'react-icons/md';
+// import { FiTrash } from 'react-icons/fi';
+// import { RiEyeLine } from 'react-icons/ri';
+// import httpClient from '@/api/http-client';
+// import { endpoints } from '@/api/endpoint';
+// import { APP_PREFIX_PATH } from '@/constants/route.constant';
+// import { HiOutlineViewGrid } from 'react-icons/hi';
+
+// interface CustomChecklist {
+//     id: number;
+//     uuid: string;
+//     group_id: number;
+//     country: string;
+//     function: string;
+//     applicable: string;
+//     state_id: number | null;
+//     legislation_act: string;
+//     compliance_categorization: string;
+//     penalty_type: string;
+//     penalty_description: string;
+//     compliance_header: string;
+//     compliance_description: string;
+//     compliance_applicability: string;
+//     compliance_reference: string;
+//     compliance_type: string;
+//     compliance_frequency: string;
+//     criticality: string;
+//     proof_mandatory: boolean;
+//     due_date_frequency: string;
+//     due_dates: {
+//         first_due_date?: string;
+//         second_due_date?: string;
+//         third_due_date?: string;
+//         last_due_date?: string;
+//     };
+//     is_active: boolean;
+//     created_by: number;
+//     created_at: string;
+//     updated_at: string;
+//     CompanyGroup: {
+//         id: number;
+//         name: string;
+//     };
+//     State: {
+//         id: number;
+//         name: string;
+//     } | null;
+//     CompanyAdmin: {
+//         id: number;
+//         name: string;
+//     };
+// }
+
+
+// interface PaginationState {
+//     pageIndex: number;
+//     pageSize: number;
+// }
+
+// interface CustomChecklistTableProps {
+//   searchQuery?: string;
+// }
+
+
+// const CustomChecklistTable = ({ searchQuery = '' }: CustomChecklistTableProps) => {
+//     const [data, setData] = useState<CustomChecklist[]>([]);
+//     const [loading, setLoading] = useState(true);
+//     const [dialogIsOpen, setDialogIsOpen] = useState(false);
+//     const [itemToDelete, setItemToDelete] = useState<CustomChecklist | null>(null);
+//     const [totalItems, setTotalItems] = useState(0);
+//     const [pageIndex, setPageIndex] = useState(1);
+//     const [pageSize, setPageSize] = useState(10);
+//     const [sort, setSort] = useState<{id: string; desc: boolean} | null>(null);
+//     const navigate = useNavigate();
+//         const [isSearching, setIsSearching] = useState(false);
+
+
+//     const fetchData = async () => {
+//         try {
+//             setLoading(true);
+//             const params = {
+//                 page: pageIndex,
+//                 limit: pageSize,
+//                 sort: sort ? `${sort.id}:${sort.desc ? 'desc' : 'asc'}` : undefined,
+//                 search: searchQuery || undefined
+//             };
+
+//             const response = await httpClient.get(endpoints.compliance.listCustomChecklist(), { params });
+//             setData(response.data.data);
+//             setTotalItems(response.data.total);
+//         } catch (error) {
+//             console.error('Error fetching custom checklists:', error);
+//             toast.push(
+//                 <Notification title="Error" type="error">
+//                     Failed to load custom checklists
+//                 </Notification>
+//             );
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//    useEffect(() => {
+//     const timer = setTimeout(() => {
+//         fetchData();
+//     }, 500); // 500ms debounce delay
+
+//     return () => clearTimeout(timer);
+// }, [pageIndex, pageSize, sort, searchQuery]); // Add searchQuery to dependencies
+
+//     const handleDeleteClick = (item: CustomChecklist) => {
+//         setItemToDelete(item);
+//         setDialogIsOpen(true);
+//     };
+
+//     const handleConfirmDelete = async () => {
+//         if (itemToDelete) {
+//             try {
+//                 await httpClient.delete(
+//                     endpoints.compliance.deleteCustomChecklist(itemToDelete.id)
+//                 );
+//                 toast.push(
+//                     <Notification title="Success" type="success">
+//                         Checklist deleted successfully
+//                     </Notification>
+//                 );
+//                 // Refresh data after deletion
+//                 fetchData();
+//             } catch (error) {
+//                 console.error('Error deleting checklist:', error);
+//                 toast.push(
+//                     <Notification title="Error" type="error">
+//                         Failed to delete checklist
+//                     </Notification>
+//                 );
+//             }
+//         }
+//         setDialogIsOpen(false);
+//         setItemToDelete(null);
+//     };
+
+//     const handleCancelDelete = () => {
+//         setDialogIsOpen(false);
+//         setItemToDelete(null);
+//     };
+
+//     const handleEditClick = (item: CustomChecklist) => {
+//         navigate(`${APP_PREFIX_PATH}/companyadmin/compliance/checklists/edit/${item.id}`);
+//     };
+
+//     const handleViewDetails = (item: CustomChecklist) => {
+//         navigate(`/app/companyadmin/compliance/checklists/view/${item.id}`);
+//     };
+
+//     const handleCreateNew = () => {
+//         navigate('/app/companyadmin/compliance/checklists/create');
+//     };
+
+
+//     const columns = useMemo(
+//         () => [
+//             // {
+//             //     header: 'ID',
+//             //     enableSorting: false,
+//             //     accessorKey: 'id',
+//             //     cell: (props) => <div className="w-10">{props.getValue()}</div>,
+//             // },
+//             // {
+//             //     header: 'Company Group',
+//             //     enableSorting: false,
+//             //     accessorKey: 'CompanyGroup.name',
+//             //     cell: (props) => (
+//             //         <div className="w-24 truncate">
+//             //             {props.row.original.CompanyGroup.name}
+//             //         </div>
+//             //     ),
+//             // },
+//             {
+//                 header: 'Country',
+//                 enableSorting: false,
+//                 accessorKey: 'country',
+//                 cell: (props) => <div className="w-20">{props.getValue()}</div>,
+//             },
+//             {
+//                 header: 'Function',
+//                 enableSorting: false,
+//                 accessorKey: 'function',
+//                 cell: (props) => <div className="w-24 truncate">{props.getValue()}</div>,
+//             },
+//             {
+//                 header: 'Applicable',
+//                 enableSorting: false,
+//                 accessorKey: 'applicable',
+//                 cell: (props) => (
+//                     <div className="w-20 capitalize">{props.getValue()}</div>
+//                 ),
+//             },
+//             {
+//                 header: 'State',
+//                 enableSorting: false,
+//                 accessorKey: 'State.name',
+//                 cell: (props) => (
+//                     <div className="w-24">
+//                         {props.row.original.State?.name || '-'}
+//                     </div>
+//                 ),
+//             },
+//             {
+//                 header: 'Legislation',
+//                 enableSorting: false,
+//                 accessorKey: 'legislation_act',
+//                 cell: (props) => (
+//                     <Tooltip title={props.getValue() as string} placement="top">
+//                         <div className="w-32 truncate">{props.getValue()}</div>
+//                     </Tooltip>
+//                 ),
+//             },
+//             {
+//                 header: 'Header',
+//                 enableSorting: false,
+//                 accessorKey: 'compliance_header',
+//                 cell: (props) => (
+//                     <Tooltip title={props.getValue() as string} placement="top">
+//                         <div className="w-40 truncate">{props.getValue()}</div>
+//                     </Tooltip>
+//                 ),
+//             },
+//             {
+//                 header: 'Criticality',
+//                 enableSorting: false,
+//                 accessorKey: 'criticality',
+//                 cell: (props) => {
+//                     const criticality = props.getValue();
+//                     return (
+//                         <div className="w-20 font-semibold capitalize">
+//                             {criticality === 'high' ? (
+//                                 <span className="text-red-500">{criticality}</span>
+//                             ) : criticality === 'medium' ? (
+//                                 <span className="text-yellow-500">{criticality}</span>
+//                             ) : (
+//                                 <span className="text-green-500">{criticality}</span>
+//                             )}
+//                         </div>
+//                     );
+//                 },
+//             },
+//             {
+//             header: 'Proof Mandatory',
+//             enableSorting: false,
+//             accessorKey: 'proof_mandatory',
+//             cell: (props) => (
+//                 <div className="w-24 capitalize">
+//                     {props.getValue() ? 'Yes' : 'No'}
+//                 </div>
+//             ),
+//         },
+//             {
+//                 header: 'Status',
+//                 enableSorting: false,
+//                 accessorKey: 'is_active',
+//                 cell: (props) => (
+//                     <div className="w-16">
+//                         {props.getValue() ? (
+//                             <span className="text-green-500">Active</span>
+//                         ) : (
+//                             <span className="text-red-500">Inactive</span>
+//                         )}
+//                     </div>
+//                 ),
+//             },
+//             {
+//                 header: 'Actions',
+//                 id: 'actions',
+//                 cell: ({ row }) => (
+//                     <div className='flex space-x-2'>
+//                         {/* <Tooltip title="View Details" placement="top">
+//                             <Button
+//                                 size="sm"
+//                                 onClick={() => handleViewDetails(row.original)}
+//                                 icon={<RiEyeLine />}
+//                                 className='hover:bg-transparent'
+//                             />
+//                         </Tooltip> */}
+//                         {/* <Tooltip title="Edit" placement="top">
+//                             <Button
+//                                 size="sm"
+//                                 onClick={() => handleEditClick(row.original)}
+//                                 icon={<MdEdit />}
+//                                 className='hover:bg-transparent'
+//                             />
+//                         </Tooltip> */}
+//                         <Tooltip title="Delete" placement="top">
+//                             <Button
+//                                 size="sm"
+//                                 onClick={() => handleDeleteClick(row.original)}
+//                                 icon={<FiTrash />}
+//                                 className='hover:bg-transparent text-red-500'
+//                             />
+//                         </Tooltip>
+//                     </div>
+//                 ),
+//             },
+//         ],
+//         []
+//     );
+
+//     const [pagination, setPagination] = useState<PaginationState>({
+//     pageIndex: 1,
+//     pageSize: 10
+// });
+
+// const handlePaginationChange = (newPagination: PaginationState) => {
+//     setPagination(newPagination);
+//     // Or if your DataTable expects separate parameters:
+//     // setPageIndex(newPagination.pageIndex);
+//     // setPageSize(newPagination.pageSize);
+// };
+
+
+
+//     return (
+//         <div className="relative">
+//              {data.length === 0 ? (
+//                             <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+//                                 <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+//                                 <p className="text-center">No Data Available</p>
+//                             </div>
+//                         ) : (
+//                             <>
+//                    <DataTable
+//     columns={columns}
+//     data={data}
+//     loading={loading}
+//     paging
+//     pageIndex={pagination.pageIndex}
+//     pageSize={pagination.pageSize}
+//     total={totalItems}
+//     onPaginationChange={handlePaginationChange}
+//     onSortingChange={(sorting) => {
+//         if (sorting.length > 0) {
+//             setSort({ id: sorting[0].id, desc: sorting[0].desc });
+//         } else {
+//             setSort(null);
+//         }
+//     }}
+//     stickyHeader
+//     stickyFirstColumn
+//     stickyLastColumn
+// />
+//                     </>
+//                 )
+//             }
+            
+//             {/* <div className="overflow-x-auto bg-white">
+//                 <DataTable
+//     columns={columns}
+//     data={data}
+//     loading={loading}
+//     paging
+//     pageIndex={pagination.pageIndex}
+//     pageSize={pagination.pageSize}
+//     total={totalItems}
+//     onPaginationChange={handlePaginationChange}
+//     onSortingChange={(sorting) => {
+//         if (sorting.length > 0) {
+//             setSort({ id: sorting[0].id, desc: sorting[0].desc });
+//         } else {
+//             setSort(null);
+//         }
+//     }}
+//     stickyHeader
+//     stickyFirstColumn
+//     stickyLastColumn
+// />
+//             </div> */}
+
+//             <Dialog
+//                 isOpen={dialogIsOpen}
+//                 onClose={handleCancelDelete}
+//                 onRequestClose={handleCancelDelete}
+//                 shouldCloseOnOverlayClick={false}
+//             >
+//                 <h5 className="mb-4">Confirm Delete</h5>
+//                 <p>
+//                     Are you sure you want to delete the checklist: {itemToDelete?.compliance_header}?
+//                 </p>
+//                 <div className="text-right mt-6">
+//                     <Button
+//                         className="ltr:mr-2 rtl:ml-2"
+//                         variant="plain"
+//                         onClick={handleCancelDelete}
+//                     >
+//                         Cancel
+//                     </Button>
+//                     <Button variant="solid" color="red-600" onClick={handleConfirmDelete}>
+//                         Confirm
+//                     </Button>
+//                 </div>
+//             </Dialog>
+//         </div>
+//     );
+// };
+
+// export default CustomChecklistTable;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useMemo, useState, useEffect } from 'react';
+// import DataTable from '@/components/shared/DataTable';
+// import { Tooltip, Button, Dialog, Notification, toast } from '@/components/ui';
+// import { useNavigate } from 'react-router-dom';
+// import { FiTrash } from 'react-icons/fi';
+// import httpClient from '@/api/http-client';
+// import { endpoints } from '@/api/endpoint';
+// import { APP_PREFIX_PATH } from '@/constants/route.constant';
+// import { HiOutlineViewGrid, HiOutlineSearch } from 'react-icons/hi';
+
+// interface CustomChecklist {
+//     id: number;
+//     uuid: string;
+//     group_id: number;
+//     country: string;
+//     function: string;
+//     applicable: string;
+//     state_id: number | null;
+//     legislation_act: string;
+//     compliance_categorization: string;
+//     penalty_type: string;
+//     penalty_description: string;
+//     compliance_header: string;
+//     compliance_description: string;
+//     compliance_applicability: string;
+//     compliance_reference: string;
+//     compliance_type: string;
+//     compliance_frequency: string;
+//     criticality: string;
+//     proof_mandatory: boolean;
+//     due_date_frequency: string;
+//     due_dates: {
+//         first_due_date?: string;
+//         second_due_date?: string;
+//         third_due_date?: string;
+//         last_due_date?: string;
+//     };
+//     is_active: boolean;
+//     created_by: number;
+//     created_at: string;
+//     updated_at: string;
+//     CompanyGroup: {
+//         id: number;
+//         name: string;
+//     };
+//     State: {
+//         id: number;
+//         name: string;
+//     } | null;
+//     CompanyAdmin: {
+//         id: number;
+//         name: string;
+//     };
+// }
+
+// interface PaginationState {
+//     pageIndex: number;
+//     pageSize: number;
+// }
+
+// interface CustomChecklistTableProps {
+//     searchQuery?: string;
+// }
+
+// const CustomChecklistTable = ({ searchQuery = '' }: CustomChecklistTableProps) => {
+//     const [data, setData] = useState<CustomChecklist[]>([]);
+//     const [loading, setLoading] = useState(true);
+//     const [isSearching, setIsSearching] = useState(false);
+//     const [dialogIsOpen, setDialogIsOpen] = useState(false);
+//     const [itemToDelete, setItemToDelete] = useState<CustomChecklist | null>(null);
+//     const [totalItems, setTotalItems] = useState(0);
+//     const [pageIndex, setPageIndex] = useState(1);
+//     const [pageSize, setPageSize] = useState(10);
+//     const [sort, setSort] = useState<{id: string; desc: boolean} | null>(null);
+//     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+//     const navigate = useNavigate();
+
+//     // Debounce search query
+//     useEffect(() => {
+//         const timer = setTimeout(() => {
+//             setDebouncedSearchQuery(searchQuery);
+//         }, 500);
+
+//         return () => clearTimeout(timer);
+//     }, [searchQuery]);
+
+//     const fetchData = async () => {
+//         try {
+//             setLoading(true);
+//             const params = {
+//                 page: pageIndex,
+//                 limit: pageSize,
+//                 sort: sort ? `${sort.id}:${sort.desc ? 'desc' : 'asc'}` : undefined,
+//                 search: debouncedSearchQuery || undefined
+//             };
+
+//             const response = await httpClient.get(endpoints.compliance.listCustomChecklist(), { params });
+//             setData(response.data.data);
+//             setTotalItems(response.data.total);
+//         } catch (error) {
+//             console.error('Error fetching custom checklists:', error);
+//             toast.push(
+//                 <Notification title="Error" type="error">
+//                     Failed to load custom checklists
+//                 </Notification>
+//             );
+//         } finally {
+//             setLoading(false);
+//             setIsSearching(false);
+//         }
+//     };
+
+//     // Fetch data when dependencies change
+//     useEffect(() => {
+//         setIsSearching(true);
+//         const timer = setTimeout(() => {
+//             fetchData();
+//         }, 300);
+
+//         return () => clearTimeout(timer);
+//     }, [pageIndex, pageSize, sort, debouncedSearchQuery]);
+
+//     const handleDeleteClick = (item: CustomChecklist) => {
+//         setItemToDelete(item);
+//         setDialogIsOpen(true);
+//     };
+
+//     const handleConfirmDelete = async () => {
+//         if (itemToDelete) {
+//             try {
+//                 await httpClient.delete(
+//                     endpoints.compliance.deleteCustomChecklist(itemToDelete.id)
+//                 );
+//                 toast.push(
+//                     <Notification title="Success" type="success">
+//                         Checklist deleted successfully
+//                     </Notification>
+//                 );
+//                 fetchData();
+//             } catch (error) {
+//                 console.error('Error deleting checklist:', error);
+//                 toast.push(
+//                     <Notification title="Error" type="error">
+//                         Failed to delete checklist
+//                     </Notification>
+//                 );
+//             }
+//         }
+//         setDialogIsOpen(false);
+//         setItemToDelete(null);
+//     };
+
+//     const handleCancelDelete = () => {
+//         setDialogIsOpen(false);
+//         setItemToDelete(null);
+//     };
+
+//     // const handlePaginationChange = (newPagination: PaginationState) => {
+//     //     setPageIndex(newPagination.pageIndex);
+//     //     setPageSize(newPagination.pageSize);
+//     // };
+
+//     const handlePaginationChange = (newPagination: PaginationState) => {
+//     setPagination(newPagination);
+//     // Or if your DataTable expects separate parameters:
+//     // setPageIndex(newPagination.pageIndex);
+//     // setPageSize(newPagination.pageSize);
+// };
+
+//     const columns = useMemo(
+//         () => [
+//             {
+//                 header: 'Country',
+//                 enableSorting: false,
+//                 accessorKey: 'country',
+//                 cell: (props) => <div className="w-20">{props.getValue()}</div>,
+//             },
+//             {
+//                 header: 'Function',
+//                 enableSorting: false,
+//                 accessorKey: 'function',
+//                 cell: (props) => <div className="w-24 truncate">{props.getValue()}</div>,
+//             },
+//             {
+//                 header: 'Applicable',
+//                 enableSorting: false,
+//                 accessorKey: 'applicable',
+//                 cell: (props) => (
+//                     <div className="w-20 capitalize">{props.getValue()}</div>
+//                 ),
+//             },
+//             {
+//                 header: 'State',
+//                 enableSorting: false,
+//                 accessorKey: 'State.name',
+//                 cell: (props) => (
+//                     <div className="w-24">
+//                         {props.row.original.State?.name || '-'}
+//                     </div>
+//                 ),
+//             },
+//             {
+//                 header: 'Legislation',
+//                 enableSorting: false,
+//                 accessorKey: 'legislation_act',
+//                 cell: (props) => (
+//                     <Tooltip title={props.getValue() as string} placement="top">
+//                         <div className="w-32 truncate">{props.getValue()}</div>
+//                     </Tooltip>
+//                 ),
+//             },
+//             {
+//                 header: 'Header',
+//                 enableSorting: false,
+//                 accessorKey: 'compliance_header',
+//                 cell: (props) => (
+//                     <Tooltip title={props.getValue() as string} placement="top">
+//                         <div className="w-40 truncate">{props.getValue()}</div>
+//                     </Tooltip>
+//                 ),
+//             },
+//             {
+//                 header: 'Criticality',
+//                 enableSorting: false,
+//                 accessorKey: 'criticality',
+//                 cell: (props) => {
+//                     const criticality = props.getValue();
+//                     return (
+//                         <div className="w-20 font-semibold capitalize">
+//                             {criticality === 'high' ? (
+//                                 <span className="text-red-500">{criticality}</span>
+//                             ) : criticality === 'medium' ? (
+//                                 <span className="text-yellow-500">{criticality}</span>
+//                             ) : (
+//                                 <span className="text-green-500">{criticality}</span>
+//                             )}
+//                         </div>
+//                     );
+//                 },
+//             },
+//             {
+//                 header: 'Proof Mandatory',
+//                 enableSorting: false,
+//                 accessorKey: 'proof_mandatory',
+//                 cell: (props) => (
+//                     <div className="w-24 capitalize">
+//                         {props.getValue() ? 'Yes' : 'No'}
+//                     </div>
+//                 ),
+//             },
+//             {
+//                 header: 'Status',
+//                 enableSorting: false,
+//                 accessorKey: 'is_active',
+//                 cell: (props) => (
+//                     <div className="w-16">
+//                         {props.getValue() ? (
+//                             <span className="text-green-500">Active</span>
+//                         ) : (
+//                             <span className="text-red-500">Inactive</span>
+//                         )}
+//                     </div>
+//                 ),
+//             },
+//             {
+//                 header: 'Actions',
+//                 id: 'actions',
+//                 cell: ({ row }) => (
+//                     <div className='flex space-x-2'>
+//                         <Tooltip title="Delete" placement="top">
+//                             <Button
+//                                 size="sm"
+//                                 onClick={() => handleDeleteClick(row.original)}
+//                                 icon={<FiTrash />}
+//                                 className='hover:bg-transparent text-red-500'
+//                             />
+//                         </Tooltip>
+//                     </div>
+//                 ),
+//             },
+//         ],
+//         []
+//     );
+
+//     return (
+//         <div className="relative">
+//             {isSearching && (
+//                 <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
+//                     <div className="flex items-center">
+//                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mr-3"></div>
+//                         <span>Searching...</span>
+//                     </div>
+//                 </div>
+//             )}
+
+//             {data.length === 0 && debouncedSearchQuery ? (
+//                 <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+//                     <HiOutlineSearch className="w-12 h-12 mb-4 text-gray-300" />
+//                     <p className="text-center">No results found for "{debouncedSearchQuery}"</p>
+//                 </div>
+//             ) : data.length === 0 ? (
+//                 <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+//                     <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+//                     <p className="text-center">No Data Available</p>
+//                 </div>
+//             ) : (
+//                 <DataTable
+//                     columns={columns}
+//                     data={data}
+//                     loading={loading}
+//                     paging
+//                     pageIndex={pageIndex}
+//                     pageSize={pageSize}
+//                     total={totalItems}
+//                     onPaginationChange={handlePaginationChange}
+//                     onSortingChange={(sorting) => {
+//                         if (sorting.length > 0) {
+//                             setSort({ id: sorting[0].id, desc: sorting[0].desc });
+//                         } else {
+//                             setSort(null);
+//                         }
+//                     }}
+//                     stickyHeader
+//                     stickyFirstColumn
+//                     stickyLastColumn
+//                 />
+//             )}
+
+//             <Dialog
+//                 isOpen={dialogIsOpen}
+//                 onClose={handleCancelDelete}
+//                 onRequestClose={handleCancelDelete}
+//                 shouldCloseOnOverlayClick={false}
+//             >
+//                 <h5 className="mb-4">Confirm Delete</h5>
+//                 <p>
+//                     Are you sure you want to delete the checklist: {itemToDelete?.compliance_header}?
+//                 </p>
+//                 <div className="text-right mt-6">
+//                     <Button
+//                         className="ltr:mr-2 rtl:ml-2"
+//                         variant="plain"
+//                         onClick={handleCancelDelete}
+//                     >
+//                         Cancel
+//                     </Button>
+//                     <Button variant="solid" color="red-600" onClick={handleConfirmDelete}>
+//                         Confirm
+//                     </Button>
+//                 </div>
+//             </Dialog>
+//         </div>
+//     );
+// };
+
+// export default CustomChecklistTable;
+
+
+
 
 import React, { useMemo, useState } from 'react';
 import DataTable from '@/components/shared/DataTable';
-import { Checkbox, Tooltip, Button, Dialog } from '@/components/ui'; // Import Dialog
-import cloneDeep from 'lodash/cloneDeep';
-import type { OnSortParam, ColumnDef } from '@/components/shared/DataTable';
+import { Tooltip, Button, Dialog, Notification, toast } from '@/components/ui';
 import { useNavigate } from 'react-router-dom';
-import { MdEdit } from 'react-icons/md';
 import { FiTrash } from 'react-icons/fi';
-import { dummyData, ComplianceData } from '@/views/IHRC/store/dummyData'
-import { RiEyeLine } from 'react-icons/ri';
+import { HiOutlineViewGrid, HiOutlineSearch } from 'react-icons/hi';
+import httpClient from '@/api/http-client';
+import { endpoints } from '@/api/endpoint';
+import { APP_PREFIX_PATH } from '@/constants/route.constant';
 
-
-interface ComplianceRow {
-    Compliance_Id: number;
-    Legislation: string;
-    Location: string;
-    Compliance_Categorization: string;
-    Compliance_Header: string;
-    Compliance_Description: string;
-    Penalty_Description: string;
-    Compliance_Applicability: string;
-    Bare_Act_Text: string;
-    Compliance_Clause: string;
-    Compliance_Type: string;
-    Compliance_Frequency: string;
-    Compliance_Statutory_Authority: string;
-    Approval_Required: string;
-    Criticality: string;
-    Penalty_Type: string;
-    Default_Due_Date: string;
-    First_Due_Date: string;
-    Due_Date: string;
-    Scheduled_Frequency: string;
-    Proof_Of_Compliance_Mandatory: string;
-    Compliance_Status:string;
+interface CustomChecklist {
+    id: number;
+    uuid: string;
+    group_id: number;
+    country: string;
+    function: string;
+    applicable: string;
+    state_id: number | null;
+    legislation_act: string;
+    compliance_categorization: string;
+    penalty_type: string;
+    penalty_description: string;
+    compliance_header: string;
+    compliance_description: string;
+    compliance_applicability: string;
+    compliance_reference: string;
+    compliance_type: string;
+    compliance_frequency: string;
+    criticality: string;
+    proof_mandatory: boolean;
+    due_date_frequency: string;
+    due_dates: {
+        first_due_date?: string;
+        second_due_date?: string;
+        third_due_date?: string;
+        last_due_date?: string;
+    };
+    is_active: boolean;
+    created_by: number;
+    created_at: string;
+    updated_at: string;
+    CompanyGroup: {
+        id: number;
+        name: string;
+    };
+    State: {
+        id: number;
+        name: string;
+    } | null;
+    CompanyAdmin: {
+        id: number;
+        name: string;
+    };
 }
 
-const complianceData: ComplianceRow[] = [
-    {
-        Compliance_Id: 3236,
-        Legislation: "Bihar Shops and Establishments Act 1953 and Bihar Shops Establishments Rules 1955/ Bihar/ IR",
-        Location: "HMVL - Office - Muzaffarpur - sadtpur - HR/ Muzaffarpur/ Bihar/ Office",
-        Compliance_Categorization: "LICENSE / REGISTRATION",
-        Compliance_Header: "Renewal of Registration",
-        Compliance_Description: "Apply for renewal of certificate of registration in Form IA in duplicate not less than thirty days before the date on which the certificate of registration expires to the Inspecting Officer along with the prescribed fees.",
-        Penalty_Description: "Fine which may extend to Rs. 250",
-        Compliance_Applicability: "EVERY EMPLOYER",
-        Bare_Act_Text: "Make an application when registration certificate is lost or destroyed to the Inspecting Officer within seven days of such loss or destruction for a duplicate copy along with a payment of a fee of two rupees either by crossed Indian Postal Order or by d",
-        Compliance_Clause: "Section 6 and Rule 3 A",
-        Compliance_Type: "On Going",
-        Compliance_Frequency: "Half Yearly",
-        Compliance_Statutory_Authority: "CHIEF INSPECTOR OF SHOPS AND COMMERCIAL ESTABLISHMENTS/REGISTERING OFFICER",
-        Approval_Required: "Yes",
-        Criticality: "High",
-        Penalty_Type: "Fine",
-        Default_Due_Date: "20th July 20th Jan",
-        First_Due_Date: "15-Apr-16",
-        Due_Date: '14-Apr-17',
-        Scheduled_Frequency: "Yearly",
-        Proof_Of_Compliance_Mandatory: "Yes",
-        Compliance_Status:"Approved"
-      },
-      {
-        Compliance_Id: 4501,
-        Legislation: "Delhi Factories Act 1948 and Delhi Factories Rules 1950/ Delhi/ IR",
-        Location: "HMVL - Office - Arrah - Ramana Pakri Road - HR/ Arrah/ Bihar/ Office",
-        Compliance_Categorization: "LICENSE / REGISTRATION",
-        Compliance_Header: "Annual Renewal of License",
-        Compliance_Description: "Submit an application for the renewal of the factory license in Form 1A, at least 45 days before the expiry date, to the Factory Inspector along with the required fees.",
-        Penalty_Description: "Penalty may extend up to Rs. 500",
-        Compliance_Applicability: "FACTORY OWNER",
-        Bare_Act_Text: "In case the factory license is lost, notify the Factory Inspector immediately and apply for a duplicate license along with a fee of ten rupees.",
-        Compliance_Clause: "Section 4 and Rule 6",
-        Compliance_Type: "On Going",
-        Compliance_Frequency: "Annually",
-        Compliance_Statutory_Authority: "FACTORY INSPECTOR",
-        Approval_Required: "Yes",
-        Criticality: "Medium",
-        Penalty_Type: "Fine",
-        Default_Due_Date: "1st March 1st September",
-        First_Due_Date: "01-Jan-17",
-        Due_Date: '31-Dec-17',
-        Scheduled_Frequency: "Yearly",
-        Proof_Of_Compliance_Mandatory: "Yes",
-        Compliance_Status:"Pending"
-      },
-      {
-        Compliance_Id: 5602,
-        Legislation: "Karnataka Shops and Commercial Establishments Act 1961 and Karnataka Shops Rules 1963/ Karnataka/ IR",
-        Location: "HMVL - Office - Aurangabad - Priyavrat Path - HR/ Aurangabad/ Bihar/ Office",
-        Compliance_Categorization: "REGISTRATION / REPORTING",
-        Compliance_Header: "Monthly Compliance Report",
-        Compliance_Description: "File a monthly compliance report in Form IX with the Labour Department, detailing employee work hours and wages paid, by the 5th of each month.",
-        Penalty_Description: "Penalty up to Rs. 1000 for late submission",
-        Compliance_Applicability: "SHOPS AND ESTABLISHMENTS",
-        Bare_Act_Text: "Report any changes in employment status or wages to the Labour Department within seven days of occurrence, along with a fee of five rupees for each report.",
-        Compliance_Clause: "Section 12 and Rule 10",
-        Compliance_Type: "Ongoing",
-        Compliance_Frequency: "Monthly",
-        Compliance_Statutory_Authority: "LABOUR COMMISSIONER",
-        Approval_Required: "No",
-        Criticality: "High",
-        Penalty_Type: "Fine",
-        Default_Due_Date: "5th of each month",
-        First_Due_Date: "01-Feb-18",
-        Due_Date: '05-Feb-18',
-        Scheduled_Frequency: "Monthly",
-        Proof_Of_Compliance_Mandatory: "No",
-        Compliance_Status:"Rejected"
-      },
-      {
-        Compliance_Id: 6789,
-        Legislation: "Maharashtra Shops and Establishments Act 1948 and Maharashtra Shops Rules 1954/ Maharashtra/ IR",
-        Location: "HMVL - Office - Begusarai - Kachhari Road - HR/ Begusarai/ Bihar/ Office",
-        Compliance_Categorization: "REPORTING",
-        Compliance_Header: "Quarterly Wage Report",
-        Compliance_Description: "Submit a quarterly wage report in Form XIV to the Labour Commissioner by the 15th of the first month following the end of the quarter.",
-        Penalty_Description: "Fine up to Rs. 500 for late submission",
-        Compliance_Applicability: "EMPLOYERS",
-        Bare_Act_Text: "File any discrepancies in wages with the Labour Commissioner within fifteen days of detection, accompanied by a fee of ten rupees.",
-        Compliance_Clause: "Section 12 and Rule 14",
-        Compliance_Type: "Ongoing",
-        Compliance_Frequency: "Quarterly",
-        Compliance_Statutory_Authority: "LABOUR COMMISSIONER",
-        Approval_Required: "No",
-        Criticality: "Medium",
-        Penalty_Type: "Fine",
-        Default_Due_Date: "15th of January, April, July, October",
-        First_Due_Date: "15-Jan-18",
-        Due_Date: '15-Jan-18',
-        Scheduled_Frequency: "Quarterly",
-        Proof_Of_Compliance_Mandatory: "No",
-        Compliance_Status:"Approved"
-      },
-      {
-        Compliance_Id: 7890,
-        Legislation: "Tamil Nadu Shops and Establishments Act 1947 and Tamil Nadu Shops Rules 1959/ Tamil Nadu/ IR",
-        Location: "HMVL - Office - Samastipur - ShivSagar Plazza -HR / Samastipur/ Bihar/ Office",
-        Compliance_Categorization: "LICENSE / REGISTRATION",
-        Compliance_Header: "Renewal of Trade License",
-        Compliance_Description: "Apply for the renewal of the trade license in Form VII at least 30 days before the license expiry date to the Municipal Authority along with the necessary fee.",
-        Penalty_Description: "Late fee up to Rs. 300",
-        Compliance_Applicability: "TRADE LICENSE HOLDERS",
-        Bare_Act_Text: "In case of loss of the trade license, report to the Municipal Authority within seven days and apply for a duplicate license with a fee of fifteen rupees.",
-        Compliance_Clause: "Section 5 and Rule 8",
-        Compliance_Type: "On Going",
-        Compliance_Frequency: "Annually",
-        Compliance_Statutory_Authority: "MUNICIPAL AUTHORITY",
-        Approval_Required: "Yes",
-        Criticality: "High",
-        Penalty_Type: "Fine",
-        Default_Due_Date: "1st June 1st December",
-        First_Due_Date: "01-June-17",
-        Due_Date: '01-June-17',
-        Scheduled_Frequency: "Yearly",
-        Proof_Of_Compliance_Mandatory: "No",
-        Compliance_Status:"Pending"
-      }
-
-
-];
-
-
-const ViewDetailsButton = ({ compliance }: { compliance: ComplianceData }) => {
-    const navigate = useNavigate();
-
-    const handleViewDetails = () => {
-        navigate(`/app/IHRC/compliance-list-detail/${compliance.Compliance_ID}`, {
-            state: compliance,
-        });
+interface CustomChecklistTableProps {
+    data: CustomChecklist[];
+    loading: boolean;
+    pagination: {
+        total: number;
+        pageIndex: number;
+        pageSize: number;
     };
+    onPaginationChange: (page: number) => void;
+    onPageSizeChange?: (pageSize: number) => void;
+    onSortChange: (sort: {id: string; desc: boolean} | null) => void;
+}
 
-    return (
-        <Button size="sm" onClick={handleViewDetails}>
-            <MdEdit size={24} />
-        </Button>
-    );
-};
-
-const CustomChecklistTable = () => {
-    const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+const CustomChecklistTable = ({
+    data,
+    loading,
+    pagination,
+    onPaginationChange,
+    onPageSizeChange,
+    onSortChange
+}: CustomChecklistTableProps) => {
     const [dialogIsOpen, setDialogIsOpen] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<ComplianceRow | null>(null);
-
+    const [itemToDelete, setItemToDelete] = useState<CustomChecklist | null>(null);
     const navigate = useNavigate();
 
-    const isAllSelected = useMemo(
-        () => selectedItems.size === complianceData.length,
-        [selectedItems]
-    );
-
-    const handleCheckboxChange = (id: number) => {
-        setSelectedItems((prev) => {
-            const newSet = new Set(prev);
-            if (newSet.has(id)) {
-                newSet.delete(id); // Deselect if already selected
-            } else {
-                newSet.add(id); // Select if not already selected
-            }
-            return newSet;
-        });
-    };
-
-    const handleDeleteClick = (item: ComplianceRow) => {
+    const handleDeleteClick = (item: CustomChecklist) => {
         setItemToDelete(item);
         setDialogIsOpen(true);
     };
 
-    const handleConfirmDelete = () => {
+    const [tableData, setTableData] = useState({
+            total: 0,
+            pageIndex: 1,
+            pageSize: 10,
+        });
+    const handleConfirmDelete = async () => {
         if (itemToDelete) {
-            // Implement your delete logic here
-            console.log('Deleting:', itemToDelete);
+            try {
+                await httpClient.delete(
+                    endpoints.compliance.deleteCustomChecklist(itemToDelete.id)
+                );
+                toast.push(
+                    <Notification title="Success" type="success">
+                        Checklist deleted successfully
+                    </Notification>
+                );
+                // Trigger parent to refetch data
+                onPaginationChange(1);
+            } catch (error) {
+                console.error('Error deleting checklist:', error);
+                toast.push(
+                    <Notification title="Error" type="error">
+                        Failed to delete checklist
+                    </Notification>
+                );
+            }
         }
         setDialogIsOpen(false);
         setItemToDelete(null);
@@ -221,188 +913,162 @@ const CustomChecklistTable = () => {
         setItemToDelete(null);
     };
 
-    const EditIcon = () => (
-        <span className="text-[#7c828e] hover:text-indigo-600">
-            <svg
-                fill="none"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                height="1em"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                ></path>
-            </svg>
-        </span>
-    );
-
-    const columns: ColumnDef<ComplianceData>[] = useMemo(
+    const columns = useMemo(
         () => [
             {
-                header: 'Compliance ID',
-                accessorKey: 'Compliance_ID',
+                header: 'Country',
+                enableSorting: false,
+                accessorKey: 'country',
+                cell: (props) => <div className="w-20">{props.getValue()}</div>,
+            },
+            {
+                header: 'Function',
+                enableSorting: false,
+                accessorKey: 'function',
+                cell: (props) => <div className="w-24 truncate">{props.getValue()}</div>,
+            },
+            {
+                header: 'Applicable',
+                enableSorting: false,
+                accessorKey: 'applicable',
                 cell: (props) => (
-                  <div className="w-10 text-start">{props.getValue()}</div>
+                    <div className="w-20 capitalize">{props.getValue()}</div>
                 ),
-              },
-              {
+            },
+            {
+                header: 'State',
+                enableSorting: false,
+                accessorKey: 'State.name',
+                cell: (props) => (
+                    <div className="w-24">
+                        {props.row.original.State?.name || '-'}
+                    </div>
+                ),
+            },
+            {
                 header: 'Legislation',
-                accessorKey: 'Legislation',
-                cell: (props) => {
-                  const value = props.getValue() as string;
-                  return (
-                    <Tooltip title={value} placement="top">
-                      <div className="w-36 truncate">{value.length > 20 ? value.substring(0, 20) + '...' : value}</div>
+                enableSorting: false,
+                accessorKey: 'legislation_act',
+                cell: (props) => (
+                    <Tooltip title={props.getValue() as string} placement="top">
+                        <div className="w-32 truncate">{props.getValue()}</div>
                     </Tooltip>
-                  );
-                },
-              },
-              {
+                ),
+            },
+            {
+                header: 'Header',
+                enableSorting: false,
+                accessorKey: 'compliance_header',
+                cell: (props) => (
+                    <Tooltip title={props.getValue() as string} placement="top">
+                        <div className="w-40 truncate">{props.getValue()}</div>
+                    </Tooltip>
+                ),
+            },
+            {
                 header: 'Criticality',
-                accessorKey: 'Criticality',
+                enableSorting: false,
+                accessorKey: 'criticality',
                 cell: (props) => {
-                    const criticality = props.getValue(); // Get the value once
-            
+                    const criticality = props.getValue();
                     return (
-                        <div className="w-24 font-semibold truncate">
-                            {criticality === 'High' ? (
+                        <div className="w-20 font-semibold capitalize">
+                            {criticality === 'high' ? (
                                 <span className="text-red-500">{criticality}</span>
-                            ) : criticality === 'Medium' ? (
+                            ) : criticality === 'medium' ? (
                                 <span className="text-yellow-500">{criticality}</span>
                             ) : (
                                 <span className="text-green-500">{criticality}</span>
                             )}
                         </div>
                     );
-                }
+                },
             },
-            
-              {
-                header: 'Location',
-                accessorKey: 'Location',
-                cell: (props) => {
-                  const value = props.getValue() as string;
-                  return (
-                    <Tooltip title={value} placement="top">
-                      <div className="w-24 truncate">{value.length > 20 ? value.substring(0, 20) + '...' : value}</div>
-                    </Tooltip>
-                  );
-                },
-              },
-              {
-                header: 'Header',
-                accessorKey: 'Compliance_Header',
-                cell: (props) => {
-                  const value = props.getValue() as string;
-                  return (
-                    <Tooltip title={value} placement="top">
-                      <div className="w-38 truncate">{value}</div>
-                    </Tooltip>
-                  );
-                },
-              },
             {
-                header: 'Description',
-                accessorKey: 'Compliance_Description',
-                cell: (props) => {
-                    const value = props.getValue() as string;
-                    return (
-                        <Tooltip title={value} placement="left">
-                            <div className="w-40 truncate">{value.length > 30 ? value.substring(0, 30) + '...' : value}</div>
-                        </Tooltip>
-                    );
-                },
+                header: 'Proof Mandatory',
+                enableSorting: false,
+                accessorKey: 'proof_mandatory',
+                cell: (props) => (
+                    <div className="w-24 capitalize">
+                        {props.getValue() ? 'Yes' : 'No'}
+                    </div>
+                ),
             },
             {
                 header: 'Status',
-                accessorKey: 'Status',
-                cell: (props) => {
-                    const criticality = props.getValue(); // Get the value once
-            
-                    return (
-                        <div className="w-24 font-semibold truncate">
-                            {criticality === 'Approved' ? (
-                                <span className="text-green-500">{criticality}</span>
-                            ) : criticality === 'Pending' ? (
-                                <span className="text-yellow-500">{criticality}</span>
-                            ) : criticality === 'Rejected' ? ( 
-                                <span className="text-red-500">{criticality}</span>
-                            ): (
-                                <span></span>
-                            )}
-                        </div>
-                    );
-                }
+                enableSorting: false,
+                accessorKey: 'is_active',
+                cell: (props) => (
+                    <div className="w-16">
+                        {props.getValue() ? (
+                            <span className="text-green-500">Active</span>
+                        ) : (
+                            <span className="text-red-500">Inactive</span>
+                        )}
+                    </div>
+                ),
             },
             {
                 header: 'Actions',
                 id: 'actions',
-                cell: ({ row }) => {
-                    const value1= "Edit Compliance"
-                    const value2= "Delete Compliance"
-                    return(
-
+                cell: ({ row }) => (
                     <div className='flex space-x-2'>
-                        <Tooltip title="View Compliance Detail" placement="top">
-                        <Button
-                          size="sm"
-                        //   onClick={() => navigate(`/app/IHRC/assign-list-detail/${row.original.Compliance_ID}`, { state: row.original })}
-                          icon={<RiEyeLine />}
-                          className='hover:bg-transparent'
-                        />
-            </Tooltip>
-                    <Tooltip title={value1} placement="top">
-                    <Button
-                        size="sm"
-                        onClick={() => handleEditClick(row.original)}
-                        icon={<MdEdit />}
-                        className='hover:bg-transparent'
-                        />
-                    </Tooltip>
-                    <Tooltip title={value2} placement="top">
-                    <Button
-                        size="sm"
-                        onClick={() => handleDeleteClick(row.original)}
-                        icon={<FiTrash />}
-                        className='hover:bg-transparent text-red-500'
-                        />
-                    </Tooltip>
-                </div>
-                )
-                },
+                        <Tooltip title="Delete" placement="top">
+                            <Button
+                                size="sm"
+                                onClick={() => handleDeleteClick(row.original)}
+                                icon={<FiTrash />}
+                                className='hover:bg-transparent text-red-500'
+                            />
+                        </Tooltip>
+                    </div>
+                ),
             },
         ],
-        [selectedItems, isAllSelected]
+        []
     );
 
     return (
-        <div className="w-full overflow-x-auto">
-            <DataTable
-                columns={columns}
-                data={dummyData}
-                skeletonAvatarColumns={[0]}
-                skeletonAvatarProps={{ className: 'rounded-md' }}
-                loading={false}
-                stickyHeader={true}
-                stickyFirstColumn={true}
-                stickyLastColumn={true}
-                
-            />
+        <div className="relative">
+            {!loading && data.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-96 text-gray-500 border rounded-xl">
+                    <HiOutlineViewGrid className="w-12 h-12 mb-4 text-gray-300" />
+                    <p className="text-center">No Data Available</p>
+                </div>
+            ) : (
+                <DataTable
+                    columns={columns}
+                    data={data}
+                    loading={loading}
+                    pagingData={{
+                        total: pagination.total,
+                        pageIndex: pagination.pageIndex,
+                        pageSize: pagination.pageSize,
+                    }}
+                    onPaginationChange={onPaginationChange}
+                    // onPageSizeChange={onPageSizeChange}
+                    // onSortingChange={(sorting) => {
+                    //     if (sorting.length > 0) {
+                    //         onSortChange({ id: sorting[0].id, desc: sorting[0].desc });
+                    //     } else {
+                    //         onSortChange(null);
+                    //     }
+                    // }}
+                    stickyHeader
+                    stickyFirstColumn
+                    stickyLastColumn
+                />
+            )}
+
             <Dialog
                 isOpen={dialogIsOpen}
                 onClose={handleCancelDelete}
                 onRequestClose={handleCancelDelete}
-                shouldCloseOnOverlayClick={false} 
+                shouldCloseOnOverlayClick={false}
             >
                 <h5 className="mb-4">Confirm Delete</h5>
                 <p>
-                    Are you sure you want to delete the compliance: {itemToDelete?.Compliance_Header}?
+                    Are you sure you want to delete the checklist: {itemToDelete?.compliance_header}?
                 </p>
                 <div className="text-right mt-6">
                     <Button

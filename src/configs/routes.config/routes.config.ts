@@ -23,6 +23,50 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+     {
+        key: 'nav.posh',
+        path: '/posh',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/POSH/Posh'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'nav.committee',
+        path: '/committee',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/POSH/components/Comittee'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'addCommittee',
+        path: '/add-committee',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/POSH/components/AddComittee'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'nav.policy',
+        path: '/policy',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/POSH/components/PoshPolicy'
+                ),
+        ),
+        authority: [],
+    },
     // {
     //     key: 'Reset Password',
     //     path: '/reset-password',
@@ -165,6 +209,28 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+     {
+        key: 'auditorEntity.add',
+        path: `/add-auditor`,
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/AuditorSetup/components/AuditorAddForm'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'auditorEntity.edit',
+        path: `/edit-auditor`,
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/AuditorSetup/components/AuditorEditForm'
+                ),
+        ),
+        authority: [],
+    },
     {
         key: 'pfSetup.edit',
         path: `/pfsetup-edit`,
@@ -179,11 +245,11 @@ export const protectedRoutes = [
 
     {
         key: 'assignChecklist.item3',
-        path: '/assigned-checklist',
+        path: '/compliance-checklist',
         component: lazy(
             () =>
                 import(
-                    '@/views/IHRC/components/AuditChecklist/AssignChecklist/AssignChecklist'
+                    '@/views/IHRC/components/AuditChecklist/AuditChecklistPage/AuditChecklistPage'
                 ),
         ),
         authority: [],
@@ -468,6 +534,17 @@ export const protectedRoutes = [
         ),
         authority: [],
     },
+    {     
+        key: 'entityMenu.poshSetup',
+        path: `${APP_PREFIX_PATH}/IHRC/posh-setup/:companyName`,
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Entity/PoshSetup/PoshSetup'
+                ),
+        ),
+        authority: [],
+    },
     {
         key: 'entityMenu.companyDetails',
         path: `${APP_PREFIX_PATH}/IHRC/company-details/:companyName`,
@@ -484,6 +561,14 @@ export const protectedRoutes = [
         path: '/user-entity',
         component: lazy(
             () => import('@/views/IHRC/components/UserEntity/UserEntity'),
+        ),
+        authority: [],
+    },
+     {
+        key: 'companySetup.collapse.auditorSetup',
+        path: '/auditor-entity',
+        component: lazy(
+            () => import('@/views/IHRC/components/AuditorSetup/AuditorEntity'),
         ),
         authority: [],
     },
@@ -610,6 +695,39 @@ export const protectedRoutes = [
             () =>
                 import(
                     '@/views/IHRC/components/RemittanceTracker/S&ETracker/components/NoticeTimelinePage'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'returnTracker',
+        path: '/return-tracker',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/ReturnTracker/ReturnTracker'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'returnTracker.add',
+        path: '/add-return-tracker',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/ReturnTracker/components/ReturnTrackerAddForm'
+                ),
+        ),
+        authority: [],
+    },
+    {
+        key: 'returnTracker.edit',
+        path: '/edit-return-tracker',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/ReturnTracker/components/ReturnTrackerEditForm'
                 ),
         ),
         authority: [],
