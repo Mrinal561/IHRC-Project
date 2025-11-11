@@ -99,7 +99,7 @@ const Status: React.FC = () => {
 
         // Find Status module
         const statusModule = response.payload.moduleAccess?.find(
-          (module: any) => module.id === 5 // Replace with correct module ID
+          (module: any) => module.id === 7 // Replace with correct module ID
         );
 
         if (!statusModule) {
