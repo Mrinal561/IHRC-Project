@@ -99,7 +99,7 @@ const Status: React.FC = () => {
 
         // Find Status module
         const statusModule = response.payload.moduleAccess?.find(
-          (module: any) => module.id === 7 // Replace with correct module ID
+          (module: any) => module.id === 8 // Replace with correct module ID
         );
 
         if (!statusModule) {
@@ -114,7 +114,7 @@ const Status: React.FC = () => {
 
         // Find Status menu item
         const statusMenu = statusModule.menus?.find(
-          (menu: any) => menu.id === 19 // Replace with correct menu ID
+          (menu: any) => menu.id === 25 // Replace with correct menu ID
         );
 
         if (!statusMenu) {

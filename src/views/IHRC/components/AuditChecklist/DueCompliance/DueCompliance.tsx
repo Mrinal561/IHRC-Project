@@ -96,7 +96,7 @@ useEffect(() => {
 
       // Find Due Compliance module
       const dueComplianceModule = response.payload.moduleAccess?.find(
-        (module: any) => module.id === 7
+        (module: any) => module.id === 8
       );
 
       if (!dueComplianceModule) {
@@ -111,7 +111,7 @@ useEffect(() => {
 
       // Find Due Compliance menu item
       const dueComplianceMenu = dueComplianceModule.menus?.find(
-        (menu: any) => menu.id === 22
+        (menu: any) => menu.id === 28
       );
 
       if (!dueComplianceMenu) {
