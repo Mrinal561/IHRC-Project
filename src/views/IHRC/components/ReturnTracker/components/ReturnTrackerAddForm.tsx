@@ -577,20 +577,79 @@ const yearOptions = Array.from({ length: 5 }, (_, i) => {
                (ret.applicable === 'STATE' && ret.state_id === Number(selectedStateId)))
           );
 
-         const isDelayed = (() => {
+//          const isDelayed = (() => {
+//   if (!superadminReturn || !values.submission_date || values.return_submission !== 'applicable') {
+//     return false;
+//   }
+
+//   const parseDueDate = (dateStr: string) => {
+//     const [day, month, year] = dateStr.split('-').map(Number);
+//     const fullYear = year < 100 ? 2000 + year : year;
+//     return new Date(fullYear, month - 1, day);
+//   };
+
+//   const dueDate = parseDueDate(superadminReturn.due_dates.first_due_date);
+//   const submissionDate = new Date(values.submission_date);
+
+//   return submissionDate > dueDate;
+// })();
+
+const isDelayed = (() => {
   if (!superadminReturn || !values.submission_date || values.return_submission !== 'applicable') {
     return false;
   }
 
-  const parseDueDate = (dateStr: string) => {
-    const [day, month, year] = dateStr.split('-').map(Number);
-    const fullYear = year < 100 ? 2000 + year : year;
-    return new Date(fullYear, month - 1, day);
+  const dueDateStr = superadminReturn.due_dates.first_due_date;
+  const [dueDay, dueMonth] = dueDateStr.split('-').map(Number);
+  
+  const submissionDate = new Date(values.submission_date);
+  const submissionYear = submissionDate.getFullYear();
+
+  // Return period के based पर due date calculate करें
+  const getDueDateForPeriod = () => {
+    const periodMonth = values.month || submissionDate.getMonth() + 1;
+    
+    switch (superadminReturn.frequency) {
+      case 'monthly':
+        // Current month का return, same month की dueDay को due
+        return new Date(submissionYear, periodMonth - 1, dueDay);
+      
+      case 'quarterly':
+        // Quarterly: Quarter के अंतिम month के बाद due
+        // जैसे: Jan-Mar quarter का return April की dueDay को due
+        const quarterEndMonth = Math.ceil(periodMonth / 3) * 3; // 3, 6, 9, 12
+        return new Date(
+          quarterEndMonth > 12 ? submissionYear + 1 : submissionYear,
+          quarterEndMonth > 12 ? 0 : quarterEndMonth - 1, // Adjust for December
+          dueDay
+        );
+      
+      case 'half_yearly':
+        // Half Yearly: Half year के अंत के बाद due
+        // जैसे: Jan-Jun half year का return July की dueDay को due
+        const halfYear = periodMonth <= 6 ? 1 : 2;
+        const halfYearDueMonth = halfYear === 1 ? 6 : 12; // June or December
+        return new Date(
+          halfYear === 2 && periodMonth === 12 ? submissionYear + 1 : submissionYear,
+          halfYear === 1 ? 6 : 11, // June (5) or December (11) - 0-indexed
+          dueDay
+        );
+      
+      case 'yearly':
+        // Yearly: साल के अंत के बाद due (अगले साल की dueMonth की dueDay)
+        return new Date(submissionYear + 1, dueMonth - 1, dueDay);
+      
+      case 'bi_annual':
+        // Bi-annual: हर 2 साल में once
+        const biAnnualYear = submissionYear % 2 === 0 ? submissionYear : submissionYear + 1;
+        return new Date(biAnnualYear, dueMonth - 1, dueDay);
+      
+      default:
+        return new Date(submissionYear, periodMonth - 1, dueDay);
+    }
   };
 
-  const dueDate = parseDueDate(superadminReturn.due_dates.first_due_date);
-  const submissionDate = new Date(values.submission_date);
-
+  const dueDate = getDueDateForPeriod();
   return submissionDate > dueDate;
 })();
 
