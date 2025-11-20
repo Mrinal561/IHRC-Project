@@ -11,6 +11,10 @@ import { endpoints } from '@/api/endpoint';
 import { useAppSelector } from '@/store';
 import useAuth from '@/utils/hooks/useAuth';
 import LimitedLineInput from '@/components/ui/Input/LimitedLineInput';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { fetchAuthUser } from '@/store/slices/login';
+import { Loading } from '@/components/shared';
 
 const FINANCIAL_YEAR_KEY = 'selectedFinancialYear'
 const FINANCIAL_YEAR_CHANGE_EVENT = 'financialYearChanged';
@@ -19,6 +23,23 @@ interface SelectOption {
   value: string;
   label: string;
 }
+
+interface Permissions {
+    canList: boolean;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+}
+
+const getPermissions = (menuItem: any): Permissions => {
+    const permissionsObject = menuItem?.permissions || menuItem?.access || {};
+    return {
+        canList: !!permissionsObject.can_list,
+        canCreate: !!permissionsObject.can_create,
+        canEdit: !!permissionsObject.can_edit,
+        canDelete: !!permissionsObject.can_delete,
+    };
+};
 
 interface PoshTableData {
   id: string;
@@ -76,17 +97,26 @@ const Posh = () => {
   const [branches, setBranches] = useState<SelectOption[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [companyGroupId, setCompanyGroupId] = useState('');
-  
+   const [permissions, setPermissions] = useState<Permissions>({
+          canList: false,
+          canCreate: false,
+          canEdit: false,
+          canDelete: false,
+      });
   const [pagination, setPagination] = useState({
         total: 0,
         pageIndex: 1,
         pageSize: 10,
     });
+    const [isInitialized, setIsInitialized] = useState(false);
+  const [permissionCheckComplete, setPermissionCheckComplete] = useState(false);
 
   
   // Using your existing useAuth hook as-is
   const auth = useAuth();
-  const userId = auth?.user?.id || 0; // Fallback to 0 if not available
+  const userId = auth?.user?.id || 0;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
    const [financialYear, setFinancialYear] = useState(sessionStorage.getItem(FINANCIAL_YEAR_KEY));
   const [isBulkDownloadOpen, setIsBulkDownloadOpen] = useState(false);
@@ -101,6 +131,86 @@ const Posh = () => {
     { value: 'district', label: 'District Level' }
   ];
   
+   // Permission initialization
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const response = await dispatch(fetchAuthUser());
+
+        if (!response.payload?.moduleAccess) {
+          toast.push(
+            <Notification title="Permission" type="error" closable={true}>
+              You don't have access to any modules
+            </Notification>
+          );
+          navigate('/home');
+          setPermissionCheckComplete(true);
+          setIsInitialized(true);
+          return;
+        }
+
+        // Find POSH module (ID 10 based on your data)
+        const poshModule = response.payload.moduleAccess?.find(
+          // (module: any) => module.id === 10
+          (module: any) => module.id === 11
+        );
+
+        if (!poshModule) {
+          toast.push(
+            <Notification title="Permission" type="error" closable={true}>
+              You don't have access to POSH module
+            </Notification>
+          );
+          navigate('/home');
+          setPermissionCheckComplete(true);
+          setIsInitialized(true);
+          return;
+        }
+
+        // Find POSH Return menu (ID 26 based on your data)
+        const poshReturnMenu = poshModule.menus?.find(
+          // (menu: any) => menu.id === 26
+          (menu: any) => menu.id === 33
+        );
+
+        if (!poshReturnMenu) {
+          toast.push(
+            <Notification title="Permission" type="error" closable={true}>
+              You don't have access to POSH Return menu
+            </Notification>
+          );
+          navigate('/home');
+          setPermissionCheckComplete(true);
+          setIsInitialized(true);
+          return;
+        }
+
+        const newPermissions = getPermissions(poshReturnMenu);
+        setPermissions(newPermissions);
+        setIsInitialized(true);
+
+        if (!newPermissions.canList) {
+          toast.push(
+            <Notification title="Permission" type="error" closable={true}>
+              You don't have permission to access POSH Returns
+            </Notification>
+          );
+          navigate('/home');
+        }
+        setPermissionCheckComplete(true);
+      } catch (error) {
+        console.error('Error fetching auth user:', error);
+        setIsInitialized(true);
+        setPermissionCheckComplete(true);
+      }
+    };
+
+    if (!isInitialized) {
+      initializeAuth();
+    }
+  }, [dispatch, isInitialized, navigate]);
+
+
   useEffect(() => {
   const handleFinancialYearChange = (event: CustomEvent) => {
     const newFinancialYear = event.detail;
@@ -122,9 +232,11 @@ const Posh = () => {
 }, []);
 
   useEffect(() => {
-    fetchCompanyGroups();
-    fetchPoshReturns();
-  }, []);
+   if (permissions.canList) {
+      fetchCompanyGroups();
+      fetchPoshReturns();
+    }
+  }, [permissions.canList]);
 
   
 
@@ -188,6 +300,7 @@ const Posh = () => {
 };
 
 const fetchPoshReturns = async () => {
+   if (!permissions.canList) return;
         setLoading(true);
         try {
             const params: Record<string, any> = {
@@ -242,8 +355,11 @@ const handlePaginationChange = (page: number) => {
     };
 
     useEffect(() => {
-        fetchPoshReturns();
-    }, [financialYear, searchTerm, pagination.pageIndex, pagination.pageSize]);
+    if (permissions.canList) {
+      fetchPoshReturns();
+    }
+  }, [financialYear, searchTerm, pagination.pageIndex, pagination.pageSize, permissions.canList]);
+
 
   const handleInputChange = (name: string, value: string | number) => {
   if (name === 'company_id') {
@@ -267,6 +383,14 @@ const handlePaginationChange = (page: number) => {
 };
 
   const handleSubmit = async () => {
+    if (!permissions.canCreate) {
+      toast.push(
+        <Notification title="Permission Denied" type="error" closable={true}>
+          You don't have permission to create POSH returns
+        </Notification>
+      );
+      return;
+    }
     if (formData.workshop_conducted < 1) {
       
       return;
@@ -344,6 +468,14 @@ const resetForm = () => {
 //   };
 
   const handleDownloadAllData = async () => {
+    if (!permissions.canList) {
+      toast.push(
+        <Notification title="Permission Denied" type="error" closable={true}>
+          You don't have permission to download data
+        </Notification>
+      );
+      return;
+    }
     try {
       const response = await httpClient.get(endpoints.poshSetup.poshReturnExport(), {
         params: {
@@ -374,6 +506,14 @@ const resetForm = () => {
   };
 
   const handleBulkDownload = async () => {
+     if (!permissions.canList) {
+      toast.push(
+        <Notification title="Permission Denied" type="error" closable={true}>
+          You don't have permission to download reports
+        </Notification>
+      );
+      return;
+    }
     try {
       const response = await httpClient.get(
         endpoints.poshSetup.poshReturnBulkDocumentDownload(), 
@@ -404,6 +544,14 @@ const resetForm = () => {
   };
 
   const handleDownloadReport = async (id: string) => {
+     if (!permissions.canList) {
+      toast.push(
+        <Notification title="Permission Denied" type="error" closable={true}>
+          You don't have permission to download reports
+        </Notification>
+      );
+      return;
+    }
     try {
       const response = await httpClient.get(
         endpoints.poshSetup.poshReturnIndividualDocumentDownload(id), 
@@ -445,6 +593,19 @@ const generateYearOption = () => {
 //   }));
 // };
 
+ // Show loading while checking permissions
+  if (!isInitialized || !permissionCheckComplete) {
+    return (
+      <Loading loading={true} type="default">
+        <div className="h-full" />
+      </Loading>
+    );
+  }
+
+  // Don't render anything if user doesn't have list permission
+  if (!permissions.canList) {
+    return null;
+  }
 
   return (
     <AdaptableCard className="h-full" bodyClass="h-full">
@@ -461,7 +622,9 @@ const generateYearOption = () => {
               fetchPoshReturns();
             }}
           />
-          <Button 
+          {permissions.canList && (
+
+            <Button 
             size='sm' 
             variant='solid' 
             icon={<HiDownload />}
@@ -469,27 +632,36 @@ const generateYearOption = () => {
           >
             Download Data
           </Button>
-          <Button 
-    size='sm' 
-    variant='solid' 
-    icon={<HiDownload />}
-    onClick={() => setIsBulkDownloadOpen(true)}
-  >
+          )}
+          {permissions.canList && (
+
+            <Button 
+            size='sm' 
+            variant='solid' 
+            icon={<HiDownload />}
+            onClick={() => setIsBulkDownloadOpen(true)}
+            >
      Download Reports
   </Button>
-          <PoshBulkUpload 
-            isOpen={isBulkUploadOpen}
+  )}
+  {permissions.canCreate && (
+    <PoshBulkUpload 
+    isOpen={isBulkUploadOpen}
             onClose={() => setIsBulkUploadOpen(false)}
             onSuccess={handleBulkUploadSuccess}
-          />
-          <Button
-            variant="solid"
-            size="sm"
-            icon={<HiPlusCircle />}
-            onClick={() => setIsDialogOpen(true)}
-          >
-            Add Return
-          </Button>
+            canCreate={permissions.canCreate}
+            />
+          )}
+         {permissions.canCreate && (
+            <Button
+              variant="solid"
+              size="sm"
+              icon={<HiPlusCircle />}
+              onClick={() => setIsDialogOpen(true)}
+            >
+              Add Return
+            </Button>
+          )}
         </div>
       </div>
 
@@ -500,6 +672,7 @@ const generateYearOption = () => {
                 pagination={pagination}
                 onPaginationChange={handlePaginationChange}
                 onPageSizeChange={handlePageSizeChange}
+                canList={permissions.canList}
             />
 
 <Dialog

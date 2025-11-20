@@ -12,14 +12,36 @@ import { Notification } from '@/components/ui';
 import useAuth from '@/utils/hooks/useAuth';
 import { useAppSelector } from '@/store';
 import OutlinedSelect from '@/components/ui/Outlined/Outlined';
+import { useDispatch } from 'react-redux';
+import { fetchAuthUser } from '@/store/slices/login';
+import { Loading } from '@/components/shared';
 
 interface SelectOption {
   value: string;
   label: string;
 }
 
+interface Permissions {
+    canList: boolean;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+}
+
+const getPermissions = (menuItem: any): Permissions => {
+    const permissionsObject = menuItem?.permissions || menuItem?.access || {};
+    return {
+        canList: !!permissionsObject.can_list,
+        canCreate: !!permissionsObject.can_create,
+        canEdit: !!permissionsObject.can_edit,
+        canDelete: !!permissionsObject.can_delete,
+    };
+};
+
+
 const Committee = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [searchTerm, setSearchTerm] = useState('');
     const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
     const [tableKey, setTableKey] = useState(Date.now()); 
@@ -27,11 +49,104 @@ const Committee = () => {
     const [companies, setCompanies] = useState<SelectOption[]>([]);
     const [selectedCompany, setSelectedCompany] = useState<SelectOption | null>(null);
       const [companyGroupId, setCompanyGroupId] = useState('');
+      const [permissions, setPermissions] = useState<Permissions>({
+        canList: false,
+        canCreate: false,
+        canEdit: false,
+        canDelete: false,
+    });
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [permissionCheckComplete, setPermissionCheckComplete] = useState(false);
     
     // Using your existing useAuth hook
     const auth = useAuth();
     const userId = auth?.user?.id || 0;
     const currentFinancialYear = useAppSelector((state: any) => state.common?.currentFinancialYear || '');
+
+     useEffect(() => {
+        const initializeAuth = async () => {
+            try {
+                const response = await dispatch(fetchAuthUser());
+
+                if (!response.payload?.moduleAccess) {
+                    toast.push(
+                        <Notification title="Permission" type="error" closable={true}>
+                            You don't have access to any modules
+                        </Notification>
+                    );
+                    navigate('/home');
+                    setPermissionCheckComplete(true);
+                    setIsInitialized(true);
+                    return;
+                }
+
+                // Find POSH module (ID 10 based on your data)
+                const poshModule = response.payload.moduleAccess?.find(
+                    // (module: any) => module.id === 10
+                    (module: any) => module.id === 11
+                );
+
+                if (!poshModule) {
+                    toast.push(
+                        <Notification title="Permission" type="error" closable={true}>
+                            You don't have access to POSH module
+                        </Notification>
+                    );
+                    navigate('/home');
+                    setPermissionCheckComplete(true);
+                    setIsInitialized(true);
+                    return;
+                }
+
+                // Find POSH Committee menu (ID 25 based on your data)
+                const poshCommitteeMenu = poshModule.menus?.find(
+                    // (menu: any) => menu.id === 25
+                    (menu: any) => menu.id === 32
+                );
+
+                if (!poshCommitteeMenu) {
+                    toast.push(
+                        <Notification title="Permission" type="error" closable={true}>
+                            You don't have access to POSH Committee menu
+                        </Notification>
+                    );
+                    navigate('/home');
+                    setPermissionCheckComplete(true);
+                    setIsInitialized(true);
+                    return;
+                }
+
+                const newPermissions = getPermissions(poshCommitteeMenu);
+                setPermissions(newPermissions);
+                setIsInitialized(true);
+
+                if (!newPermissions.canList) {
+                    toast.push(
+                        <Notification title="Permission" type="error" closable={true}>
+                            You don't have permission to access POSH Committee
+                        </Notification>
+                    );
+                    navigate('/home');
+                }
+                setPermissionCheckComplete(true);
+            } catch (error) {
+                console.error('Error fetching auth user:', error);
+                setIsInitialized(true);
+                setPermissionCheckComplete(true);
+            }
+        };
+
+        if (!isInitialized) {
+            initializeAuth();
+        }
+    }, [dispatch, isInitialized, navigate]);
+
+    useEffect(() => {
+        if (permissions.canList) {
+            fetchCompanyGroups();
+        }
+    }, [permissions.canList]);
+
 
     const handleBulkUploadSuccess = () => {
         setIsBulkUploadOpen(false);
@@ -39,6 +154,14 @@ const Committee = () => {
     };
 
     const handleDownloadAllData = async () => {
+         if (!permissions.canList) {
+            toast.push(
+                <Notification title="Permission Denied" type="error" closable={true}>
+                    You don't have permission to download committee data
+                </Notification>
+            );
+            return;
+        }
         try {
             const response = await httpClient.get(endpoints.poshSetup.committeeData(), {
                 params: {
@@ -69,10 +192,7 @@ const Committee = () => {
         }
     };
 
-    useEffect(() => {
-        fetchCompanyGroups();
-      }, []);
-
+  
      const fetchCompanyGroups = async () => {
     try {
       const response = await httpClient.get(endpoints.companyGroup.getAll(), {
@@ -107,6 +227,14 @@ const Committee = () => {
   };
 
     const handleDownloadReports = async () => {
+         if (!permissions.canList) {
+            toast.push(
+                <Notification title="Permission Denied" type="error" closable={true}>
+                    You don't have permission to download committee reports
+                </Notification>
+            );
+            return;
+        }
         if (!selectedCompany) {
          
              toast.push(
@@ -150,6 +278,20 @@ const Committee = () => {
         }
     };
 
+     if (!isInitialized || !permissionCheckComplete) {
+        return (
+            <Loading loading={true} type="default">
+                <div className="h-full" />
+            </Loading>
+        );
+    }
+
+    // Don't render anything if user doesn't have list permission
+    if (!permissions.canList) {
+        return null;
+    }
+
+
     return (
         <AdaptableCard className="h-full" bodyClass="h-full">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
@@ -157,14 +299,16 @@ const Committee = () => {
                     <h3 className="text-2xl font-bold">POSH Committee</h3>
                 </div>
                 <div className="flex gap-2">
-                    <Button 
-                        size='sm' 
-                        variant='solid' 
-                        icon={<HiDownload />}
-                        onClick={handleDownloadAllData}
-                    >
-                        Download Data
-                    </Button>
+                   {permissions.canList && (
+                        <Button 
+                            size='sm' 
+                            variant='solid' 
+                            icon={<HiDownload />}
+                            onClick={handleDownloadAllData}
+                        >
+                            Download Data
+                        </Button>
+                    )}
                     {/* <Button 
                         size='sm' 
                         variant='solid' 
@@ -176,22 +320,27 @@ const Committee = () => {
                     >
                         Download Reports
                     </Button> */}
-                    <CommitteeBulkUpload 
-                        isOpen={isBulkUploadOpen}
-                        onClose={() => setIsBulkUploadOpen(false)}
-                        onSuccess={handleBulkUploadSuccess}
-                    />
-                    <Button
-                        variant="solid"
-                        size="sm"
-                        icon={<HiPlusCircle />}
-                        onClick={() => navigate('/add-committee')}
-                    >
-                        Add Committee
-                    </Button>
+                     {permissions.canCreate && (
+                        <CommitteeBulkUpload 
+                            isOpen={isBulkUploadOpen}
+                            onClose={() => setIsBulkUploadOpen(false)}
+                            onSuccess={handleBulkUploadSuccess}
+                        />
+                    )}
+                  {permissions.canCreate && (
+                        <Button
+                            variant="solid"
+                            size="sm"
+                            icon={<HiPlusCircle />}
+                            onClick={() => navigate('/add-committee')}
+                        >
+                            Add Committee
+                        </Button>
+                    )}
                 </div>
             </div>
-            <CommitteeTable key={tableKey} searchTerm={searchTerm} />
+            <CommitteeTable key={tableKey} searchTerm={searchTerm} canList={permissions.canList}
+                />
 
             {/* Download Reports Dialog */}
             <Dialog

@@ -20,6 +20,10 @@ interface PoshPolicyTableProps {
     // onDelete: (id: number) => void;
     onReferesh: () => void
     onDownload: (id: number) => void;
+    canList: boolean;
+    canDelete: boolean;
+    canEdit: boolean;
+    onDelete?: (id: number) => void;
 }
 
 const PoshPolicyTable = ({ 
@@ -29,7 +33,11 @@ const PoshPolicyTable = ({
     onPaginationChange,
     // onDelete,
     onReferesh,
-    onDownload
+    onDownload,
+    canList,
+    canDelete,
+    canEdit,
+    onDelete
 }: PoshPolicyTableProps) => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
@@ -65,14 +73,19 @@ const PoshPolicyTable = ({
             cell: ({ row }) => (
                 <div className="flex space-x-1">
                     <Tooltip title="Download Policy">
-                        <Button
+                        {canList && (
+
+                            <Button
                             size="sm"
                             icon={<HiDownload />}
                             onClick={() => onDownload(row.original.id)}
-                        />
+                            />
+                        )}
                     </Tooltip>
                     <Tooltip title="Delete Policy">
-                        <Button
+                        {canDelete && (
+
+                            <Button
                             size="sm"
                             icon={<FiTrash />}
                             onClick={(e) => {
@@ -81,14 +94,24 @@ const PoshPolicyTable = ({
                                 setDeleteDialogOpen(true);
                             }}
                             className="hover:bg-transparent text-red-500"
-                        />
+                            />
+                        )}
                     </Tooltip>
                 </div>
             )
         }
-    ], []);
+    ], [canDelete, canList]);
 
      const handleDeletePolicy = async (id: number) => {
+        if (!canDelete) {
+            toast.push(
+                <Notification title="Permission Denied" type="error">
+                    You don't have permission to delete policies
+                </Notification>
+            );
+            return;
+        }
+
     try {
         await httpClient.delete(endpoints.poshSetup.policyDelete(id));
         toast.push(
@@ -116,6 +139,14 @@ const PoshPolicyTable = ({
             handleDeletePolicy(selectedPolicyId)
         }
     };
+
+     if (!canList) {
+        return (
+            <div className="flex items-center justify-center h-96 text-gray-500 border rounded-xl">
+                <p>You don't have permission to view POSH policies</p>
+            </div>
+        );
+    }
 
     return (
         <div className="relative">

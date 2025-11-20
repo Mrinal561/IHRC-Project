@@ -43,7 +43,12 @@ const toTitleCase = (str: string) => {
     })
 }
 
-const CommitteeTable = () => {
+interface CommitteeTableProps {
+    canList: boolean;
+    onRefresh?: () => void;
+}
+
+const CommitteeTable = ({ canList, onRefresh}: CommitteeTableProps) => {
     const [data, setData] = useState<CommitteeData[]>([])
     const [loading, setLoading] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
@@ -54,6 +59,7 @@ const CommitteeTable = () => {
     )
 
     const fetchCommittees = async () => {
+        if (!canList) return;
         setLoading(true)
         try {
             const response = await httpClient.get(
@@ -116,6 +122,14 @@ const CommitteeTable = () => {
     // };
 
     const handleDownload = async (id: string) => {
+         if (!canList) {
+            toast.push(
+                <Notification title="Permission Denied" type="error">
+                    You don't have permission to download committee documents
+                </Notification>,
+            )
+            return
+        }
         try {
             // First check if document exists
             const checkResponse = await httpClient.get(
@@ -159,7 +173,7 @@ const CommitteeTable = () => {
 
     useEffect(() => {
         fetchCommittees()
-    }, [searchTerm, currentFinancialYear])
+    }, [searchTerm, currentFinancialYear, canList])
 
     const renderMemberCell = (member: CommitteeMember | undefined) => {
         return (
@@ -269,11 +283,14 @@ const CommitteeTable = () => {
             id: 'actions',
             cell: ({ row }) => (
                 <Tooltip title="Download Policy">
-                    <Button
+                    {canList && (
+
+                        <Button
                         size="sm"
                         icon={<HiDownload />}
                         onClick={() => handleDownload(row.original.id)}
-                    />
+                        />
+                    )}
                 </Tooltip>
             ),
         }

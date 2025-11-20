@@ -10,6 +10,10 @@ import httpClient from '@/api/http-client';
 import { endpoints } from '@/api/endpoint';
 import useAuth from '@/utils/hooks/useAuth';
 import { Button, Dialog, Notification, toast } from '@/components/ui';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { fetchAuthUser } from '@/store/slices/login';
+import { Loading } from '@/components/shared';
 
 interface PoshPolicy {
     id: number;
@@ -29,6 +33,23 @@ interface Company {
     name: string;
 }
 
+interface Permissions {
+    canList: boolean;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+}
+
+const getPermissions = (menuItem: any): Permissions => {
+    const permissionsObject = menuItem?.permissions || menuItem?.access || {};
+    return {
+        canList: !!permissionsObject.can_list,
+        canCreate: !!permissionsObject.can_create,
+        canEdit: !!permissionsObject.can_edit,
+        canDelete: !!permissionsObject.can_delete,
+    };
+};
+
 const PoshPolicy = () => {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
@@ -43,12 +64,102 @@ const PoshPolicy = () => {
     });
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
+    const [permissions, setPermissions] = useState<Permissions>({
+        canList: false,
+        canCreate: false,
+        canEdit: false,
+        canDelete: false,
+    });
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [permissionCheckComplete, setPermissionCheckComplete] = useState(false);
 
     const auth = useAuth();
     const userId = auth?.user?.id || 0;
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+     // Permission initialization
+    useEffect(() => {
+        const initializeAuth = async () => {
+            try {
+                const response = await dispatch(fetchAuthUser());
+
+                if (!response.payload?.moduleAccess) {
+                    toast.push(
+                        <Notification title="Permission" type="error" closable={true}>
+                            You don't have access to any modules
+                        </Notification>
+                    );
+                    navigate('/home');
+                    setPermissionCheckComplete(true);
+                    setIsInitialized(true);
+                    return;
+                }
+
+                // Find POSH module (ID 10 based on your data)
+                const poshModule = response.payload.moduleAccess?.find(
+                    // (module: any) => module.id === 10
+                    (module: any) => module.id === 11
+                );
+
+                if (!poshModule) {
+                    toast.push(
+                        <Notification title="Permission" type="error" closable={true}>
+                            You don't have access to POSH module
+                        </Notification>
+                    );
+                    navigate('/home');
+                    setPermissionCheckComplete(true);
+                    setIsInitialized(true);
+                    return;
+                }
+
+                // Find POSH Policy menu (ID 24 based on your data)
+                const poshPolicyMenu = poshModule.menus?.find(
+                    // (menu: any) => menu.id === 24
+                    (menu: any) => menu.id === 31
+                );
+
+                if (!poshPolicyMenu) {
+                    toast.push(
+                        <Notification title="Permission" type="error" closable={true}>
+                            You don't have access to POSH Policy menu
+                        </Notification>
+                    );
+                    navigate('/home');
+                    setPermissionCheckComplete(true);
+                    setIsInitialized(true);
+                    return;
+                }
+
+                const newPermissions = getPermissions(poshPolicyMenu);
+                setPermissions(newPermissions);
+                setIsInitialized(true);
+
+                if (!newPermissions.canList) {
+                    toast.push(
+                        <Notification title="Permission" type="error" closable={true}>
+                            You don't have permission to access POSH Policies
+                        </Notification>
+                    );
+                    navigate('/home');
+                }
+                setPermissionCheckComplete(true);
+            } catch (error) {
+                console.error('Error fetching auth user:', error);
+                setIsInitialized(true);
+                setPermissionCheckComplete(true);
+            }
+        };
+
+        if (!isInitialized) {
+            initializeAuth();
+        }
+    }, [dispatch, isInitialized, navigate]);
 
     // Fetch all necessary data
     const fetchData = async () => {
+         if (!permissions.canList) return;
         await fetchCompanyGroups();
         await fetchPolicies();
     };
@@ -95,6 +206,7 @@ const PoshPolicy = () => {
     };
 
     const fetchPolicies = async (page = 1, limit = 10) => {
+         if (!permissions.canList) return;
         setLoading(true);
         try {
             const response = await httpClient.get(endpoints.poshSetup.listPolicy(), {
@@ -120,6 +232,14 @@ const PoshPolicy = () => {
     };
 
     const handleDownloadPolicy = async (id: number) => {
+         if (!permissions.canList) {
+            toast.push(
+                <Notification title="Permission Denied" type="error">
+                    You don't have permission to download policies
+                </Notification>
+            );
+            return;
+        }
         try {
             const response = await httpClient.get(endpoints.poshSetup.downloadPolicy(id), {
                 responseType: 'blob'
@@ -144,6 +264,15 @@ const PoshPolicy = () => {
     };
 
     const handleDownloadAll = async () => {
+         if (!permissions.canList) {
+            toast.push(
+                <Notification title="Permission Denied" type="error">
+                    You don't have permission to download policies
+                </Notification>
+            );
+            return;
+        }
+
         try {
             const response = await httpClient.get(endpoints.poshSetup.downloadBulkPolicy(), {
                 responseType: 'blob'
@@ -168,6 +297,14 @@ const PoshPolicy = () => {
     };
 
    const handleDeletePolicy = async (id: number) => {
+     if (!permissions.canDelete) {
+            toast.push(
+                <Notification title="Permission Denied" type="error">
+                    You don't have permission to delete policies
+                </Notification>
+            );
+            return;
+        }
     try {
         await httpClient.delete(endpoints.poshSetup.policyDelete(id));
         toast.push(
@@ -193,9 +330,23 @@ const PoshPolicy = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [permissions.canList]); 
 
     
+     // Show loading while checking permissions
+    if (!isInitialized || !permissionCheckComplete) {
+        return (
+            <Loading loading={true} type="default">
+                <div className="h-full" />
+            </Loading>
+        );
+    }
+
+    // Don't render anything if user doesn't have list permission
+    if (!permissions.canList) {
+        return null;
+    }
+
 
     return (
         <AdaptableCard className="h-full" bodyClass="h-full">
@@ -204,30 +355,36 @@ const PoshPolicy = () => {
                     <h3 className="text-2xl font-bold">POSH Policy</h3>
                 </div>
                 <div className="flex gap-2">
-                    <Button 
-                        size='sm' 
-                        variant='solid' 
-                        icon={<HiDownload />}
-                        onClick={handleDownloadAll}
-                    >
-                        Download All
-                    </Button>
-                    <Button
-                        variant="solid"
-                        size="sm"
-                        icon={<HiUpload />}
-                        onClick={() => setIsBulkUploadOpen(true)}
-                    >
-                        Bulk Upload
-                    </Button>
-                    <Button
-                        variant="solid"
-                        size="sm"
-                        icon={<HiPlusCircle />}
-                        onClick={() => setIsAddDialogOpen(true)}
-                    >
-                        Add Policy
-                    </Button>
+                    {permissions.canList && (
+                        <Button 
+                            size='sm' 
+                            variant='solid' 
+                            icon={<HiDownload />}
+                            onClick={handleDownloadAll}
+                        >
+                            Download All
+                        </Button>
+                    )}
+                      {/* {permissions.canCreate && (
+                        <Button
+                            variant="solid"
+                            size="sm"
+                            icon={<HiUpload />}
+                            onClick={() => setIsBulkUploadOpen(true)}
+                        >
+                            Bulk Upload
+                        </Button>
+                    )} */}
+                    {permissions.canCreate && (
+                        <Button
+                            variant="solid"
+                            size="sm"
+                            icon={<HiPlusCircle />}
+                            onClick={() => setIsAddDialogOpen(true)}
+                        >
+                            Add Policy
+                        </Button>
+                    )}
                 </div>
             </div>
             
@@ -238,27 +395,31 @@ const PoshPolicy = () => {
                 onPaginationChange={fetchPolicies}
                 onDownload={handleDownloadPolicy}
                 onReferesh={fetchPolicies}
-                // onDelete={(id) => {
-                //     setSelectedPolicyId(id);
-                //     setDeleteDialogOpen(true);
-                // }}
+                canList={permissions.canList}
+                canEdit={permissions.canEdit}
+                canDelete={permissions.canDelete}
+               
             />
             
-            <AddPolicyDialog
-                isOpen={isAddDialogOpen}
-                onClose={() => setIsAddDialogOpen(false)}
-                onSuccess={handleSuccess}
-                companies={companies}
-            />
+            {permissions.canCreate && (
+                <AddPolicyDialog
+                    isOpen={isAddDialogOpen}
+                    onClose={() => setIsAddDialogOpen(false)}
+                    onSuccess={handleSuccess}
+                    companies={companies}
+                />
+            )}
             
-            <PolicyBulkUpload
-                isOpen={isBulkUploadOpen}
-                onClose={() => setIsBulkUploadOpen(false)}
-                onSuccess={() => {
-                    setIsBulkUploadOpen(false);
-                    fetchPolicies(pagingData.page, pagingData.limit);
-                }}
-            />
+            {permissions.canCreate && (
+                <PolicyBulkUpload
+                    isOpen={isBulkUploadOpen}
+                    onClose={() => setIsBulkUploadOpen(false)}
+                    onSuccess={() => {
+                        setIsBulkUploadOpen(false);
+                        fetchPolicies(pagingData.page, pagingData.limit);
+                    }}
+                />
+            )}
             
             <Dialog
                 isOpen={deleteDialogOpen}

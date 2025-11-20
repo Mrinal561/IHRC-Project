@@ -769,6 +769,7 @@ const SideNav = () => {
             'Return Tracker': 'Return Tracker',
             'POSH': 'POSH',
             'Audit Tracker': 'Audit Tracker',
+            'Audit Checklist': 'Audit Tracker',
 
             // Menu level mappings
             'Entity Setup': 'Entity Setup',
@@ -790,7 +791,9 @@ const SideNav = () => {
             'Custom Checklist': 'Custom Checklist',
             'Compliance Checklist': 'Compliance Checklist',
             'Due Compliance': 'Due Compliance',
+            'Due Compliances': 'Due Compliance',
             'Certificate': 'Certificate',
+            'Compliance Certificate': 'Certificate',
             'History': 'History',
             'POSH Policy': 'POSH Policy',
             'POSH Committee': 'POSH Committee',
@@ -824,7 +827,58 @@ const SideNav = () => {
             return false
         }
 
-        // For all other users (including admin)
+        // // For all other users (including admin)
+        // for (const module of moduleList) {
+        //     // First check if this is a module-level match
+        //     if (module.name === mappedName) {
+        //         return true
+        //     }
+
+        //     // Then check menu items within modules
+        //     if (module.menus) {
+        //         for (const menu of module.menus) {
+        //             if (menu.name === mappedName) {
+        //                 return menu.permissions?.can_list === true
+        //             }
+
+        //             // Check child menus if they exist
+        //             if (menu.children) {
+        //                 for (const child of menu.children) {
+        //                     if (child.name === mappedName) {
+        //                         return child.permissions?.can_list === true
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        if (userType === 'user') {
+        for (const module of moduleList) {
+            // Check module level access first
+            if (module.name === mappedName) {
+                return module.access?.can_list === true
+            }
+
+            // Check menu items within modules
+            if (module.menus) {
+                for (const menu of module.menus) {
+                    if (menu.name === mappedName) {
+                        return menu.access?.can_list === true
+                    }
+
+                    // Check child menus if they exist
+                    if (menu.children) {
+                        for (const child of menu.children) {
+                            if (child.name === mappedName) {
+                                return child.access?.can_list === true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        // For admin and other users
         for (const module of moduleList) {
             // First check if this is a module-level match
             if (module.name === mappedName) {
@@ -849,6 +903,7 @@ const SideNav = () => {
                 }
             }
         }
+    }
 
         return false
     }

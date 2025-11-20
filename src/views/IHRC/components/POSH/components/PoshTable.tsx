@@ -27,6 +27,7 @@ interface PoshTableProps {
     };
     onPaginationChange: (page: number) => void;
     onPageSizeChange: (pageSize: number) => void;
+    canList: boolean;
 }
 
 
@@ -35,7 +36,7 @@ interface PoshTableProps {
 
 const PoshTable = ({ data, loading, onDownload,pagination,
     onPaginationChange,
-    onPageSizeChange }: PoshTableProps) => {
+    onPageSizeChange, canList }: PoshTableProps) => {
 
  
 
@@ -97,11 +98,14 @@ const PoshTable = ({ data, loading, onDownload,pagination,
             id: 'actions',
             cell: ({ row }) => (
                 <Tooltip title="Download Report">
-                    <Button
+                    {canList && (
+
+                        <Button
                         size="sm"
                         icon={<HiDownload />}
                         onClick={() => onDownload(row.original.id)}  // Uncommented and added onClick handler
-                    />
+                        />
+                    )}
                 </Tooltip>
             )
         }
