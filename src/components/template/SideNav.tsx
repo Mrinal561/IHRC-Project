@@ -398,69 +398,14 @@ const adminnav: NavigationTree[] = [
         ],
     },
     {
-        key: 'register.collapse',
-        path: '',
+        key: 'register',
+        path: '/register',
         title: 'Register',
-        translateKey: 'nav.companySetup.register',
+        translateKey: 'nav.register',
         icon: 'remittanceCollapse',
-        type: NAV_ITEM_TYPE_COLLAPSE,
+        type: NAV_ITEM_TYPE_ITEM,
         authority: [],
-        subMenu: [
-            {
-                key: 'registerContractor.collapse',
-                path: '',
-                title: 'Register For Contractor',
-                translateKey: 'nav.registerContractor.collapse',
-                icon: '',
-                type: NAV_ITEM_TYPE_COLLAPSE,
-                authority: [],
-                subMenu: [
-                    {
-                        key: 'registerContractor.collapse.contractorRegister',
-                        path: '/register-contractor',
-                        title: 'Contractor Register',
-                        translateKey:
-                            'nav.registerContractor.collapse.contractorRegister',
-                        icon: '',
-                        type: NAV_ITEM_TYPE_ITEM,
-                        authority: [],
-                        subMenu: [],
-                    },
-                ],
-            },
-            {
-                key: 'registerClient.collapse.clientRegister',
-                path: '/registers',
-                title: 'Register For Client',
-                translateKey: 'nav.registerClient.collapse.clientRegister',
-                icon: '',
-                type: NAV_ITEM_TYPE_COLLAPSE,
-                authority: [],
-                subMenu: [
-                    // {
-                    //     key: 'registerClient.collapse.clientRegister',
-                    //     path: '/registers',
-                    //     title: 'Registers',
-                    //     translateKey:
-                    //         'nav.registerClient.collapse.clientRegister',
-                    //     icon: '',
-                    //     type: NAV_ITEM_TYPE_ITEM,
-                    //     authority: [],
-                    //     subMenu: [],
-                    // },
-                    // {
-                    //     key: 'registerClient.collapse.clientRegister',
-                    //     path: '/attendance-register',
-                    //     title: 'Attendance Register',
-                    //     translateKey: 'nav.registerClient.collapse.clientRegister',
-                    //     icon: '',
-                    //     type: NAV_ITEM_TYPE_ITEM,
-                    //     authority: [],
-                    //     subMenu: [],
-                    // }
-                ],
-            },
-        ],
+        subMenu: [],
     },
 ]
 
@@ -689,6 +634,16 @@ const usernav: NavigationTree[] = [
                 subMenu: [],
             },
         ],
+    },
+    {
+        key: 'register',
+        path: '/register',
+        title: 'Register',
+        translateKey: 'nav.register',
+        icon: 'remittanceCollapse',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
     },
 ]
 

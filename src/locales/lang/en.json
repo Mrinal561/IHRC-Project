@@ -78,29 +78,8 @@
             "notice": "Notice Tracker",
             "externaluser": "External User",
             "agreement": "Agreement",
-        "register": {
-            "register": "Register & Return",
-            "collapse": {
-                "inputSetup": {
-                    "collapse": {
-                        "collapse": "Input",
-                        "item1": "Salary Register",
-                        "item2": "Attendance Register",
-                        "item3": "Leave Register",
-                        "item4": "Bonus Register",
-                        "item5": "Maternity Register"
-                    }
-                },
-                "outputSetup": {
-                    "collapse": {
-                        "collapse": "Output",
-                        "item1": "Output Registers"
-                    }
-                }
-
-            }
-        },
         "posh": "POSH",
-        "return": "Return Tracker"
+        "return": "Return Tracker",
+        "register": "Register"
         }
 }

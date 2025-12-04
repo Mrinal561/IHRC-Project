@@ -872,72 +872,83 @@ export const protectedRoutes = [
     },
 
     {
-        key: 'register.collapse.item1',
-        path: '/salary-register-input',
+        key: 'nav.register',
+        path: '/register',
         component: lazy(
             () =>
                 import(
-                    '@/views/IHRC/components/Registers&Return/input/SalaryRegister/SalaryRegister'
+                    '@/views/IHRC/components/Register/Register'
                 ),
         ),
         authority: [],
     },
-    {
-        key: 'register.collapse.item2',
-        path: '/attendance-register-input',
-        component: lazy(
-            () =>
-                import(
-                    '@/views/IHRC/components/Registers&Return/input/AttendanceRegister/AttendanceRegister'
-                ),
-        ),
-        authority: [],
-    },
-    {
-        key: 'register.collapse.item3',
-        path: '/leave-register-input',
-        component: lazy(
-            () =>
-                import(
-                    '@/views/IHRC/components/Registers&Return/input/LeaveRegister/LeaveRegister'
-                ),
-        ),
-        authority: [],
-    },
-    {
-        key: 'register.collapse.item4',
-        path: '/bonus-register-input',
-        component: lazy(
-            () =>
-                import(
-                    '@/views/IHRC/components/Registers&Return/input/BonusRegister/BonusRegister'
-                ),
-        ),
-        authority: [],
-    },
-    {
-        key: 'register.collapse.item5',
-        path: '/maternity-register-input',
-        component: lazy(
-            () =>
-                import(
-                    '@/views/IHRC/components/Registers&Return/input/MaternityRegister/MaternityRegister'
-                ),
-        ),
-        authority: [],
-    },
+    // {
+    //     key: 'register.collapse.item1',
+    //     path: '/salary-register-input',
+    //     component: lazy(
+    //         () =>
+    //             import(
+    //                 '@/views/IHRC/components/Registers&Return/input/SalaryRegister/SalaryRegister'
+    //             ),
+    //     ),
+    //     authority: [],
+    // },
+    // {
+    //     key: 'register.collapse.item2',
+    //     path: '/attendance-register-input',
+    //     component: lazy(
+    //         () =>
+    //             import(
+    //                 '@/views/IHRC/components/Registers&Return/input/AttendanceRegister/AttendanceRegister'
+    //             ),
+    //     ),
+    //     authority: [],
+    // },
+    // {
+    //     key: 'register.collapse.item3',
+    //     path: '/leave-register-input',
+    //     component: lazy(
+    //         () =>
+    //             import(
+    //                 '@/views/IHRC/components/Registers&Return/input/LeaveRegister/LeaveRegister'
+    //             ),
+    //     ),
+    //     authority: [],
+    // },
+    // {
+    //     key: 'register.collapse.item4',
+    //     path: '/bonus-register-input',
+    //     component: lazy(
+    //         () =>
+    //             import(
+    //                 '@/views/IHRC/components/Registers&Return/input/BonusRegister/BonusRegister'
+    //             ),
+    //     ),
+    //     authority: [],
+    // },
+    // {
+    //     key: 'register.collapse.item5',
+    //     path: '/maternity-register-input',
+    //     component: lazy(
+    //         () =>
+    //             import(
+    //                 '@/views/IHRC/components/Registers&Return/input/MaternityRegister/MaternityRegister'
+    //             ),
+    //     ),
+    //     authority: [],
+    // },
 
-    {
-        key: 'register.collapse.item1',
-        path: '/output-register',
-        component: lazy(
-            () =>
-                import(
-                    '@/views/IHRC/components/Registers&Return/output/OutputRegisters/OutputRegisters'
-                ),
-        ),
-        authority: [],
-    },
+    // {
+    //     key: 'register.collapse.item1',
+    //     path: '/output-register',
+    //     component: lazy(
+    //         () =>
+    //             import(
+    //                 '@/views/IHRC/components/Registers&Return/output/OutputRegisters/OutputRegisters'
+    //             ),
+    //     ),
+    //     authority: [],
+    // },
 
     {
         key: 'editRequestDetail',
