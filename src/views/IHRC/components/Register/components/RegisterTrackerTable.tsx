@@ -206,7 +206,7 @@ const RegisterTrackerTable = ({
                 ),
             },
             {
-                header: 'Processed Date',
+                header: 'Completed Date',
                 enableSorting: false,
                 accessorKey: 'processed_uploaded_at',
                 cell: ({ row }) => (
