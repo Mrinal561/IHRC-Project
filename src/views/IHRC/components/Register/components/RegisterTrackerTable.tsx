@@ -247,8 +247,8 @@ const RegisterTrackerTable = ({
                             <Tooltip title="Download Processed File">
                                 <Button
                                     size="sm"
-                                    variant="plain"
-                                    icon={<FiDownload className="w-5 h-5 text-green-600 hover:text-green-800" />}
+                                    // variant="plain"
+                                    icon={<FiDownload />}
                                     onClick={() => handleDownload(row.original.id, 'processed')}
                                     loading={downloading === `${row.original.id}-processed`}
                                     disabled={downloading === `${row.original.id}-processed`}
