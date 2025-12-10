@@ -101,6 +101,7 @@
             }
         },
         "posh": "POSH",
-        "return": "Return Tracker"
+        "return": "Return Tracker",
+        "registers": "Register"
         }
 }

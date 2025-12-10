@@ -22,19 +22,19 @@ export const endpoints = {
         create: () => api('companyadmin/company'),
         update: (id: string) => api(`companyadmin/company/${id}`),
         delete: (id: string) => api(`companyadmin/company/${id}`),
-        downloadFormat: () => api(`/companyadmin/company/export-template`),
-        bulkCreate: () => api(`/companyadmin/company/bulk-upload`),
+        downloadFormat: () => api(`companyadmin/company/export-template`),
+        bulkCreate: () => api(`companyadmin/company/bulk-upload`),
         companyList: () => api('company')
     },
     common: {
-        getAll: () => api('/company-group'),
-        state: () => api('/states'),
-        district: () => api('/district'),
-        location: () => api('/location'),
-        getSubCategory: () => api('/subcategory-suggestions'),
-        createSubCategory: () => api('/subcategory'),
-        agreementTypeSuggestions: () => api('/agreement-type-suggestions'),
-        createAgreementType: () => api('/agreement-type'),
+        getAll: () => api('company-group'),
+        state: () => api('states'),
+        district: () => api('district'),
+        location: () => api('location'),
+        getSubCategory: () => api('subcategory-suggestions'),
+        createSubCategory: () => api('subcategory'),
+        agreementTypeSuggestions: () => api('agreement-type-suggestions'),
+        createAgreementType: () => api('agreement-type'),
        
 
     },
@@ -62,7 +62,7 @@ export const endpoints = {
 
     },
     complianceSuperadmin: {
-        getAll: () => api('/companyadmin/compliance/recommend'),
+        getAll: () => api('companyadmin/compliance/recommend'),
         // getAll: () => api('/companyadmin/compliance/recommend'),
     },
     assign: {
@@ -86,7 +86,7 @@ export const endpoints = {
         // update: (id: string) => api(`companyadmin/branch/${id}`),
         delete: (id: string) => api(`companyadmin/branch/${id}`),
         downloadFormat: () => api(`companyadmin/branch/download-template`),
-        bulkCreate: () => api(`/companyadmin/branch/bulk-upload`),
+        bulkCreate: () => api(`companyadmin/branch/bulk-upload`),
         downloadData: () => api('companyadmin/branch/branch-data/export')
     },
     role: {
@@ -95,10 +95,10 @@ export const endpoints = {
         update:(id:any)=> api(`companyadmin/role/${id}`),
         getById:(id:any)=> api(`companyadmin/role/${id}`),
         delete:(id:any)=> api(`companyadmin/role/${id}`),
-        bulkCreate:()=> api(`/companyadmin/role/bulk-upload`),
-        download: () => api(`/companyadmin/role/export`),
-        downloadFormat: () => api(`/companyadmin/role/designation-template`),
-        rolePermission:(id:any) => api(`/companyadmin/role/role-permission/${id}`)
+        bulkCreate:()=> api(`companyadmin/role/bulk-upload`),
+        download: () => api(`companyadmin/role/export`),
+        downloadFormat: () => api(`companyadmin/role/designation-template`),
+        rolePermission:(id:any) => api(`companyadmin/role/role-permission/${id}`)
     },
     compliance: {
         createCustomChecklist: () => api('companyadmin/compliance/checklists'),
@@ -138,18 +138,18 @@ export const endpoints = {
         getById: (id: string) => api(`companyadmin/esisetup/${id}`), 
         create: () => api('companyadmin/esisetup'),
         // download: () => api(`companyadmin/esisetup/esi-tracker/export`)
-         update: (id: any) => api(`/companyadmin/esisetup/${id}`),
+         update: (id: any) => api(`companyadmin/esisetup/${id}`),
          delete: (id:any) => api(`companyadmin/esisetup/${id}`),
          getAllCodes:()=> api('esi-code'),
-         downloadFormat: (id:any) => api(`/companyadmin/esisetup/template/download?company_id=${id}`),
-         downloadData: () => api('/companyadmin/esisetup/esisetup-data/export'),
-         bulkCreate: () => api('/companyadmin/esisetup/bulk-upload'),
+         downloadFormat: (id:any) => api(`companyadmin/esisetup/template/download?company_id=${id}`),
+         downloadData: () => api('companyadmin/esisetup/esisetup-data/export'),
+         bulkCreate: () => api('companyadmin/esisetup/bulk-upload'),
     },
     pfSetup: {
         getAll: () => api('companyadmin/pfsetup'),
         create: () => api('companyadmin/pfsetup'),
         getById: (id: any) => api(`companyadmin/pfsetup/${id}`),
-        update: (id: any) => api(`/companyadmin/pfsetup/${id}`),
+        update: (id: any) => api(`companyadmin/pfsetup/${id}`),
         delete: (id:any) => api(`companyadmin/pfsetup/${id}`),
         getAllCodes:()=> api('pf-code')
     },
@@ -171,37 +171,37 @@ export const endpoints = {
         listRegisterSetup: () => api('companyadmin/register/register-setup')
     },
     tracker: {
-        downloadFormat: () => api('/companyadmin/pfsetup/pf-tracker/exportdata'),
+        downloadFormat: () => api('companyadmin/pfsetup/pf-tracker/exportdata'),
         pfUpload: () => api('companyadmin/pfsetup/pf-tracker'),
         pfGetALl: () => api(`companyadmin/pfsetup/pf-tracker`),
         uploadDocs: (id: any) =>
             api(`companyadmin/pfsetup/pf-tracker/document/${id}`),
-        downloadALl: () => api('/companyadmin/pfsetup/pf-tracker/export'),
+        downloadALl: () => api('companyadmin/pfsetup/pf-tracker/export'),
         getById: (id: any) => api(`companyadmin/pfsetup/pf-tracker/${id}`),
         delete: (id: string) => api(`companyadmin/pfsetup/pf-delete/${id}`),
-        update: (id: any) => api(`/companyadmin/pfsetup/pf-tracker/${id}`),
+        update: (id: any) => api(`companyadmin/pfsetup/pf-tracker/${id}`),
     },
     esiTracker: {
         getAll: () => api(`companyadmin/esisetup/esi-tracker`),
         bulkUpload: () => api(`companyadmin/esisetup/esi-tracker`),
-        download: () => api('/companyadmin/esisetup/esi-tracker/exportdata'),
+        download: () => api('companyadmin/esisetup/esi-tracker/exportdata'),
         uploadDocs: (id: any) =>
             api(`companyadmin/esisetup/esi-tracker/challan/${id}`),
-        downloadAll: () => api('/companyadmin/esisetup/esi-tracker/export'),
+        downloadAll: () => api('companyadmin/esisetup/esi-tracker/export'),
         getById: (id: any) => api(`companyadmin/esisetup/esi-tracker/${id}`),
         delete: (id: string) => api(`companyadmin/esisetup/esi-delete/${id}`),
-        update: (id: any) => api(`/companyadmin/esisetup/esi-tracker/${id}`),
+        update: (id: any) => api(`companyadmin/esisetup/esi-tracker/${id}`),
     },
     ptrc: {
-        download: () => api('/companyadmin/ptsetup/ptrc-tracker/exportdata'),
+        download: () => api('companyadmin/ptsetup/ptrc-tracker/exportdata'),
         bulkUpload: () => api('companyadmin/ptsetup/ptrc-tracker'),
-        getAll: () => api('/companyadmin/ptsetup/ptrc-tracker'),
+        getAll: () => api('companyadmin/ptsetup/ptrc-tracker'),
         uploadDocs: (id: any) =>
             api(`/companyadmin/ptsetup/ptrc-tracker/document/${id}`),
-        downloadAll: () => api('/companyadmin/ptsetup/ptrc-tracker/export'),
+        downloadAll: () => api('companyadmin/ptsetup/ptrc-tracker/export'),
         delete: (id: any) => api(`companyadmin/ptsetup/ptrc-delete/${id}`),
         getById: (id: any) => api(`companyadmin/ptsetup/ptrc-tracker/${id}`),
-         update: (id: any) => api(`/companyadmin/ptsetup/ptrc-tracker/${id}`),
+         update: (id: any) => api(`companyadmin/ptsetup/ptrc-tracker/${id}`),
     },
     // ptTracker: {
     //     getAll: () => api(`companyadmin/esisetup/esi-tracker`),
@@ -214,16 +214,16 @@ export const endpoints = {
         download: () => api(`upload/sample_files/esi-tracker.xlsx`),
     },
     ptec: {
-        download: () => api('/companyadmin/ptsetup/ptec-tracker/exportdata'),
+        download: () => api('companyadmin/ptsetup/ptec-tracker/exportdata'),
         // download: () => api('upload/sample_files/ptec-tracker.xlsx'),
-        bulkUpload: () => api('/companyadmin/ptsetup/ptec-tracker'),
-        getAll: () => api('/companyadmin/ptsetup/ptec-tracker'),
+        bulkUpload: () => api('companyadmin/ptsetup/ptec-tracker'),
+        getAll: () => api('companyadmin/ptsetup/ptec-tracker'),
         uploadDocs: (id: any) =>
-            api(`/companyadmin/ptsetup/ptec-tracker/document/${id}`),
-        downloadAll: () => api('/companyadmin/ptsetup/ptec-tracker/export'),
+            api(`companyadmin/ptsetup/ptec-tracker/document/${id}`),
+        downloadAll: () => api('companyadmin/ptsetup/ptec-tracker/export'),
         delete: (id: any) => api(`companyadmin/ptsetup/ptec-delete/${id}`),
         getById: (id: any) => api(`companyadmin/ptsetup/ptec-tracker/${id}`),
-        update: (id: any) => api(`/companyadmin/ptsetup/ptec-tracker/${id}`),
+        update: (id: any) => api(`companyadmin/ptsetup/ptec-tracker/${id}`),
     },
     poshSetup: {
     detail: (id:any) => api(`companyadmin/posh-setup/${id}`),
@@ -244,7 +244,7 @@ export const endpoints = {
     poshCommitteeExport: () => api("companyadmin/posh-setup/committee/export"),
     poshReturnBulkDocumentDownload: () => api("companyadmin/posh-setup/posh-return/bulk-download"),
     poshReturnIndividualDocumentDownload: (id: any) => api(`companyadmin/posh-setup/posh-return/report/${id}`),
-    poshCommitteeIndividualDocumentDownload: (id: any) => api(`/companyadmin/posh-setup/committee/policy/${id}`),
+    poshCommitteeIndividualDocumentDownload: (id: any) => api(`companyadmin/posh-setup/committee/policy/${id}`),
     createPolicy: () => api("companyadmin/posh-setup/policy"),
     downloadPolicy: (id:any) => api(`companyadmin/posh-setup/policy/download/${id}`),
     downloadBulkPolicy: () => api("companyadmin/posh-setup/policy/download"),
@@ -257,36 +257,36 @@ export const endpoints = {
     
     pfiwtracker: {
         download: () => api('companyadmin/pfsetup/pfiw-tracker/exportdata'),
-        bulkupload: () => api('/companyadmin/pfsetup/pfiw-tracker'),
-        pfiwGetAll: () => api('/companyadmin/pfsetup/pfiw-tracker'),
+        bulkupload: () => api('companyadmin/pfsetup/pfiw-tracker'),
+        pfiwGetAll: () => api('companyadmin/pfsetup/pfiw-tracker'),
         challanupload: (id: any) =>
-            api(`/companyadmin/pfsetup/pfiw-tracker/document/${id}`),
-        downloadALl: () => api('/companyadmin/pfsetup/pfiw-tracker/export'),
+            api(`companyadmin/pfsetup/pfiw-tracker/document/${id}`),
+        downloadALl: () => api('companyadmin/pfsetup/pfiw-tracker/export'),
         delete: (id: any) => api(`companyadmin/pfsetup/pfiw-delete/${id}`),
         getById: (id: any) => api(`companyadmin/pfsetup/pfiw-tracker/${id}`),
-        update: (id: any) => api(`/companyadmin/pfsetup/pfiw-tracker/${id}`),
+        update: (id: any) => api(`companyadmin/pfsetup/pfiw-tracker/${id}`),
     },
     lwftracker: {
-        downlaodAll: () => api(`/companyadmin/lwfsetup/lwf-tracker/export`),
+        downlaodAll: () => api(`companyadmin/lwfsetup/lwf-tracker/export`),
         download: () => api('companyadmin/lwfsetup/lwf-tracker/exportdata'),
-        bulkupload: () => api('/companyadmin/lwfsetup/lwf-tracker'),
+        bulkupload: () => api('companyadmin/lwfsetup/lwf-tracker'),
         lwfGetAll: () => api('companyadmin/lwfsetup/lwf-tracker'),
         upload: (id: any) =>
-            api(`/companyadmin/lwfsetup/lwf-tracker/payment-receipt/${id}`),
+            api(`companyadmin/lwfsetup/lwf-tracker/payment-receipt/${id}`),
         getById: (id: any) => api(`companyadmin/lwfsetup/lwf-tracker/${id}`),
         delete: (id: any) => api(`companyadmin/lwfsetup/lwf-delete/${id}`),
-        update: (id: any) => api(`/companyadmin/lwfsetup/lwf-tracker/${id}`),
+        update: (id: any) => api(`companyadmin/lwfsetup/lwf-tracker/${id}`),
     },
     lwfSetup: {
-        getAll: () => api('/companyadmin/lwfsetup'),
-        create: () => api('/companyadmin/lwfsetup'),
+        getAll: () => api('companyadmin/lwfsetup'),
+        create: () => api('companyadmin/lwfsetup'),
         getById: (id: any) => api(`companyadmin/lwfsetup/${id}`),
           update: (id: any) => api(`companyadmin/lwfsetup/${id}`),
           delete: (id:any) => api(`companyadmin/lwfsetup/${id}`),
           getAllCodes:()=> api('lwf-code'),
           downloadFormat:(id:any)=> api(`companyadmin/lwfsetup/template/download?company_id=${id}`),
           bulkCreate:()=> api('companyadmin/lwfsetup/bulk-create'),
-          download: () => api('/companyadmin/lwfsetup/lwfsetup-data/export')
+          download: () => api('companyadmin/lwfsetup/lwfsetup-data/export')
     },
     request: {
         request: (id: any) => api(`companyadmin/company/edit-request/${id}`),
@@ -300,26 +300,26 @@ export const endpoints = {
         trackerTimeline: () => api('companyadmin/company/trackerTimeline')
     },
     certificate:{
-        list: ()=> api('/companyadmin/certificate/list'),
-        certificateDownload: (id:any)=> api(`/companyadmin/certificate/download/${id}`)
+        list: ()=> api('companyadmin/certificate/list'),
+        certificateDownload: (id:any)=> api(`companyadmin/certificate/download/${id}`)
     },
     noticeTracker:{
-        create: () => api('/companyadmin/noticetracker'),
-        followupNoticeCreate: (id:any) => api(`/companyadmin/noticetracker/followup/${id}`),
-        update: (id:any) => api(`/companyadmin/noticetracker/${id}`),
+        create: () => api('companyadmin/noticetracker'),
+        followupNoticeCreate: (id:any) => api(`companyadmin/noticetracker/followup/${id}`),
+        update: (id:any) => api(`companyadmin/noticetracker/${id}`),
         list:()=> api('companyadmin/noticetracker'),
-        detail: (id:any) => api(`/companyadmin/noticetracker/${id}`),
-        delete: (id:any) => api(`/companyadmin/noticetracker/${id}`),
-        timeline: (id: any) => api(`/companyadmin/noticeTracker/timeline/${id}`),
-        noticeReply: (id: any) => api(`/companyadmin/noticeTracker/reply/${id}`),
-        createNoticeType:()=> api(`/companyadmin/noticeTracker/notice-type`),
-        noticeTypeSuggestions:() => api(`/companyadmin/noticeTracker/notice-type`),
-        createNoticeActType:() => api(`/companyadmin/noticeTracker/notice-act`),
-        noticeActSuggestions:() => api(`/companyadmin/noticeTracker/notice-act`),
-        noticeStatusSuggestions: () => api(`/companyadmin/noticeTracker/status`),
-        createNoticeStatusSuggestions: () => api(`/companyadmin/noticeTracker/status`),
-        noticeCriticalitySuggestion: () => api(`/companyadmin/noticeTracker/criticality`),
-        createNoticeCriticalitySuggestion: () => api(`/companyadmin/noticeTracker/criticality`),
+        detail: (id:any) => api(`companyadmin/noticetracker/${id}`),
+        delete: (id:any) => api(`companyadmin/noticetracker/${id}`),
+        timeline: (id: any) => api(`companyadmin/noticeTracker/timeline/${id}`),
+        noticeReply: (id: any) => api(`companyadmin/noticeTracker/reply/${id}`),
+        createNoticeType:()=> api(`companyadmin/noticeTracker/notice-type`),
+        noticeTypeSuggestions:() => api(`companyadmin/noticeTracker/notice-type`),
+        createNoticeActType:() => api(`companyadmin/noticeTracker/notice-act`),
+        noticeActSuggestions:() => api(`companyadmin/noticeTracker/notice-act`),
+        noticeStatusSuggestions: () => api(`companyadmin/noticeTracker/status`),
+        createNoticeStatusSuggestions: () => api(`companyadmin/noticeTracker/status`),
+        noticeCriticalitySuggestion: () => api(`companyadmin/noticeTracker/criticality`),
+        createNoticeCriticalitySuggestion: () => api(`companyadmin/noticeTracker/criticality`),
         download:()=> api(`companyadmin/noticetracker/download-notice-data`),
         followUpNoticeDetail: (id: any) => api(`companyadmin/noticetracker/followup/${id}`),
         updateFollowupNotice: (id: any) => api(`companyadmin/noticetracker/followup/${id}`),
@@ -333,22 +333,22 @@ export const endpoints = {
     branchAgreement: {
         list: () => api('companyadmin/agreement/agreement'),
         create: () => api('companyadmin/agreement/agreement'),
-        update: (id: any) => api(`/companyadmin/agreement/agreement/${id}`),
-        detail: (id: any) => api(`/companyadmin/agreement/agreement/${id}`),
-        delete: (id: any) => api(`/companyadmin/agreement/agreement/${id}`),
+        update: (id: any) => api(`companyadmin/agreement/agreement/${id}`),
+        detail: (id: any) => api(`companyadmin/agreement/agreement/${id}`),
+        delete: (id: any) => api(`companyadmin/agreement/agreement/${id}`),
         download: () => api('companyadmin/agreement/agreement-data/export')
 
     },
     notification:{
             notification:() => api('notifications/settings'),
-            unmarkedlist:()=> api('/notifications?unmarked=true'),
-            allList:()=> api(`/notifications`),
+            unmarkedlist:()=> api('notifications?unmarked=true'),
+            allList:()=> api(`notifications`),
             markRead:(id:any)=> api(`notification/read/${id}`)
         },
     forgotpassword:{
             forgot:()=> api('forgot-password'),
             reset:() => api(`reset-password`),
-            verifyToken: () => api(`/verify-reset-token`)
+            verifyToken: () => api(`verify-reset-token`)
         },
      graph:{
             branchType: () => api(`companyadmin/graph/branch-types`),
@@ -390,6 +390,17 @@ export const endpoints = {
         downloadAttendanceRegisterTemplate: () => api('companyadmin/register/template/download'),
         createAttendancceRegister: () => api('companyadmin/register/upload'),
         exportRegister: () => api('companyadmin/register/export/house-rent')
-    }
+    },
+     registerNew: {
+    create: () => api('companyadmin/registers/upload'),
+    getAll: () => api('companyadmin/registers'),
+    getById: (id: number) => api(`companyadmin/registers/${id}`),
+    delete: (id: number) => api(`companyadmin/registers/${id}`),
+    downloadFile: (id: number, type: 'original' | 'processed') => 
+        api(`companyadmin/registers/download/${id}?type=${type}`),
+    getYears: () => api('companyadmin/registers/years'),
+    getCompanies: () => api('companyadmin/registers/companies'),
+    update: (id: number) => api(`companyadmin/registers/${id}`),
+},
         
 }

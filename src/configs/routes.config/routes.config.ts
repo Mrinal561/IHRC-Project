@@ -883,6 +883,18 @@ export const protectedRoutes = [
         authority: [],
     },
 
+     {
+        key: 'nav.registers',
+        path: '/registers',
+        component: lazy(
+            () =>
+                import(
+                    '@/views/IHRC/components/Registers/Register'
+                ),
+        ),
+        authority: [],
+    },
+
     {
         key: 'register.collapse.item1',
         path: '/salary-register-input',
