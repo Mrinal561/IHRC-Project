@@ -25,6 +25,12 @@ const validationSchema = Yup.object().shape({
         .required('Year is required')
         .min(2000, 'Year must be 2000 or later')
         .max(2100, 'Year must be 2100 or earlier'),
+    month: Yup.string()
+        .required('Month is required')
+        .oneOf([
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ], 'Please select a valid month'),
     description: Yup.string(),
     file: Yup.mixed()
         .required('File is required')
@@ -52,6 +58,21 @@ const RegisterUploadModal = ({
 
        const [companyOptions, setCompanyOptions] = useState<SelectOption[]>([]);
    
+        const monthOptions: SelectOption[] = [
+        { value: 'January', label: 'January' },
+        { value: 'February', label: 'February' },
+        { value: 'March', label: 'March' },
+        { value: 'April', label: 'April' },
+        { value: 'May', label: 'May' },
+        { value: 'June', label: 'June' },
+        { value: 'July', label: 'July' },
+        { value: 'August', label: 'August' },
+        { value: 'September', label: 'September' },
+        { value: 'October', label: 'October' },
+        { value: 'November', label: 'November' },
+        { value: 'December', label: 'December' },
+    ];
+
 
     const currentYear = new Date().getFullYear();
 const yearOptions: SelectOption[] = Array.from(
@@ -92,6 +113,7 @@ const yearOptions: SelectOption[] = Array.from(
             const formData = new FormData();
             formData.append('company_id', values.company_id);
             formData.append('year', values.year);
+            formData.append('month', values.month);
             if (values.description) {
                 formData.append('description', values.description);
             }
@@ -131,6 +153,7 @@ const yearOptions: SelectOption[] = Array.from(
     const initialValues = {
         company_id: '',
         year: '',
+        month: '',
         description: '',
         file: null,
     };
@@ -182,6 +205,8 @@ const yearOptions: SelectOption[] = Array.from(
                                 )}
                             </div>
 
+<div className='grid grid-cols-1 md:grid-cols-2 gap-4 '>
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">
                                     Year <span className="text-red-500">*</span>
@@ -207,6 +232,33 @@ const yearOptions: SelectOption[] = Array.from(
                                     <p className="text-red-500 text-xs">{errors.year}</p>
                                 )}
                             </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">
+                                    Month <span className="text-red-500">*</span>
+                                </label>
+                                <Field name="month">
+                                    {({ field }: any) => (
+                                        <OutlinedSelect
+                                            label="Select Month"
+                                            options={monthOptions}
+                                            value={monthOptions.find(
+                                                (option) => option.value === values.month
+                                            )}
+                                            onChange={(selectedOption: SelectOption | null) => {
+                                                setFieldValue(
+                                                    'month',
+                                                    selectedOption ? selectedOption.value : ''
+                                                );
+                                            }}
+                                        />
+                                    )}
+                                </Field>
+                                {errors.month && touched.month && (
+                                    <p className="text-red-500 text-xs">{errors.month}</p>
+                                )}
+                            </div>
+</div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Description (Optional)</label>
