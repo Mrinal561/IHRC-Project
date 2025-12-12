@@ -169,6 +169,14 @@ const RegisterTrackerTable = ({
                     <div className="w-20">{row.original.year}</div>
                 ),
             },
+            {
+                header: 'Month',
+                enableSorting: false,
+                accessorKey: 'month',
+                cell: ({ row }) => (
+                    <div className="w-20">{row.original.month}</div>
+                ),
+            },
             // {
             //     header: 'Description',
             //     enableSorting: false,
@@ -220,7 +228,7 @@ const RegisterTrackerTable = ({
                 cell: ({ row }) => (
                     <div className="flex items-center justify-center">
                         {row.original.has_original_zip ? (
-                            <Tooltip title="Download Original File">
+                            <Tooltip title="Download Input Register">
                                 <Button
                                     size="sm"
                                     variant="plain"
@@ -244,7 +252,7 @@ const RegisterTrackerTable = ({
                 cell: ({ row }) => (
                     <div className="flex items-center gap-2">
                         {row.original.has_processed_zip && (
-                            <Tooltip title="Download Processed File">
+                            <Tooltip title="Download Output Register">
                                 <Button
                                     size="sm"
                                     // variant="plain"

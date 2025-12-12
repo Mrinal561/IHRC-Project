@@ -17,6 +17,7 @@ interface RegisterEditModalProps {
         company_id: number;
         company_name: string;
         year: number;
+        month?: string;
         description?: string;
         status: string;
     } | null;
@@ -33,6 +34,14 @@ const validationSchema = Yup.object().shape({
         .required('Year is required')
         .min(2000, 'Year must be 2000 or later')
         .max(2100, 'Year must be 2100 or earlier'),
+
+     month: Yup.string()
+        .nullable() // Month can be null
+        .oneOf([
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December',
+            null
+        ], 'Please select a valid month'),
     description: Yup.string(),
     file: Yup.mixed()
         .nullable()
@@ -61,12 +70,28 @@ const RegisterEditModal = ({
     const [initialValues, setInitialValues] = useState<any>({
         company_id: '',
         year: '',
+        month: '',
         description: '',
         file: null,
     });
 
             const [companyOptions, setCompanyOptions] = useState<SelectOption[]>([]);
     
+            const monthOptions: SelectOption[] = [
+        { value: 'January', label: 'January' },
+        { value: 'February', label: 'February' },
+        { value: 'March', label: 'March' },
+        { value: 'April', label: 'April' },
+        { value: 'May', label: 'May' },
+        { value: 'June', label: 'June' },
+        { value: 'July', label: 'July' },
+        { value: 'August', label: 'August' },
+        { value: 'September', label: 'September' },
+        { value: 'October', label: 'October' },
+        { value: 'November', label: 'November' },
+        { value: 'December', label: 'December' },
+    ];
+
 
       useEffect(() => {
         const loadOptions = async () => {
@@ -103,6 +128,7 @@ const yearOptions: SelectOption[] = Array.from(
             setInitialValues({
                 company_id: String(registerData.company_id),
                 year: String(registerData.year),
+                month: registerData.month || '',
                 description: registerData.description || '',
                 file: null,
             });
@@ -123,6 +149,9 @@ const yearOptions: SelectOption[] = Array.from(
             }
             if (values.year !== String(registerData.year)) {
                 formData.append('year', values.year);
+            }
+            if (values.month !== (registerData.month || '')) {
+                formData.append('month', values.month || '');
             }
             if (values.description !== registerData.description) {
                 formData.append('description', values.description || '');
@@ -192,7 +221,7 @@ const yearOptions: SelectOption[] = Array.from(
                         <div className="space-y-2">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">
-                                    Company <span className="text-red-500">*</span>
+                                    Company
                                 </label>
                                 <Field name="company_id">
                                     {({ field }: any) => (
@@ -217,9 +246,11 @@ const yearOptions: SelectOption[] = Array.from(
                                 )}
                             </div>
 
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">
-                                    Year <span className="text-red-500">*</span>
+                                    Year
                                 </label>
                                 <Field name="year">
                                     {({ field }: any) => (
@@ -242,6 +273,35 @@ const yearOptions: SelectOption[] = Array.from(
                                     <p className="text-red-500 text-xs">{errors.year}</p>
                                 )}
                             </div>
+
+                            <div className="space-y-2">
+                                    <label className="text-sm font-medium">
+                                        Month
+                                    </label>
+                                    <Field name="month">
+                                        {({ field }: any) => (
+                                            <OutlinedSelect
+                                                label="Select Month"
+                                                options={monthOptions}
+                                                value={monthOptions.find(
+                                                    (option) => option.value === values.month
+                                                )}
+                                                onChange={(selectedOption: SelectOption | null) => {
+                                                    setFieldValue(
+                                                        'month',
+                                                        selectedOption && selectedOption.value !== '' ? 
+                                                        selectedOption.value : ''
+                                                    );
+                                                }}
+                                            />
+                                        )}
+                                    </Field>
+                                    {errors.month && touched.month && (
+                                        <p className="text-red-500 text-xs">{errors.month}</p>
+                                    )}
+                                   
+                                </div>
+</div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Description (Optional)</label>

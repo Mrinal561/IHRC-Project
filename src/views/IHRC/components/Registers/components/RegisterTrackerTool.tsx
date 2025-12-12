@@ -42,6 +42,7 @@ const RegisterTrackerTool = () => {
     const [filters, setFilters] = useState({
         company_id: '',
         year: '',
+        month: '',
         search: '',
         page: 1,
         page_size: 10,
@@ -74,6 +75,7 @@ const RegisterTrackerTool = () => {
             if (filters.company_id) params.company_id = filters.company_id;
             if (filters.year) params.year = filters.year;
             if (filters.search) params.search = filters.search;
+            if(filters.month) params.month = filters.month;
 
             const response = await httpClient.get(endpoints.registerNew.getAll(), { params });
             

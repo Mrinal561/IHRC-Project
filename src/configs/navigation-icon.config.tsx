@@ -8,6 +8,8 @@ import {
     HiOutlineUser,
     HiOutlineGlobeAlt, 
     HiOutlineClipboardList,
+    HiOutlineBookOpen,
+    HiOutlineDocumentText  
 } from 'react-icons/hi'
 import { HiOutlineBellSnooze, HiOutlineBuildingOffice2 } from 'react-icons/hi2'
 import { AiOutlineAudit } from "react-icons/ai";
@@ -28,7 +30,8 @@ const navigationIcon: NavigationIcons = {
     auditCollapse: <AiOutlineAudit />,
     remittanceCollapse: <MdOutlineMonitorHeart />,
     agreement: <HiOutlineClipboardList />,
-    notice: <HiOutlineBellSnooze />
+    notice: <HiOutlineDocumentText />,
+    registers: <HiOutlineBookOpen />
 
 
 

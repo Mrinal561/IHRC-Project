@@ -19,10 +19,26 @@ const RegisterTrackerFilter = ({ onFilterChange, availableYears, availableCompan
     const [filters, setFilters] = useState({
         company_id: '',
         year: '',
+        month: '',
         search: '',
     });
         const [companyOptions, setCompanyOptions] = useState<SelectOption[]>([]);
     
+const monthOptions: SelectOption[] = [
+        { value: 'January', label: 'January' },
+        { value: 'February', label: 'February' },
+        { value: 'March', label: 'March' },
+        { value: 'April', label: 'April' },
+        { value: 'May', label: 'May' },
+        { value: 'June', label: 'June' },
+        { value: 'July', label: 'July' },
+        { value: 'August', label: 'August' },
+        { value: 'September', label: 'September' },
+        { value: 'October', label: 'October' },
+        { value: 'November', label: 'November' },
+        { value: 'December', label: 'December' },
+    ];
+
 
    const currentYear = new Date().getFullYear();
 const yearOptions: SelectOption[] = Array.from(
@@ -66,7 +82,7 @@ const yearOptions: SelectOption[] = Array.from(
     }, []);
 
     return ( 
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"> 
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"> 
             <div className="min-w-0">
                 <OutlinedSelect
                     label="Company"
@@ -81,6 +97,14 @@ const yearOptions: SelectOption[] = Array.from(
                     options={yearOptions}
                     value={yearOptions.find(opt => opt.value === filters.year) || null}
                     onChange={(option) => handleFilterChange('year', option?.value || '')}
+                />
+            </div>
+            <div className="min-w-0">
+                <OutlinedSelect
+                    label="Month"
+                    options={monthOptions}
+                    value={monthOptions.find(opt => opt.value === filters.month) || null}
+                    onChange={(option) => handleFilterChange('month', option?.value || '')}
                 />
             </div>
             <div className="min-w-0">
