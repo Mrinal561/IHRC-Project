@@ -8,13 +8,17 @@ interface SideProps extends CommonProps {
     content?: React.ReactNode
 }
 
+const base = import.meta.env.VITE_BASE_NAME || ''
+
+
 const Side = ({ children, content, ...rest }: SideProps) => {
     return (
         <div className="grid lg:grid-cols-3 h-full">
             <div
                 className="bg-no-repeat custom-logo  bg-cover py-6 px-16 flex-col justify-between hidden lg:flex"
                 style={{
-                    backgroundImage: `url('/img/others/auth-side-bg.jpg')`,
+                     backgroundImage: `url('${base ? `/${base}` : ''}/img/others/auth-side-bg.jpg')`,
+
                 }}
             >
                 <Logo mode="dark" />
