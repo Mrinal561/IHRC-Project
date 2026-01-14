@@ -7,7 +7,7 @@ import {
     Notification,
     toast,
 } from '@/components/ui'
-import { FiTrash } from 'react-icons/fi'
+import { FiTrash, FiX } from 'react-icons/fi'
 import { MdEdit } from 'react-icons/md'
 import OutlinedInput from '@/components/ui/OutlinedInput/OutlinedInput'
 import OutlinedSelect from '@/components/ui/Outlined'
@@ -25,6 +25,7 @@ import { HiOutlineBookOpen, HiOutlineViewGrid } from 'react-icons/hi'
 import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-dots-loop-scale.json'
 import Lottie from 'lottie-react'
 import BranchEditDialog from './BranchEditDialog'
+import CancelBranchDialog from './CancelBranchDialog'
 import { useNavigate } from 'react-router-dom'
 import { showErrorNotification } from '@/components/ui/ErrorMessage'
 
@@ -53,7 +54,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
     const { login } = store.getState()
     const agreement = login.user.user.moduleAccess
     const hasAgreementAccess = agreement.some(
-        (module) => module.name === 'Agreement',
+        (module: any) => module.name === 'Agreement',
     )
     const [tableData, setTableData] = useState({
         total: 0,
@@ -67,6 +68,8 @@ const BranchTable: React.FC<BranchTableProps> = ({
     const [editDialogIsOpen, setEditDialogIsOpen] = useState(false)
     const [itemToEdit, setItemToEdit] = useState<number | null>(null)
     const [editedBranch, setEditedBranch] = useState('')
+    const [cancelDialogIsOpen, setCancelDialogIsOpen] = useState(false)
+    const [itemToCancel, setItemToCancel] = useState<number | null>(null)
     const [selectedCompanyGroup, setSelectedCompanyGroup] =
         useState<SelectOption | null>(null)
     const [selectedCompany, setSelectedCompany] = useState<SelectOption | null>(
@@ -134,7 +137,6 @@ const BranchTable: React.FC<BranchTableProps> = ({
                         Branch Deleted Successfully
                     </Notification>,
                 )
-
                 handleRefreshData()
                 handleDialogClose()
             } catch (error: any) {
@@ -184,7 +186,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 header: 'Company',
                 enableSorting: false,
                 accessorKey: 'Company.name',
-                cell: (props) => (
+                cell: (props: any) => (
                     <div className="w-32 truncate">
                         {props.getValue() as string}
                     </div>
@@ -194,7 +196,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 header: 'State',
                 enableSorting: false,
                 accessorKey: 'State.name',
-                cell: (props) => (
+                cell: (props: any) => (
                     <div className="w-32 truncate">
                         {props.getValue() as string}
                     </div>
@@ -204,7 +206,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 header: 'District',
                 enableSorting: false,
                 accessorKey: 'District.name',
-                cell: (props) => (
+                cell: (props: any) => (
                     <div className="w-32 truncate">
                         {props.getValue() as string}
                     </div>
@@ -214,7 +216,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 header: 'Location',
                 enableSorting: false,
                 accessorKey: 'Location.name',
-                cell: (props) => (
+                cell: (props: any) => (
                     <div className="w-32 truncate">
                         {props.getValue() as string}
                     </div>
@@ -224,7 +226,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 header: 'Branch Name',
                 enableSorting: false,
                 accessorKey: 'name',
-                cell: (props) => (
+                cell: (props: any) => (
                     <div className="w-40 truncate">
                         {props.getValue() as string}
                     </div>
@@ -234,7 +236,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 header: 'Branch Address',
                 enableSorting: false,
                 accessorKey: 'address',
-                cell: (props) => (
+                cell: (props: any) => (
                     <div className="w-40 truncate">
                         {props.getValue() as string}
                     </div>
@@ -244,7 +246,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 header: 'Branch Opening Date',
                 enableSorting: false,
                 accessorKey: 'opening_date',
-                cell: (props) => (
+                cell: (props: any) => (
                     <div className="w-44 ">
                         {dayjs(props.getValue() as string).format('DD-MM-YYYY')}
                     </div>
@@ -254,7 +256,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 header: 'Actions',
                 enableSorting: false,
                 id: 'actions',
-                cell: ({ row }) => (
+                cell: ({ row }: any) => (
                     <div className="flex items-center gap-2">
                         <Tooltip title="Edit">
                             <Button
@@ -292,6 +294,17 @@ const BranchTable: React.FC<BranchTableProps> = ({
                                 </Button>
                             </Tooltip>
                         )}
+                        <Tooltip title="Cancel Branch">
+                            <Button
+                                size="sm"
+                                onClick={() => {
+                                    setItemToCancel(row.original.id)
+                                    setCancelDialogIsOpen(true)
+                                }}
+                                icon={<FiX />}
+                                className="text-orange-500"
+                            />
+                        </Tooltip>
                         <Tooltip title="Delete">
                             <Button
                                 size="sm"
@@ -441,12 +454,26 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 />
             )}
 
-            <BranchEditDialog
-                isOpen={editDialogIsOpen}
-                onClose={() => setEditDialogIsOpen(false)}
-                branchId={currentBranchId}
-                onRefresh={handleRefreshData}
-            />
+            {currentBranchId && (
+                <BranchEditDialog
+                    isOpen={editDialogIsOpen}
+                    onClose={() => setEditDialogIsOpen(false)}
+                    branchId={currentBranchId}
+                    onRefresh={handleRefreshData}
+                />
+            )}
+
+            {itemToCancel && (
+                <CancelBranchDialog
+                    isOpen={cancelDialogIsOpen}
+                    onClose={() => {
+                        setCancelDialogIsOpen(false)
+                        setItemToCancel(null)
+                    }}
+                    branchId={itemToCancel}
+                    onRefresh={handleRefreshData}
+                />
+            )}
 
             <Dialog
                 isOpen={dialogIsOpen}
