@@ -9,7 +9,8 @@ import { useAppDispatch } from '@/store'
 import { BranchData } from '@/@types/branch'
 import { toast, Notification } from '@/components/ui'
 import Company from '../../Home/components/Company'
-import OutlinedInput from '@/components/ui/OutlinedInput';
+import OutlinedInput from '@/components/ui/OutlinedInput'
+import OutlinedSelect from '@/components/ui/Outlined'
 
 interface SelectOption {
     label: string
@@ -38,6 +39,10 @@ const Branch = () => {
         useState<SelectOption | null>(null)
     const [selectedLocation, setSelectedLocation] =
         useState<SelectOption | null>(null)
+    const [selectedStatus, setSelectedStatus] = useState<SelectOption | null>({
+        value: 'all',
+        label: 'All',
+    })
 
     const tableRefreshRef = useRef<(() => void) | null>(null)
     // Method to set the refresh function
@@ -51,7 +56,6 @@ const Branch = () => {
             tableRefreshRef.current()
         }
     }
-    
 
     const filterValues = {
         branchId: selectedBranch?.value,
@@ -61,6 +65,7 @@ const Branch = () => {
         districtId: selectedDistrict?.value,
         locationId: selectedLocation?.value,
         search: searchTerm,
+        status: selectedStatus?.value,
     }
 
     return (
@@ -75,10 +80,12 @@ const Branch = () => {
                             onChange={(e) => handleSearch(e)}
                         />
                         <div className="flex-shrink-0">
-                            <BranchTool 
-                            onTableRefresh={handleTableRefresh} 
-                            companyGroupId={selectedCompanyGroup?.value}
-                            companyId={selectedCompany?.value} />
+                            <BranchTool
+                                onTableRefresh={handleTableRefresh}
+                                companyGroupId={selectedCompanyGroup?.value}
+                                companyId={selectedCompany?.value}
+                                status={selectedStatus?.value}
+                            />
                         </div>
                     </div>
                 </div>
@@ -94,6 +101,20 @@ const Branch = () => {
                             onDistrictChange={setSelectedDistrict}
                             onLocationChange={setSelectedLocation}
                         />
+                        <div className="w-40">
+                            <OutlinedSelect
+                                label="Status"
+                                options={[
+                                    { value: 'all', label: 'All' },
+                                    { value: 'open', label: 'Open' },
+                                    { value: 'close', label: 'Closed' },
+                                ]}
+                                value={selectedStatus}
+                                onChange={(option: any) =>
+                                    setSelectedStatus(option)
+                                }
+                            />
+                        </div>
                     </div>
                     {/* Add Branch button will maintain its size */}
                 </div>

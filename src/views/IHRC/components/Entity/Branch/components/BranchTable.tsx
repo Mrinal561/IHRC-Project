@@ -7,7 +7,7 @@ import {
     Notification,
     toast,
 } from '@/components/ui'
-import { FiTrash, FiX } from 'react-icons/fi'
+import { FiTrash, FiX, FiEye } from 'react-icons/fi'
 import { MdEdit } from 'react-icons/md'
 import OutlinedInput from '@/components/ui/OutlinedInput/OutlinedInput'
 import OutlinedSelect from '@/components/ui/Outlined'
@@ -26,6 +26,7 @@ import loadingAnimation from '@/assets/lotties/system-regular-716-spinner-three-
 import Lottie from 'lottie-react'
 import BranchEditDialog from './BranchEditDialog'
 import CancelBranchDialog from './CancelBranchDialog'
+import BranchClosingDetailsDialog from './BranchClosingDetailsDialog'
 import { useNavigate } from 'react-router-dom'
 import { showErrorNotification } from '@/components/ui/ErrorMessage'
 
@@ -42,6 +43,7 @@ interface BranchTableProps {
         districtId?: string
         locationId?: string
         search?: any
+        status?: string
     }
 
     onRefreshMethodAvailable?: (refreshFn: () => void) => void
@@ -70,6 +72,10 @@ const BranchTable: React.FC<BranchTableProps> = ({
     const [editedBranch, setEditedBranch] = useState('')
     const [cancelDialogIsOpen, setCancelDialogIsOpen] = useState(false)
     const [itemToCancel, setItemToCancel] = useState<number | null>(null)
+    const [closingDetailsDialogIsOpen, setClosingDetailsDialogIsOpen] =
+        useState(false)
+    const [selectedBranchForDetails, setSelectedBranchForDetails] =
+        useState<any>(null)
     const [selectedCompanyGroup, setSelectedCompanyGroup] =
         useState<SelectOption | null>(null)
     const [selectedCompany, setSelectedCompany] = useState<SelectOption | null>(
@@ -253,6 +259,28 @@ const BranchTable: React.FC<BranchTableProps> = ({
                 ),
             },
             {
+                header: 'Status',
+                enableSorting: false,
+                accessorKey: 'status',
+                cell: (props: any) => {
+                    const status = props.getValue() as string
+                    const isActive = status?.toLowerCase() === 'active'
+                    return (
+                        <div className="w-20">
+                            <span
+                                className={`px-2 py-1 rounded text-xs font-semibold ${
+                                    isActive
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                }`}
+                            >
+                                {isActive ? 'Open' : 'Closed'}
+                            </span>
+                        </div>
+                    )
+                },
+            },
+            {
                 header: 'Actions',
                 enableSorting: false,
                 id: 'actions',
@@ -294,17 +322,34 @@ const BranchTable: React.FC<BranchTableProps> = ({
                                 </Button>
                             </Tooltip>
                         )}
-                        <Tooltip title="Cancel Branch">
-                            <Button
-                                size="sm"
-                                onClick={() => {
-                                    setItemToCancel(row.original.id)
-                                    setCancelDialogIsOpen(true)
-                                }}
-                                icon={<FiX />}
-                                className="text-orange-500"
-                            />
-                        </Tooltip>
+                        {row.original.status === 'active' && (
+                            <Tooltip title="Close Branch">
+                                <Button
+                                    size="sm"
+                                    onClick={() => {
+                                        setItemToCancel(row.original.id)
+                                        setCancelDialogIsOpen(true)
+                                    }}
+                                    icon={<FiX />}
+                                    className="text-orange-500"
+                                />
+                            </Tooltip>
+                        )}
+                        {row.original.status === 'inactive' && (
+                            <Tooltip title="View Closing Details">
+                                <Button
+                                    size="sm"
+                                    onClick={() => {
+                                        setSelectedBranchForDetails(
+                                            row.original,
+                                        )
+                                        setClosingDetailsDialogIsOpen(true)
+                                    }}
+                                    icon={<FiEye />}
+                                    className="text-blue-500"
+                                />
+                            </Tooltip>
+                        )}
                         <Tooltip title="Delete">
                             <Button
                                 size="sm"
@@ -343,6 +388,14 @@ const BranchTable: React.FC<BranchTableProps> = ({
     const fetchBranchData = async (page: number, size: number) => {
         setIsLoading(true)
         try {
+            // Map status filter: 'open' -> 'active', 'close' -> 'inactive', 'all' -> undefined
+            let statusParam: string | undefined = undefined
+            if (filterValues.status === 'open') {
+                statusParam = 'active'
+            } else if (filterValues.status === 'close') {
+                statusParam = 'inactive'
+            }
+
             const { data } = await httpClient.get(endpoints.branch.getAll(), {
                 params: {
                     'branch_id[]': filterValues.branchId || undefined,
@@ -352,6 +405,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
                     'district_id[]': filterValues.districtId || undefined,
                     'location_id[]': filterValues.locationId || undefined,
                     search: filterValues.search || undefined,
+                    status: statusParam,
                     page: page,
                     page_size: size,
                 },
@@ -410,6 +464,7 @@ const BranchTable: React.FC<BranchTableProps> = ({
         filterValues.districtId,
         filterValues.locationId,
         filterValues.search,
+        filterValues.status,
     ])
 
     if (isLoading) {
@@ -474,6 +529,15 @@ const BranchTable: React.FC<BranchTableProps> = ({
                     onRefresh={handleRefreshData}
                 />
             )}
+
+            <BranchClosingDetailsDialog
+                isOpen={closingDetailsDialogIsOpen}
+                onClose={() => {
+                    setClosingDetailsDialogIsOpen(false)
+                    setSelectedBranchForDetails(null)
+                }}
+                branchData={selectedBranchForDetails}
+            />
 
             <Dialog
                 isOpen={dialogIsOpen}

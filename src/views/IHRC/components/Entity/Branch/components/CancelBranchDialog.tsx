@@ -78,28 +78,37 @@ const CancelBranchDialog: React.FC<CancelBranchDialogProps> = ({
         }
 
         try {
-            const formData = new FormData()
+            // Prepare the request body as JSON
+            const requestBody: {
+                closer_date?: string
+                closer_reason?: string
+                closer_submission_copy?: string
+            } = {}
 
             // Format date as "YYYY-MM-DD HH:mm:ss"
             if (values.closer_date) {
-                const formattedDate = dayjs(values.closer_date).format(
+                requestBody.closer_date = dayjs(values.closer_date).format(
                     'YYYY-MM-DD HH:mm:ss',
                 )
-                formData.append('closer_date', formattedDate)
             }
 
-            formData.append('closer_reason', values.closer_reason)
+            if (values.closer_reason && values.closer_reason.trim()) {
+                requestBody.closer_reason = values.closer_reason.trim()
+            }
 
             if (values.closer_submission_copy) {
-                formData.append(
-                    'closer_submission_copy',
-                    values.closer_submission_copy,
-                )
+                requestBody.closer_submission_copy =
+                    values.closer_submission_copy
             }
 
             await httpClient.put(
                 endpoints.branch.cancel(branchId.toString()),
-                formData,
+                requestBody,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                },
             )
 
             toast.push(
@@ -197,15 +206,14 @@ const CancelBranchDialog: React.FC<CancelBranchDialogProps> = ({
                             {/* Closing Submission Copy */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">
-                                    Closing Submission Copy (PDF/Zip/Image, Max
-                                    20MB){' '}
+                                    Closing Submission Copy (PDF Only, Max 20MB){' '}
                                     <span className="text-red-500">*</span>
                                 </label>
                                 <Input
                                     type="file"
                                     size="md"
                                     className="w-full"
-                                    accept=".pdf,.zip,.jpeg,.jpg,.png,.gif"
+                                    accept=".pdf"
                                     onChange={async (
                                         e: React.ChangeEvent<HTMLInputElement>,
                                     ) => {
