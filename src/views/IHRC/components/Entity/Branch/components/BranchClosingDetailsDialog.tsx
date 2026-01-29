@@ -4,7 +4,7 @@ import { HiDownload } from 'react-icons/hi'
 import dayjs from 'dayjs'
 import httpClient from '@/api/http-client'
 import { endpoints } from '@/api/endpoint'
-
+import moment from 'moment-timezone'
 interface BranchClosingDetailsDialogProps {
     isOpen: boolean
     onClose: () => void
@@ -147,10 +147,16 @@ const BranchClosingDetailsDialog: React.FC<BranchClosingDetailsDialogProps> = ({
                         </label>
                         <p className="text-sm text-gray-900 dark:text-gray-100 flex-1">
                             {branchData.closer_date
-                                ? dayjs(branchData.closer_date).format(
-                                      'DD-MMM-YYYY HH:mm A',
-                                  )
-                                : 'N/A'}
+                                ? moment
+                                      .utc(branchData.closer_date)
+                                      .tz('Asia/Kolkata')
+                                      .subtract(5, 'hours')
+                                      .subtract(30, 'minutes')
+                                      .format('DD-MMM-YYYY hh:mm A')
+                                : //   moment(branchData.closer_date).format(
+                                  //                                       'DD-MMM-YYYY HH:mm A',
+                                  //                                   )
+                                  'N/A'}
                         </p>
                     </div>
 
