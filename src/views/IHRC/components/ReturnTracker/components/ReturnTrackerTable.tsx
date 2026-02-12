@@ -435,20 +435,28 @@ const formatDateToDDMMYYYY = (dateString: string | null) => {
             {
                 header: 'Actions',
                 id: 'actions',
-                cell: ({ row }) => (
-                    <div className="flex items-center gap-2">
-                        <Tooltip title="Edit">
-                            <Button
-                                size="sm"
-                                onClick={() => navigate('/edit-return-tracker', {
-                                    state: { returnTrackerId: row.original.id },
-                                })}
-                                icon={<MdEdit />}
-                                className="text-blue-500"
-                            />
-                        </Tooltip>
-                    </div>
-                ),
+                cell: ({ row }) => {
+                    // Check branch_status - only show actions if branch_status is 'active'
+                    const branchStatus = (row.original as any).branch_status || 
+                                        (row.original as any).Branch?.status || 
+                                        (row.original as any).branch?.status;
+                    if (branchStatus !== 'active') return null;
+                    
+                    return (
+                        <div className="flex items-center gap-2">
+                            <Tooltip title="Edit">
+                                <Button
+                                    size="sm"
+                                    onClick={() => navigate('/edit-return-tracker', {
+                                        state: { returnTrackerId: row.original.id },
+                                    })}
+                                    icon={<MdEdit />}
+                                    className="text-blue-500"
+                                />
+                            </Tooltip>
+                        </div>
+                    );
+                },
             },
         ],
         [navigate, downloading]
