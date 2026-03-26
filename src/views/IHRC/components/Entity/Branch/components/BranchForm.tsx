@@ -391,7 +391,7 @@ const AddBranchForm: React.FC = () => {
         { value: 'owned', label: 'Owned' },
     ]
     const officeTypeOption = [
-        { value: 'register_office', label: 'Register Office' },
+        { value: 'register_office', label: 'Registered Office' },
         { value: 'coorporate_office', label: 'Corporate Office' },
         { value: 'regional_office', label: 'Regional Office' },
         { value: 'factory', label: 'Factory' },

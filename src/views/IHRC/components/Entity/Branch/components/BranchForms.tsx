@@ -178,7 +178,7 @@ const AddBranchForm: React.FC = () => {
         { value: 'owned', label: 'Owned' },
     ]
     const officeTypeOption = [
-        { value: 'register_office', label: 'Register Office' },
+        { value: 'register_office', label: 'Registered Office' },
         { value: 'coorporate_office', label: 'Coorporate Office' },
         { value: 'regional_office', label: 'Regional Office' },
         { value: 'factory', label: 'Factory' },
@@ -1249,7 +1249,7 @@ const AddBranchForm: React.FC = () => {
                                                 id="file-upload"
                                                 size="sm"
                                                 type="file"
-                                                accept='.pdf, .zip, jpg'
+                                                accept=".pdf, .zip, jpg"
                                                 className="py-[5px]"
                                                 onChange={
                                                     handleSeDocumentUpload

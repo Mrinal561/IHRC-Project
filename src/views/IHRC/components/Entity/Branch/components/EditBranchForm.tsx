@@ -37,7 +37,6 @@ import { Formik, Field, Form, ErrorMessage } from 'formik'
 import { Eye } from 'lucide-react'
 import moment from 'moment'
 
-
 interface AgreementSection {
     agreement_type: string
     start_date: string
@@ -222,17 +221,19 @@ const validationSchema = yup.object().shape({
                     .required('SE validity is required'),
             otherwise: (schema) => schema.notRequired(),
         }),
-        gst_number: yup
+    gst_number: yup
         .string()
         .nullable()
-        .test('format-if-exists', 'GST number must be 15 characters and can contain only numbers and uppercase letters', 
-          function(value) {
-            // If value is empty or null, pass the validation
-            if (!value) return true;
-            
-            // Otherwise check format
-            return /^[0-9A-Z]{15}$/.test(value);
-          }
+        .test(
+            'format-if-exists',
+            'GST number must be 15 characters and can contain only numbers and uppercase letters',
+            function (value) {
+                // If value is empty or null, pass the validation
+                if (!value) return true
+
+                // Otherwise check format
+                return /^[0-9A-Z]{15}$/.test(value)
+            },
         ),
     document: yup.string().nullable(),
     document_validity_type: yup
@@ -243,7 +244,7 @@ const validationSchema = yup.object().shape({
 const AddBranchForm: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate()
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false)
     //   const [locationData, setLocationData] = useState([]);
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -341,7 +342,7 @@ const AddBranchForm: React.FC = () => {
         { value: 'owned', label: 'Owned' },
     ]
     const officeTypeOption = [
-        { value: 'register_office', label: 'Register Office' },
+        { value: 'register_office', label: 'Registered Office' },
         { value: 'coorporate_office', label: 'Coorporate Office' },
         { value: 'regional_office', label: 'Regional Office' },
         { value: 'branch', label: 'Branch Office' },
@@ -844,18 +845,13 @@ const AddBranchForm: React.FC = () => {
                 ? null
                 : formData.lease_document,
         }
-    
+
         // Remove specific keys if office_mode is virtual
         if (editdata.office_mode === 'virtual') {
-            const {
-                type,
-                office_type,
-                se_status,
-                ...rest
-            } = editdata
+            const { type, office_type, se_status, ...rest } = editdata
             editdata = rest
         }
-    
+
         //check validation here all
         await validateFormData(editdata) // This validates all fields at once
         const isValid = await validateFormData(editdata)
@@ -863,9 +859,9 @@ const AddBranchForm: React.FC = () => {
         if (!isValid) {
             return // Don't proceed if validation failed
         }
-    
+
         try {
-            setIsSubmitting(true);
+            setIsSubmitting(true)
             const res = await dispatch(
                 updateBranch({
                     id: branchId,
@@ -876,7 +872,7 @@ const AddBranchForm: React.FC = () => {
                 .catch((error: any) => {
                     throw error
                 })
-    
+
             if (res) {
                 navigate('/branch')
                 showNotification('success', 'Branch Updated successfully')
@@ -885,7 +881,7 @@ const AddBranchForm: React.FC = () => {
             const errorMessage = error || 'Failed to Update user'
         } finally {
             setLoading(false)
-            setIsSubmitting(false);
+            setIsSubmitting(false)
         }
     }
 
@@ -900,9 +896,7 @@ const AddBranchForm: React.FC = () => {
                     }
                     onClick={() => navigate('/branch')}
                 />
-                <h3 className="text-2xl font-semibold mb-2">
-                    Edit Branch
-                </h3>
+                <h3 className="text-2xl font-semibold mb-2">Edit Branch</h3>
             </div>
             {/* <p>
                 {companyGroups.length},{companies.length},{states.length}
@@ -914,7 +908,7 @@ const AddBranchForm: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                             <div>
                                 <p className="mb-2">
-                                     Company Group{' '}
+                                    Company Group{' '}
                                     <span className="text-red-500">*</span>
                                 </p>
                                 {/* <OutlinedSelect
@@ -929,10 +923,10 @@ const AddBranchForm: React.FC = () => {
                                     onChange={setSelectedCompanyGroup}
                                 /> */}
                                 <OutlinedInput
-                             label="Company Group"
-                             value={selectedCompanyGroup?.label}
-                             onChange={()=>{}}
-                        />
+                                    label="Company Group"
+                                    value={selectedCompanyGroup?.label}
+                                    onChange={() => {}}
+                                />
                             </div>
                             <div>
                                 <p className="mb-2">
@@ -1083,9 +1077,9 @@ const AddBranchForm: React.FC = () => {
                                                 : '',
                                         }))
                                     }}
-                                    inputFormat="DD-MM-YYYY"  // Changed to uppercase format tokens
-                            yearLabelFormat="YYYY"
-                            monthLabelFormat="MMMM YYYY"
+                                    inputFormat="DD-MM-YYYY" // Changed to uppercase format tokens
+                                    yearLabelFormat="YYYY"
+                                    monthLabelFormat="MMMM YYYY"
                                 />{' '}
                                 {errors?.opening_date && (
                                     <span className="text-red-500 text-sm">
@@ -1115,9 +1109,7 @@ const AddBranchForm: React.FC = () => {
                                 )}
                             </div>
                             <div>
-                                <p className="mb-2">
-                                    GST Number{' '}
-                                </p>
+                                <p className="mb-2">GST Number </p>
                                 <OutlinedInput
                                     label="Enter Gst Number"
                                     value={formData.gst_number}
@@ -1472,9 +1464,9 @@ const AddBranchForm: React.FC = () => {
                                                                 },
                                                             )
                                                         }}
-                                                        inputFormat="DD-MM-YYYY"  // Changed to uppercase format tokens
-                            yearLabelFormat="YYYY"
-                            monthLabelFormat="MMMM YYYY"
+                                                        inputFormat="DD-MM-YYYY" // Changed to uppercase format tokens
+                                                        yearLabelFormat="YYYY"
+                                                        monthLabelFormat="MMMM YYYY"
                                                     />
                                                     {errors?.se_validity && (
                                                         <span className="text-red-500 text-sm">
@@ -1502,7 +1494,7 @@ const AddBranchForm: React.FC = () => {
                                                         id="file-upload"
                                                         size="sm"
                                                         type="file"
-                                                        accept='.pdf, .zip, .jpg'
+                                                        accept=".pdf, .zip, .jpg"
                                                         className="py-[5px]"
                                                         onChange={
                                                             handleSeDocumentUpload
@@ -1599,9 +1591,9 @@ const AddBranchForm: React.FC = () => {
                                                         onChange={
                                                             handleLeaseValidityChange
                                                         }
-                                                        inputFormat="DD-MM-YYYY"  // Changed to uppercase format tokens
-                            yearLabelFormat="YYYY"
-                            monthLabelFormat="MMMM YYYY"
+                                                        inputFormat="DD-MM-YYYY" // Changed to uppercase format tokens
+                                                        yearLabelFormat="YYYY"
+                                                        monthLabelFormat="MMMM YYYY"
                                                     />
                                                     {errors?.lease_validity && (
                                                         <span className="text-red-500 text-sm">
@@ -1615,8 +1607,9 @@ const AddBranchForm: React.FC = () => {
                                             <div>
                                                 <div className="flex flex-col gap-4">
                                                     <label>
-                                                        Upload Lease deed
-                                                        copy (Accepted: PDF/Zip/Image, Max 20MB)
+                                                        Upload Lease deed copy
+                                                        (Accepted:
+                                                        PDF/Zip/Image, Max 20MB)
                                                         <span className="text-red-500">
                                                             *
                                                         </span>
@@ -1625,7 +1618,7 @@ const AddBranchForm: React.FC = () => {
                                                         <Input
                                                             id="file-upload"
                                                             type="file"
-                                                           accept='.pdf, .zip, .jpg'
+                                                            accept=".pdf, .zip, .jpg"
                                                             onChange={
                                                                 handleLeaseDocumentUpload
                                                             }
@@ -1822,9 +1815,9 @@ const AddBranchForm: React.FC = () => {
                                                                     }),
                                                                 )
                                                             }}
-                                                            inputFormat="DD-MM-YYYY"  // Changed to uppercase format tokens
-                            yearLabelFormat="YYYY"
-                            monthLabelFormat="MMMM YYYY"
+                                                            inputFormat="DD-MM-YYYY" // Changed to uppercase format tokens
+                                                            yearLabelFormat="YYYY"
+                                                            monthLabelFormat="MMMM YYYY"
                                                         />{' '}
                                                         {errors?.se_validity && (
                                                             <span className="text-red-500 text-sm">
@@ -1853,7 +1846,7 @@ const AddBranchForm: React.FC = () => {
                                                             id="file-upload"
                                                             size="sm"
                                                             type="file"
-                                                            accept='.pdf, .zip, .jpg'
+                                                            accept=".pdf, .zip, .jpg"
                                                             className="py-[5px]"
                                                             onChange={
                                                                 handleSeDocumentUpload
@@ -1948,7 +1941,6 @@ const AddBranchForm: React.FC = () => {
                 </div> */}
 
                         <div className="flex justify-end gap-2">
-                            
                             <Button
                                 type="button"
                                 variant="plain"
@@ -1962,7 +1954,7 @@ const AddBranchForm: React.FC = () => {
                                 loading={isSubmitting}
                                 onClick={handleUpdateBranch}
                             >
-                               Confirm
+                                Confirm
                             </Button>
                         </div>
                     </div>
